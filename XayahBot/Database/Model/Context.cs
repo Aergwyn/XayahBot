@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using XayahBot.Utility;
 
-namespace XayahBot.Model
+namespace XayahBot.Database.Model
 {
     public class Context : DbContext
     {

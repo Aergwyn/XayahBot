@@ -1,4 +1,4 @@
-﻿namespace XayahBot.Model
+﻿namespace XayahBot.Database.Model
 {
     public class DbProperty
     {

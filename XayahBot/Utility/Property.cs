@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using XayahBot.Model;
 using XayahBot.Service;
-using XayahBot.Utility;
 
 namespace XayahBot.Utility
 {

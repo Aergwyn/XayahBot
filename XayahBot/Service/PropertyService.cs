@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using XayahBot.Model;
+using XayahBot.Database.Model;
 using XayahBot.Utility;
 
 namespace XayahBot.Service
