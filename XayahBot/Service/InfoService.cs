@@ -62,7 +62,7 @@ namespace XayahBot.Service
                                 $"Cost     - {spell.CostBurn}{Environment.NewLine}" +
                                 $"Range    - {spell.RangeBurn}{Environment.NewLine}" +
                                 $"Cooldown - {spell.CooldownBurn}{Environment.NewLine}" +
-                                $"Scalings - {spell.Vars}";
+                                $"Scalings - {spell.GetVarsString()}";
                         }
                         message += $"```{Environment.NewLine}__Skins__```";
                         for (int i = 0; i < skins.Count(); i++)

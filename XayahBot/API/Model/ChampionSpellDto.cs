@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 
 namespace XayahBot.API.Model
 {
@@ -25,5 +26,29 @@ namespace XayahBot.API.Model
         //public string SanitizedTooltip { get; set; }
         //public string Tooltip { get; set; }
         public List<SpellVarsDto> Vars { get; set; }
+
+        //
+
+        public string GetVarsString()
+        {
+            List<string> varList = new List<string>();
+            List<string> coEffList = new List<string>();
+            if (this.Vars != null)
+            {
+                foreach (SpellVarsDto var in this.Vars)
+                {
+                    if (var.CoEff != null)
+                    {
+                        foreach (decimal coEff in var.CoEff)
+                        {
+                            coEffList.Add(coEff.ToString(CultureInfo.InvariantCulture));
+                        }
+                        varList.Add(string.Join(",", coEffList));
+                        coEffList.Clear();
+                    }
+                }
+            }
+            return string.Join("/", varList);
+        }
     }
 }
