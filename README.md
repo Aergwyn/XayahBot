@@ -1,0 +1,2 @@
+# XayahBot
+Discord bot
