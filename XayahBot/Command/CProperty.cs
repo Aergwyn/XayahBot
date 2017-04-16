@@ -7,6 +7,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using XayahBot.Service;
 using XayahBot.Utility;
+using XayahBot.Command.Attribute;
 
 namespace XayahBot.Command
 {
@@ -36,61 +37,19 @@ namespace XayahBot.Command
         //
 
         [Command("get property"), Alias("gp")]
+        [RequireOwner]
         [RequireContext(ContextType.DM)]
-        public Task GetProperty(string name = "", [Remainder] string trash = "")
+        [Summary("Lists all or the specified property.")]
+        public Task GetProperty(string name = "")
         {
             Logger.Log(LogSeverity.Debug, nameof(CProperty), string.Format(_logRequest, this.Context.User, "get property"));
-            if (PermissionService.IsAdmin(this.Context))
-            {
-                if (!string.IsNullOrWhiteSpace(name))
-                {
-                    Property property = Property.GetByName(name);
-                    if (property != null)
-                    {
-                        ReplyAsync(string.Format(_currentValue, property.Name, property.Value));
-                    }
-                    else
-                    {
-                        ReplyAsync(string.Format(_notFound, name));
-                    }
-                }
-                else
-                {
-                    string values = $"__List of properties__{Environment.NewLine}```";
-                    List<Property> displayList = Property.Values.Where(x => x.Updatable).ToList();
-                    for (int i = 0; i < displayList.Count(); i++)
-                    {
-                        if (i > 0)
-                        {
-                            values += Environment.NewLine;
-                        }
-                        values += $"{(displayList[i].Name + ":").PadRight(Property.Values.Where(x => x.Updatable).OrderByDescending(x => x.Name.Length).First().Name.Length + 1, ' ')}\"{displayList[i].Value}\"";
-                    }
-                    values += "```";
-                    ReplyAsync(values);
-                }
-            }
-            else
-            {
-                ReplyAsync(string.Format(_noPermission, Property.Author));
-            }
-            return Task.CompletedTask;
-        }
 
-        [Command("set property"), Alias("sp")]
-        [RequireContext(ContextType.DM)]
-        public Task SetProperty(string name = "", [Remainder]string value = "")
-        {
-            Logger.Log(LogSeverity.Warning, nameof(CProperty), string.Format(_logRequest, this.Context.User, "set property"));
-            if (PermissionService.IsAdmin(this.Context))
+            if (!string.IsNullOrWhiteSpace(name))
             {
                 Property property = Property.GetByName(name);
                 if (property != null)
                 {
-                    string oldValue = property.Value;
-                    property.Value = value.Trim();
-                    ReplyAsync(string.Format(_changed, property.Name, oldValue, property.Value));
-                    Logger.Log(LogSeverity.Warning, nameof(CProperty), string.Format(_logChanged, property.Name, property.Value));
+                    ReplyAsync(string.Format(_currentValue, property.Name, property.Value));
                 }
                 else
                 {
@@ -99,7 +58,41 @@ namespace XayahBot.Command
             }
             else
             {
-                ReplyAsync(string.Format(_noPermission, Property.Author));
+                string values = $"__List of properties__{Environment.NewLine}```";
+                List<Property> displayList = Property.Values.Where(x => x.Updatable).ToList();
+                for (int i = 0; i < displayList.Count; i++)
+                {
+                    if (i > 0)
+                    {
+                        values += Environment.NewLine;
+                    }
+                    values += $"{(displayList[i].Name + ":").PadRight(Property.Values.Where(x => x.Updatable).OrderByDescending(x => x.Name.Length).First().Name.Length + 1, ' ')}\"{displayList[i].Value}\"";
+                }
+                values += "```";
+                ReplyAsync(values);
+            }
+            return Task.CompletedTask;
+        }
+
+        [Command("set property"), Alias("sp")]
+        [RequireOwner]
+        [RequireContext(ContextType.DM)]
+        [Summary("Updates specified property.")]
+        public Task SetProperty(string name, [Remainder]string value = "")
+        {
+            Logger.Log(LogSeverity.Warning, nameof(CProperty), string.Format(_logRequest, this.Context.User, "set property"));
+
+            Property property = Property.GetByName(name);
+            if (property != null)
+            {
+                string oldValue = property.Value;
+                property.Value = value.Trim();
+                ReplyAsync(string.Format(_changed, property.Name, oldValue, property.Value));
+                Logger.Log(LogSeverity.Warning, nameof(CProperty), string.Format(_logChanged, property.Name, property.Value));
+            }
+            else
+            {
+                ReplyAsync(string.Format(_notFound, name));
             }
             return Task.CompletedTask;
         }
@@ -108,6 +101,8 @@ namespace XayahBot.Command
 
 #pragma warning disable 4014 // Intentional
         [Command("set game")]
+        [RequireMod]
+        [Summary("Updates the current game-status.")]
         public async Task SetGame([Remainder] string value = "")
         {
             Logger.Log(LogSeverity.Debug, nameof(CProperty), string.Format(_logRequest, this.Context.User, "set game"));
@@ -125,17 +120,10 @@ namespace XayahBot.Command
                 Logger.Log(LogSeverity.Error, nameof(CProperty), string.Format(_logNoReplyChannel, this.Context.User));
                 return;
             }
-            if (PermissionService.IsAdminOrMod(this.Context))
-            {
-                string game = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
-                Property.GameActive.Value = game;
-                this.Client.SetGameAsync(game);
-                Logger.Log(LogSeverity.Debug, nameof(CProperty), string.Format(_logChanged, Property.GameActive.Name, game));
-            }
-            else
-            {
-                channel.SendMessageAsync(string.Format(_noPermission, Property.Author));
-            }
+            string game = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+            Property.GameActive.Value = game;
+            this.Client.SetGameAsync(game);
+            Logger.Log(LogSeverity.Debug, nameof(CProperty), string.Format(_logChanged, Property.GameActive.Name, game));
         }
 #pragma warning restore 4014
     }

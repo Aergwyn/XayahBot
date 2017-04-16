@@ -9,9 +9,9 @@ namespace XayahBot.Command
 #pragma warning disable 4014 // Intentional
         [Command("quiz")]
         [RequireContext(ContextType.Guild)]
-        public Task Quiz(string option = "", [Remainder] string trash = "")
+        [Summary("Asks a random question about a champion (sponsored by Riot API).")]
+        public Task Quiz()
         {
-            // TODO add modes
             QuizService.AskQuestionAsync(this.Context);
             return Task.CompletedTask;
         }
@@ -20,9 +20,10 @@ namespace XayahBot.Command
 #pragma warning disable 4014 // Intentional
         [Command("answer")]
         [RequireContext(ContextType.Guild)]
-        public Task Answer([Remainder] string answer = "")
+        [Summary("Answers a previously opened question.")]
+        public Task Answer([Remainder] string text)
         {
-            QuizService.AnswerQuestionAsync(this.Context, answer);
+            QuizService.AnswerQuestionAsync(this.Context, text);
             return Task.CompletedTask;
         }
 #pragma warning restore 4014

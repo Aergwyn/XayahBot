@@ -14,8 +14,8 @@ namespace XayahBot
     {
         private readonly DiscordSocketClient _client;
 
-        private readonly IDependencyMap _map = new DependencyMap();
-        private readonly CommandService _commands = new CommandService();
+        private readonly IDependencyMap _dependencyMap = new DependencyMap();
+        private readonly CommandService _commandService = new CommandService();
 
         //
 
@@ -84,9 +84,9 @@ namespace XayahBot
             // EventHandler
             this._client.MessageReceived += this.HandleCommand;
             // Map
-            this._map.Add(this._client);
+            this._dependencyMap.Add(this._client);
             // Command
-            await this._commands.AddModulesAsync(Assembly.GetEntryAssembly());
+            await this._commandService.AddModulesAsync(Assembly.GetEntryAssembly());
         }
 
         //
@@ -108,16 +108,11 @@ namespace XayahBot
 #pragma warning disable 4014 // Intentional
         private async Task HandleCommand(SocketMessage arg)
         {
-            SocketUserMessage message = arg as SocketUserMessage;
-            if (message == null)
-            {
-                return;
-            }
             int pos = 0;
-            if (message.HasCharPrefix(char.Parse(Property.CmdPrefix.Value), ref pos) || message.HasMentionPrefix(message.Discord.CurrentUser, ref pos))
+            if (arg is SocketUserMessage message && (message.HasCharPrefix(char.Parse(Property.CmdPrefix.Value), ref pos) || message.HasMentionPrefix(message.Discord.CurrentUser, ref pos)))
             {
                 CommandContext context = new CommandContext(message.Discord, message);
-                IResult result = await this._commands.ExecuteAsync(context, pos, this._map);
+                IResult result = await this._commandService.ExecuteAsync(context, pos, this._dependencyMap);
                 if (!result.IsSuccess)
                 {
                     if (result.ErrorReason.Contains("Invalid context for command"))

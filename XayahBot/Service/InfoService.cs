@@ -51,7 +51,7 @@ namespace XayahBot.Service
                             $"Resource - {champion.ParType}{Environment.NewLine}" +
                             $"Passive  - {champion.Passive.Name}```" +
                             $"{Environment.NewLine}__Abilities__```";
-                        for (int i = 0; i < champion.Spells.Count(); i++)
+                        for (int i = 0; i < champion.Spells.Count; i++)
                         {
                             if (i > 0)
                             {
@@ -65,14 +65,14 @@ namespace XayahBot.Service
                                 $"Scalings - {spell.GetVarsString()}";
                         }
                         message += $"```{Environment.NewLine}__Skins__```";
-                        for (int i = 0; i < skins.Count(); i++)
+                        for (int i = 0; i < skins.Count; i++)
                         {
                             if (i > 0)
                             {
                                 message += Environment.NewLine;
                             }
                             SkinDto skin = skins.ElementAt(i);
-                            message += $"{skin.Num.ToString().PadLeft(2, ' ')} - {skin.Name}";
+                            message += $"{skin.Num.ToString().PadLeft(2)} - {skin.Name}";
                         }
                         message += "```";
 

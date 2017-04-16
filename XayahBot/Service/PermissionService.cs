@@ -52,15 +52,15 @@ namespace XayahBot.Service
             {
                 List<string> mods = Property.ConfigMods.Value.Split(',').ToList();
                 mods.RemoveAll(x => string.IsNullOrWhiteSpace(x));
-                if (mods.Count() > 0)
+                if (mods.Count > 0)
                 {
-                    int preRemoveCount = mods.Count();
+                    int preRemoveCount = mods.Count;
                     List<string> matches = mods.Where(x => x.ToLower().Contains(name.ToLower())).ToList();
                     foreach (string mod in matches)
                     {
                         mods.Remove(mod);
                     }
-                    if (mods.Count() != preRemoveCount)
+                    if (mods.Count != preRemoveCount)
                     {
                         Property.ConfigMods.Value = string.Join(",", mods);
                         return true;

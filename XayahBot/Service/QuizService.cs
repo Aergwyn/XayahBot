@@ -177,7 +177,7 @@ namespace XayahBot.Service
 
         private static string GetRandomAnswer(List<string> list)
         {
-            return list.ElementAt(RNG.Next(list.Count()) - 1);
+            return list.ElementAt(RNG.Next(list.Count) - 1);
         }
 
         //
@@ -186,7 +186,7 @@ namespace XayahBot.Service
         {
             QuizEntry entry = null;
             ChampionListDto championList = await RiotDataService.GetChampionListAsync();
-            int id = championList.Data.ElementAt(RNG.Next(championList.Data.Count()) - 1).Value.Id; // Get random champion id from list
+            int id = championList.Data.ElementAt(RNG.Next(championList.Data.Count) - 1).Value.Id; // Get random champion id from list
             ChampionDto champion = await RiotDataService.GetChampionDetailsAsync(id); // Get/Update data of champion
             if (champion != null)
             {
@@ -244,10 +244,10 @@ namespace XayahBot.Service
                     entry = new QuizEntry(string.Format(_championSkinNameQ, champion.Name, Property.QuizMatch), int.Parse(Property.QuizMatch.Value), answer.ToArray());
                     break;
                 case 2:
-                    entry = new QuizEntry(string.Format(_championSkinCountQ, champion.Name), champion.Skins.Count().ToString());
+                    entry = new QuizEntry(string.Format(_championSkinCountQ, champion.Name), champion.Skins.Count.ToString());
                     break;
                 case 3:
-                    SkinDto randomSkin = champion.Skins.FirstOrDefault(x => x.Num.Equals(RNG.Next(champion.Skins.Count() - 1)));
+                    SkinDto randomSkin = champion.Skins.FirstOrDefault(x => x.Num.Equals(RNG.Next(champion.Skins.Count - 1)));
                     entry = new QuizEntry(string.Format(_championSkinOrderQ, randomSkin.Num, NumberSuffix(randomSkin.Num), champion.Name, Property.QuizMatch), int.Parse(Property.QuizMatch.Value), randomSkin.Name);
                     break;
             }
@@ -272,7 +272,7 @@ namespace XayahBot.Service
         private static QuizEntry AskChampionSpell(ChampionDto champion)
         {
             QuizEntry entry = null;
-            ChampionSpellDto spell = champion.Spells.ElementAt(RNG.Next(champion.Spells.Count()) - 1); // Get random spell from list
+            ChampionSpellDto spell = champion.Spells.ElementAt(RNG.Next(champion.Spells.Count) - 1); // Get random spell from list
             int rank = RNG.Next(spell.MaxRank); // Random spell rank
             switch (RNG.Next(5))
             {
@@ -331,7 +331,7 @@ namespace XayahBot.Service
                     }
                 }
             }
-            if (answer.Count() == 0)
+            if (answer.Count == 0)
             {
                 answer.Add("0");
                 answer.Add("None");

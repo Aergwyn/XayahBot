@@ -2,36 +2,38 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using XayahBot.Service;
 using XayahBot.Utility;
+using System.Collections.Generic;
+using System.Linq;
+using XayahBot.Command.Attribute;
 
 namespace XayahBot.Command
 {
     public class CHelp : ModuleBase
     {
+        public CommandService CmdService { get; set; }
+
+        //
+
+        public CHelp(CommandService cmdService)
+        {
+            this.CmdService = cmdService;
+        }
+
+        //
+
         private static readonly string _logNoReplyChannel = "Could not reply to \"{0}\" because no appropriate channel could be found!";
 
-        private static readonly string _normalHelp = "__Commands__```" +
-            "{0}help (or h) [<command>] - displays detailed info." + Environment.NewLine +
-            "{0}are (or is, am) <text>? - triggers an 8ball-like response." + Environment.NewLine +
-            "{0}data <mode> <name>      - displays data about the specified topic sponsored by Riot API." + Environment.NewLine +
-            "{0}quiz [<mode>]           - asks a random question about a champion sponsored by Riot API." + Environment.NewLine +
-            "{0}answer <text>           - answers a previously stated question.```";
-        private static readonly string _modHelp = Environment.NewLine + "__Mod-Commands__```" +
-            "{0}set game <text> - changes my \"status\" message.```";
-        private static readonly string _adminHelp = Environment.NewLine + "__Admin-Commands__```" +
-            "{0}get property (or gp) [<name>] - displays a list of properties [or a specific one] with their respective values." + Environment.NewLine +
-            "{0}set property (or sp) <name>   - sets the value of a specified property." + Environment.NewLine +
-            "{0}mod <option> <name>           - changes the list of mods.```";
-        private static readonly string _finishHelp = Environment.NewLine + "You can also trigger commands with mentioning me instead of the prefix. " +
+        private static readonly string _finishHelp = "You can also trigger commands with mentioning me instead of the prefix. " +
             "Also always remember using a space between each argument!" + Environment.NewLine +
-            "If you have problems and/or questions do not hesitate to message {0}.";
+            "If you have problems, questions and/or suggestions do not hesitate to message {0}.";
 
         //
 
 #pragma warning disable 4014 // Intentional
         [Command("help"), Alias("h")]
-        public async Task Help(string command = "", [Remainder] string trash = "")
+        [Summary("Displays the list of commands.")]
+        public async Task Help(string command = "")
         {
             IMessageChannel channel = null;
             if (this.Context.IsPrivate)
@@ -47,19 +49,102 @@ namespace XayahBot.Command
                 Logger.Log(LogSeverity.Error, nameof(CProperty), string.Format(_logNoReplyChannel, this.Context.User));
                 return;
             }
-            string prefix = Property.CmdPrefix.Value;
-            string message = string.Format(_normalHelp, prefix);
-            if (PermissionService.IsAdminOrMod(this.Context))
+            string message = string.Empty;
+            if (string.IsNullOrWhiteSpace(command))
             {
-                message += string.Format(_modHelp, prefix);
+                string prefix = Property.CmdPrefix.Value;
+                List<HelpLine> normalCmdList = new List<HelpLine>();
+                List<HelpLine> modCmdList = new List<HelpLine>();
+                List<HelpLine> adminCmdList = new List<HelpLine>();
+                foreach (CommandInfo cmd in this.CmdService.Commands)
+                {
+                    if (cmd.Preconditions.Contains(new RequireOwnerAttribute()))
+                    {
+                        adminCmdList.Add(this.GetCommandStringSimple(cmd));
+                    }
+                    else if (cmd.Preconditions.Contains(new RequireModAttribute()))
+                    {
+                        modCmdList.Add(this.GetCommandStringSimple(cmd));
+                    }
+                    else
+                    {
+                        normalCmdList.Add(this.GetCommandStringSimple(cmd));
+                    }
+                }
+                message = "__**Command List**__```";
+                message += this.GetCommandBlockString(normalCmdList);
+                message += $"```{Environment.NewLine}__Mod-Commands__```";
+                message += this.GetCommandBlockString(modCmdList);
+                message += $"```{Environment.NewLine}__Admin-Commands__```";
+                message += this.GetCommandBlockString(adminCmdList);
+                message += $"```{Environment.NewLine}{string.Format(_finishHelp, Property.Author)}";
             }
-            if (PermissionService.IsAdmin(this.Context))
+            else
             {
-                message += string.Format(_adminHelp, prefix);
+                int pos = this.Context.Message.Content.IndexOf(command);
+                SearchResult result = this.CmdService.Search(this.Context, pos);
+                IReadOnlyList<CommandMatch> matches = result.Commands;
+                message = "Not implemented yet.";
+                if (matches != null && matches.Count > 0)
+                {
+                    List<CommandMatch> visibleCommands = new List<CommandMatch>();
+                    //check precondition if able to see
+                    if (matches.Count > 1)
+                    {
+                        //TODO multiple commands
+                    }
+                    else
+                    {
+                        //TODO detailed info
+                        //else
+                        //TODO no permission to see this
+                    }
+                }
+                else
+                {
+                    //TODO no command found
+                }
             }
-            message += string.Format(_finishHelp, Property.Author);
             channel.SendMessageAsync(message);
         }
 #pragma warning restore 4014
+
+        //
+
+        private HelpLine GetCommandStringSimple(CommandInfo cmd)
+        {
+            string command = $".{string.Join("|.", cmd.Aliases)}";
+            foreach (ParameterInfo param in cmd.Parameters)
+            {
+                if (param.IsOptional)
+                {
+                    command += $" [<{param.Name}>]";
+                }
+                else
+                {
+                    command += $" <{param.Name}>";
+                }
+            }
+            return new HelpLine()
+            {
+                Command = command,
+                Summary = cmd.Summary
+            };
+        }
+
+        private string GetCommandBlockString(List<HelpLine> cmdList)
+        {
+            string text = string.Empty;
+            for (int i = 0; i < cmdList.Count; i++)
+            {
+                if (i > 0)
+                {
+                    text += Environment.NewLine;
+                }
+                HelpLine line = cmdList.ElementAt(i);
+                text += $"{line.Command.PadRight(cmdList.OrderByDescending(x => x.Command.Length).First().Command.Length)} - {line.Summary}";
+            }
+            return text;
+        }
     }
 }

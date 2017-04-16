@@ -50,21 +50,22 @@ namespace XayahBot.Command
         //
         
         [Command("are"), Alias("is", "am")]
+        [Summary("Triggers an 8ball-esque response.")]
         public Task Are([Remainder] string message = "")
         {
             string response = string.Empty;
             message = message.Trim();
             if (message.EndsWith("?"))
             {
-                response = _responses.ElementAt(RNG.Next(_responses.Count()) - 1);
+                response = _responses.ElementAt(RNG.Next(_responses.Count) - 1);
             }
             else if (message.EndsWith(".") || message.EndsWith("!"))
             {
-                response = _noQuestion.ElementAt(RNG.Next(_noQuestion.Count()) - 1);
+                response = _noQuestion.ElementAt(RNG.Next(_noQuestion.Count) - 1);
             }
             else
             {
-                response = _noSentence.ElementAt(RNG.Next(_noSentence.Count()) - 1);
+                response = _noSentence.ElementAt(RNG.Next(_noSentence.Count) - 1);
             }
             ReplyAsync(response);
             return Task.CompletedTask;
