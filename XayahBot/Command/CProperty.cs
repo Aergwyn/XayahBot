@@ -25,7 +25,6 @@ namespace XayahBot.Command
 
         private static readonly string _logRequest = "\"{0}\" requested \"{1}\".";
         private static readonly string _logChanged = "\"{0}\" changed to \"{1}\".";
-        private static readonly string _noPermission = "You do NOT have permission to do that! Ask {0} and maybe you're lucky.";
 
         private static readonly string _notFound = "Could not find property with name `{0}`!";
         private static readonly string _changed = $"Property changed...{Environment.NewLine}```Old: {{0}}:\"{{1}}\"{Environment.NewLine}New: {{0}}:\"{{2}}\"```";
