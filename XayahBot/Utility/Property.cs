@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using XayahBot.Service;
+using XayahBot.Database.Service;
 
 namespace XayahBot.Utility
 {
@@ -9,19 +9,20 @@ namespace XayahBot.Utility
     {
         // Static "Enums" with set values
         public static readonly Property Author = new Property("author", "Aergwyn#8786", false);
-        public static readonly Property CmdPrefix = new Property("cmd_prefix", "!", false);
+        public static readonly Property CmdPrefix = new Property("cmd_prefix", ".", false);
         public static readonly Property DbName = new Property("db_name", "xayah.db", false);
         public static readonly Property FilePath = new Property("file_path", AppContext.BaseDirectory + @"\", false);
         public static readonly Property FileRiotApiKey = new Property("file_riotapikey", "riotapikey.txt", false);
         public static readonly Property FileToken = new Property("file_token", "token.txt", false);
         // Changeable "Enums" with default values
         public static readonly Property ConfigMods = new Property("cfg_mods", "");
-        public static readonly Property DataLongevity = new Property("data_longevity", "24");
+        public static readonly Property DataLongevity = new Property("data_longevity", "24"); // Hours
         public static readonly Property GameActive = new Property("game_active", "with Rakan");
         public static readonly Property GameShutdown = new Property("game_shutdown", "shutting down...");
-        public static readonly Property QuizMatch = new Property("quiz_match", "70");
+        public static readonly Property QuizLastReset = new Property("quiz_lastreset", "1/2017");
+        public static readonly Property QuizMatch = new Property("quiz_match", "70"); // Percentage
         public static readonly Property QuizMaxTries = new Property("quiz_maxtries", "10");
-        public static readonly Property QuizTimeout = new Property("quiz_timeout", "10");
+        public static readonly Property QuizTimeout = new Property("quiz_timeout", "10"); // Minutes
 
         //
 
@@ -40,6 +41,7 @@ namespace XayahBot.Utility
                 yield return DataLongevity;
                 yield return GameActive;
                 yield return GameShutdown;
+                yield return QuizLastReset;
                 yield return QuizMatch;
                 yield return QuizMaxTries;
                 yield return QuizTimeout;

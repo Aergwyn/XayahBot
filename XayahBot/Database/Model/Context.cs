@@ -5,7 +5,8 @@ namespace XayahBot.Database.Model
 {
     public class Context : DbContext
     {
-        public DbSet<DbProperty> Properties { get; set; }
+        public DbSet<TProperty> Properties { get; set; }
+        public DbSet<TQuizStat> QuizStats { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

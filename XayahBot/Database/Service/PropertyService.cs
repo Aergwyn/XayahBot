@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using XayahBot.Database.Model;
 using XayahBot.Utility;
 
-namespace XayahBot.Service
+namespace XayahBot.Database.Service
 {
     public static class PropertyService
     {
@@ -11,7 +11,7 @@ namespace XayahBot.Service
         {
             using (Context db = new Context())
             {
-                DbProperty dbProperty = db.Properties.FirstOrDefault(x => x.Name.Equals(property.Name));
+                TProperty dbProperty = db.Properties.FirstOrDefault(x => x.Name.Equals(property.Name));
                 if (dbProperty != null)
                 {
                     return dbProperty.Value;
@@ -24,10 +24,10 @@ namespace XayahBot.Service
         {
             using (Context db = new Context())
             {
-                DbProperty dbProperty = db.Properties.FirstOrDefault(x => x.Name.Equals(property.Name));
+                TProperty dbProperty = db.Properties.FirstOrDefault(x => x.Name.Equals(property.Name));
                 if (dbProperty == null)
                 {
-                    db.Properties.Add(new DbProperty() { Name = property.Name, Value = property.Value });
+                    db.Properties.Add(new TProperty() { Name = property.Name, Value = property.Value });
                 }
                 else
                 {

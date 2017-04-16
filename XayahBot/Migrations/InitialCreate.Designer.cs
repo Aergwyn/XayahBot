@@ -6,7 +6,7 @@ using XayahBot.Database.Model;
 namespace XayahBot.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20170415190400_InitialCreate")]
+    [Migration("InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -14,7 +14,7 @@ namespace XayahBot.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.1");
 
-            modelBuilder.Entity("XayahBot.Model.DbProperty", b =>
+            modelBuilder.Entity("XayahBot.Database.Model.TProperty", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
@@ -26,6 +26,22 @@ namespace XayahBot.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Properties");
+                });
+
+            modelBuilder.Entity("XayahBot.Database.Model.TQuizStat", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("Answers");
+
+                    b.Property<ulong>("Guild");
+
+                    b.Property<string>("User");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("QuizStats");
                 });
         }
     }

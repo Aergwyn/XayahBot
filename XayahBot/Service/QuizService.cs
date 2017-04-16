@@ -8,6 +8,7 @@ using Discord.Commands;
 using Newtonsoft.Json.Linq;
 using XayahBot.API.Model;
 using XayahBot.Utility;
+using XayahBot.Database.Service;
 
 namespace XayahBot.Service
 {
@@ -115,7 +116,6 @@ namespace XayahBot.Service
                         if (!string.IsNullOrWhiteSpace(correctAnswer))
                         {
                             success = true;
-                            _questionMap.Remove(context.Guild.Id);
                             response = string.Format(GetRandomAnswer(_fullAnswerList), context.User.Mention);
                         }
                     }
@@ -128,18 +128,21 @@ namespace XayahBot.Service
                             if (percentage >= 100)
                             {
                                 success = true;
-                                _questionMap.Remove(context.Guild.Id);
                                 response = string.Format(GetRandomAnswer(_fullAnswerList), context.User.Mention);
                             }
                             else if (percentage >= int.Parse(Property.QuizMatch.Value))
                             {
                                 success = true;
-                                _questionMap.Remove(context.Guild.Id);
                                 response = string.Format(GetRandomAnswer(_partialAnswerList), context.User.Mention, correctAnswer);
                             }
                         }
                     }
-                    if (!success)
+                    if (success)
+                    {
+                        _questionMap.Remove(context.Guild.Id);
+                        QuizStatService.IncrementAnswerAsync(context.Guild.Id, context.User.ToString());
+                    }
+                    else
                     {
                         entry.TimesFailed++;
                         if (entry.TimesFailed >= int.Parse(Property.QuizMaxTries.Value))
@@ -158,6 +161,10 @@ namespace XayahBot.Service
                 {
                     context.Channel.SendMessageAsync(response);
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(new LogMessage(LogSeverity.Error, nameof(QuizService), ex.Message, ex));
             }
             finally
             {
