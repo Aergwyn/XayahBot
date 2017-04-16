@@ -11,7 +11,7 @@ namespace XayahBot.Utility
         public static readonly Property Author = new Property("author", "Aergwyn#8786", false);
         public static readonly Property CmdPrefix = new Property("cmd_prefix", ".", false);
         public static readonly Property DbName = new Property("db_name", "xayah.db", false);
-        public static readonly Property FilePath = new Property("file_path", AppContext.BaseDirectory + @"\", false);
+        public static readonly Property FilePath = new Property("file_path", AppContext.BaseDirectory + "/", false);
         public static readonly Property FileRiotApiKey = new Property("file_riotapikey", "riotapikey.txt", false);
         public static readonly Property FileToken = new Property("file_token", "token.txt", false);
         // Changeable "Enums" with default values

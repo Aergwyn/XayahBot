@@ -8,7 +8,7 @@ namespace XayahBot.Command
 {
     public class CAre : ModuleBase
     {
-        private static readonly List<string> _responses = new List<string>()
+        private readonly List<string> _responses = new List<string>()
         {
             // Positive
             "Yes, totally!",
@@ -32,14 +32,14 @@ namespace XayahBot.Command
             "Just... no.",
             "Oh, hell NO.",
         };
-        private static readonly List<string> _noQuestion = new List<string>()
+        private readonly List<string> _noQuestion = new List<string>()
         {
             "Did you not learn how to correctly phrase a question?",
             "I could sell you a beautiful set of question marks.",
             "Was that for me?",
             "I nearly thought you were asking me something.",
         };
-        private static readonly List<string> _noSentence = new List<string>()
+        private readonly List<string> _noSentence = new List<string>()
         {
             "I hate lazy people like you that can't finish a sentence properly.",
             "I think you missed the point. Like... literally.",
@@ -57,15 +57,15 @@ namespace XayahBot.Command
             message = message.Trim();
             if (message.EndsWith("?"))
             {
-                response = _responses.ElementAt(RNG.Next(_responses.Count) - 1);
+                response = this._responses.ElementAt(RNG.Next(this._responses.Count) - 1);
             }
             else if (message.EndsWith(".") || message.EndsWith("!"))
             {
-                response = _noQuestion.ElementAt(RNG.Next(_noQuestion.Count) - 1);
+                response = this._noQuestion.ElementAt(RNG.Next(this._noQuestion.Count) - 1);
             }
             else
             {
-                response = _noSentence.ElementAt(RNG.Next(_noSentence.Count) - 1);
+                response = this._noSentence.ElementAt(RNG.Next(this._noSentence.Count) - 1);
             }
             ReplyAsync(response);
             return Task.CompletedTask;

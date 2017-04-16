@@ -6,6 +6,7 @@ using XayahBot.Utility;
 using System.Collections.Generic;
 using System.Linq;
 using XayahBot.Command.Attribute;
+using XayahBot.Service;
 
 namespace XayahBot.Command
 {
@@ -22,9 +23,9 @@ namespace XayahBot.Command
 
         //
 
-        private static readonly string _logNoReplyChannel = "Could not reply to \"{0}\" because no appropriate channel could be found!";
+        private readonly string _logNoReplyChannel = "Could not reply to \"{0}\" because no appropriate channel could be found!";
 
-        private static readonly string _finishHelp = "You can also trigger commands with mentioning me instead of the prefix. " +
+        private readonly string _finishHelp = "You can also trigger commands with mentioning me instead of the prefix. " +
             "Also always remember using a space between each argument!" + Environment.NewLine +
             "If you have problems, questions and/or suggestions do not hesitate to message {0}.";
 
@@ -33,7 +34,7 @@ namespace XayahBot.Command
 #pragma warning disable 4014 // Intentional
         [Command("help"), Alias("h")]
         [Summary("Displays the list of commands.")]
-        public async Task Help(string command = "")
+        public async Task Help()
         {
             IMessageChannel channel = null;
             if (this.Context.IsPrivate)
@@ -46,65 +47,44 @@ namespace XayahBot.Command
             }
             if (channel == null)
             {
-                Logger.Log(LogSeverity.Error, nameof(CProperty), string.Format(_logNoReplyChannel, this.Context.User));
+                Logger.Log(LogSeverity.Error, nameof(CProperty), string.Format(this._logNoReplyChannel, this.Context.User));
                 return;
             }
             string message = string.Empty;
-            if (string.IsNullOrWhiteSpace(command))
+
+            string prefix = Property.CmdPrefix.Value;
+            List<HelpLine> normalCmdList = new List<HelpLine>();
+            List<HelpLine> modCmdList = new List<HelpLine>();
+            List<HelpLine> adminCmdList = new List<HelpLine>();
+            foreach (CommandInfo cmd in this.CmdService.Commands)
             {
-                string prefix = Property.CmdPrefix.Value;
-                List<HelpLine> normalCmdList = new List<HelpLine>();
-                List<HelpLine> modCmdList = new List<HelpLine>();
-                List<HelpLine> adminCmdList = new List<HelpLine>();
-                foreach (CommandInfo cmd in this.CmdService.Commands)
+                if (cmd.Preconditions.Contains(new RequireAdminAttribute()))
                 {
-                    if (cmd.Preconditions.Contains(new RequireOwnerAttribute()))
-                    {
-                        adminCmdList.Add(this.GetCommandStringSimple(cmd));
-                    }
-                    else if (cmd.Preconditions.Contains(new RequireModAttribute()))
-                    {
-                        modCmdList.Add(this.GetCommandStringSimple(cmd));
-                    }
-                    else
-                    {
-                        normalCmdList.Add(this.GetCommandStringSimple(cmd));
-                    }
+                    adminCmdList.Add(this.GetCommandStringSimple(cmd));
                 }
-                message = "__**Command List**__```";
-                message += this.GetCommandBlockString(normalCmdList);
-                message += $"```{Environment.NewLine}__Mod-Commands__```";
-                message += this.GetCommandBlockString(modCmdList);
-                message += $"```{Environment.NewLine}__Admin-Commands__```";
-                message += this.GetCommandBlockString(adminCmdList);
-                message += $"```{Environment.NewLine}{string.Format(_finishHelp, Property.Author)}";
-            }
-            else
-            {
-                int pos = this.Context.Message.Content.IndexOf(command);
-                SearchResult result = this.CmdService.Search(this.Context, pos);
-                IReadOnlyList<CommandMatch> matches = result.Commands;
-                message = "Not implemented yet.";
-                if (matches != null && matches.Count > 0)
+                else if (cmd.Preconditions.Contains(new RequireModAttribute()))
                 {
-                    List<CommandMatch> visibleCommands = new List<CommandMatch>();
-                    //check precondition if able to see
-                    if (matches.Count > 1)
-                    {
-                        //TODO multiple commands
-                    }
-                    else
-                    {
-                        //TODO detailed info
-                        //else
-                        //TODO no permission to see this
-                    }
+                    modCmdList.Add(this.GetCommandStringSimple(cmd));
                 }
                 else
                 {
-                    //TODO no command found
+                    normalCmdList.Add(this.GetCommandStringSimple(cmd));
                 }
             }
+            message = "__**Command List**__```";
+            message += this.GetCommandBlockString(normalCmdList);
+            if (PermissionService.IsAdminOrMod(this.Context) && modCmdList.Count > 0)
+            {
+                message += $"```{Environment.NewLine}__Mod-Commands__```";
+                message += this.GetCommandBlockString(modCmdList);
+            }
+            if (PermissionService.IsAdmin(this.Context) && adminCmdList.Count > 0)
+            {
+                message += $"```{Environment.NewLine}__Admin-Commands__```";
+                message += this.GetCommandBlockString(adminCmdList);
+            }
+            message += $"```{Environment.NewLine}{string.Format(_finishHelp, Property.Author)}";
+
             channel.SendMessageAsync(message);
         }
 #pragma warning restore 4014

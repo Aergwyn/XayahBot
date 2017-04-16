@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using XayahBot.Service;
 using XayahBot.Utility;
 using XayahBot.Command.Attribute;
 
@@ -37,7 +36,7 @@ namespace XayahBot.Command
         //
 
         [Command("get property"), Alias("gp")]
-        [RequireOwner]
+        [RequireAdmin]
         [RequireContext(ContextType.DM)]
         [Summary("Lists all or the specified property.")]
         public Task GetProperty(string name = "")
@@ -75,7 +74,7 @@ namespace XayahBot.Command
         }
 
         [Command("set property"), Alias("sp")]
-        [RequireOwner]
+        [RequireAdmin]
         [RequireContext(ContextType.DM)]
         [Summary("Updates specified property.")]
         public Task SetProperty(string name, [Remainder]string value = "")
@@ -103,7 +102,7 @@ namespace XayahBot.Command
         [Command("set game")]
         [RequireMod]
         [Summary("Updates the current game-status.")]
-        public async Task SetGame([Remainder] string value = "")
+        public async Task SetGame([Remainder] string status = "")
         {
             Logger.Log(LogSeverity.Debug, nameof(CProperty), string.Format(_logRequest, this.Context.User, "set game"));
             IMessageChannel channel = null;
@@ -120,7 +119,7 @@ namespace XayahBot.Command
                 Logger.Log(LogSeverity.Error, nameof(CProperty), string.Format(_logNoReplyChannel, this.Context.User));
                 return;
             }
-            string game = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+            string game = string.IsNullOrWhiteSpace(status) ? null : status.Trim();
             Property.GameActive.Value = game;
             this.Client.SetGameAsync(game);
             Logger.Log(LogSeverity.Debug, nameof(CProperty), string.Format(_logChanged, Property.GameActive.Name, game));

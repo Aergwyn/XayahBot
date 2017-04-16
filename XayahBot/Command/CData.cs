@@ -10,7 +10,7 @@ namespace XayahBot.Command
     [Group("data")]
     public class CData : ModuleBase
     {
-        private static readonly string _logNoReplyChannel = "Could not reply to \"{0}\" because no appropriate channel could be found!";
+        private readonly string _logNoReplyChannel = "Could not reply to \"{0}\" because no appropriate channel could be found!";
 
         //
 
@@ -30,7 +30,7 @@ namespace XayahBot.Command
             }
             if (channel == null)
             {
-                Logger.Log(LogSeverity.Error, nameof(CData), string.Format(_logNoReplyChannel, this.Context.User));
+                Logger.Log(LogSeverity.Error, nameof(CData), string.Format(this._logNoReplyChannel, this.Context.User));
                 return;
             }
             InfoService.GetChampionData(channel, name);
