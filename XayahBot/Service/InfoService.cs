@@ -18,7 +18,7 @@ namespace XayahBot.Service
         //
 
 #pragma warning disable 4014 // Intentional
-        public static async Task GetData(IMessageChannel channel, string name)
+        public static async Task GetChampionData(IMessageChannel channel, string name)
         {
             if (!string.IsNullOrWhiteSpace(name))
             {

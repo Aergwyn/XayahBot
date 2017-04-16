@@ -35,7 +35,7 @@ namespace XayahBot.Command
 
         //
 
-        [Command("get property")]
+        [Command("get property"), Alias("gp")]
         [RequireContext(ContextType.DM)]
         public Task GetProperty(string name = "", [Remainder] string trash = "")
         {
@@ -77,7 +77,7 @@ namespace XayahBot.Command
             return Task.CompletedTask;
         }
 
-        [Command("set property")]
+        [Command("set property"), Alias("sp")]
         [RequireContext(ContextType.DM)]
         public Task SetProperty(string name = "", [Remainder]string value = "")
         {

@@ -6,15 +6,15 @@ using XayahBot.Utility;
 
 namespace XayahBot.Command
 {
-    public class CInfo : ModuleBase
+    public class CData : ModuleBase
     {
         private static readonly string _logNoReplyChannel = "Could not reply to \"{0}\" because no appropriate channel could be found!";
 
         //
 
 #pragma warning disable 4014 // Intentional
-        [Command("info")]
-        public async Task Info([Remainder] string champion = "")
+        [Command("data")]
+        public async Task Data(/*string option = "", */[Remainder] string arg = "")
         {
             IMessageChannel channel = null;
             if (this.Context.IsPrivate)
@@ -27,10 +27,11 @@ namespace XayahBot.Command
             }
             if (channel == null)
             {
-                Logger.Log(LogSeverity.Error, nameof(CInfo), string.Format(_logNoReplyChannel, this.Context.User));
+                Logger.Log(LogSeverity.Error, nameof(CData), string.Format(_logNoReplyChannel, this.Context.User));
                 return;
             }
-            InfoService.GetData(channel, champion);
+            // TODO add options
+            InfoService.GetChampionData(channel, arg);
         }
 #pragma warning restore 4014
     }

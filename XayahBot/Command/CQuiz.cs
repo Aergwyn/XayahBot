@@ -9,8 +9,9 @@ namespace XayahBot.Command
 #pragma warning disable 4014 // Intentional
         [Command("quiz")]
         [RequireContext(ContextType.Guild)]
-        public Task Quiz([Remainder] string trash = "")
+        public Task Quiz(string option = "", [Remainder] string trash = "")
         {
+            // TODO add modes
             QuizService.AskQuestionAsync(this.Context);
             return Task.CompletedTask;
         }

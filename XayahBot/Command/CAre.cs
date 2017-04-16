@@ -6,7 +6,7 @@ using XayahBot.Utility;
 
 namespace XayahBot.Command
 {
-    public class CWhat : ModuleBase
+    public class CAre : ModuleBase
     {
         private static readonly List<string> _responses = new List<string>()
         {
@@ -49,8 +49,8 @@ namespace XayahBot.Command
 
         //
         
-        [Command("what")]
-        public Task What([Remainder] string message = "")
+        [Command("are"), Alias("is", "am")]
+        public Task Are([Remainder] string message = "")
         {
             string response = string.Empty;
             message = message.Trim();
