@@ -45,6 +45,7 @@ namespace XayahBot.Utility
                 yield return GameShutdown;
                 yield return QuizLastReset;
                 yield return QuizLeaderboardCd;
+                yield return QuizLeaderboardMax;
                 yield return QuizMatch;
                 yield return QuizMaxTries;
                 yield return QuizTimeout;
