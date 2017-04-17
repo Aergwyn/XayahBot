@@ -29,6 +29,25 @@ namespace XayahBot.API.Model
 
         //
 
+        private string _na = "N/A";
+
+        //
+
+        public string GetCostString()
+        {
+            return this.CostBurn != "0" ? this.CostBurn : this._na;
+        }
+
+        public string GetRangeString()
+        {
+            return this.RangeBurn != "0" ? this.RangeBurn : this._na;
+        }
+
+        public string GetCooldownString()
+        {
+            return this.CooldownBurn != "0" ? this.CooldownBurn : this._na;
+        }
+
         public string GetVarsString()
         {
             List<string> varList = new List<string>();
@@ -41,14 +60,19 @@ namespace XayahBot.API.Model
                     {
                         foreach (decimal coEff in var.CoEff)
                         {
-                            coEffList.Add(coEff.ToString(CultureInfo.InvariantCulture));
+                            coEffList.Add($"{(coEff * 100).ToString("G0", CultureInfo.InvariantCulture)}%");
                         }
                         varList.Add(string.Join(",", coEffList));
                         coEffList.Clear();
                     }
                 }
             }
-            return string.Join("/", varList);
+            string result = this._na;
+            if (varList.Count > 0)
+            {
+                result = string.Join(" | ", varList);
+            }
+            return result;
         }
     }
 }

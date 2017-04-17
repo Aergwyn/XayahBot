@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using XayahBot.API.Model;
 using XayahBot.Utility;
+using System.Globalization;
 
 namespace XayahBot.Service
 {
@@ -46,11 +47,13 @@ namespace XayahBot.Service
                         List<SkinDto> skins = champion.Skins.Where(x => x.Num > 0).ToList();
                         skins.Sort((a, b) => a.Num.CompareTo(b.Num));
 
-                        string message = $"{Environment.NewLine}__{champion.Name} {champion.Title}__```" +
+                        string message = $"__**{champion.Name} {champion.Title}**__```" +
                             $"Tags     - {string.Join(", ", champion.Tags)}{Environment.NewLine}" +
                             $"Resource - {champion.ParType}{Environment.NewLine}" +
-                            $"Passive  - {champion.Passive.Name}```" +
-                            $"{Environment.NewLine}__Abilities__```";
+                            $"Passive  - {champion.Passive.Name}" +
+                            $"```{Environment.NewLine}__Statistics__```" +
+                            GetStatisticBlock(champion.Stats) +
+                            $"```{Environment.NewLine}__Abilities__```";
                         for (int i = 0; i < champion.Spells.Count; i++)
                         {
                             if (i > 0)
@@ -59,10 +62,10 @@ namespace XayahBot.Service
                             }
                             ChampionSpellDto spell = champion.Spells.ElementAt(i);
                             message += $"Name     - {spell.Name}{Environment.NewLine}" +
-                                $"Cost     - {spell.CostBurn}{Environment.NewLine}" +
-                                $"Range    - {spell.RangeBurn}{Environment.NewLine}" +
-                                $"Cooldown - {spell.CooldownBurn}{Environment.NewLine}" +
-                                $"Scalings - {spell.GetVarsString()}";
+                                $"Cost     - {spell.GetCostString()}{Environment.NewLine}" +
+                                $"Range    - {spell.GetRangeString()}{Environment.NewLine}" +
+                                $"Cooldown - {spell.GetCooldownString()}{Environment.NewLine}" +
+                                $"Scaling  - {spell.GetVarsString()}";
                         }
                         message += $"```{Environment.NewLine}__Skins__```";
                         for (int i = 0; i < skins.Count; i++)
@@ -97,6 +100,58 @@ namespace XayahBot.Service
         private static string FilterName(string name)
         {
             return Regex.Replace(name, @"[^ a-zA-Z0-9]+", string.Empty);
+        }
+
+        private static string GetStatisticBlock(StatsDto stats)
+        {
+            List<decimal> leftStats = new List<decimal>()
+            {
+                stats.Hp,
+                stats.HpRegen,
+                stats.Mp,
+                stats.MpRegen,
+                stats.AttackRange,
+            };
+            List<decimal> leftScaling = new List<decimal>()
+            {
+                stats.HpPerLevel,
+                stats.HpRegenPerLevel,
+                stats.MpPerLevel,
+                stats.MpRegenPerLevel,
+                // no AttackRange here
+            };
+            List<decimal> rightStats = new List<decimal>()
+            {
+                stats.AttackDamage,
+                stats.AttackSpeedOffset,
+                stats.Armor,
+                stats.Spellblock,
+                stats.MoveSpeed,
+            };
+            List<decimal> rightScaling = new List<decimal>()
+            {
+                stats.AttackDamagePerLevel,
+                stats.AttackSpeedPerLevel,
+                stats.ArmorPerLevel,
+                stats.SpellblockPerLevel,
+                // no MoveSpeed here
+            };
+            DecAlign leftStatAlign = new DecAlign(leftStats);
+            DecAlign leftScalingAlign = new DecAlign(leftScaling);
+            DecAlign rightStatAlign = new DecAlign(rightStats);
+            DecAlign rightScalingAlign = new DecAlign(rightScaling);
+
+            string text = $"Health    - {leftStatAlign.Align(stats.Hp)} (+ {leftScalingAlign.Align(stats.HpPerLevel)}) | " +
+                $"Attack Damage - {rightStatAlign.Align(stats.AttackDamage)} (+ {rightScalingAlign.Align(stats.AttackDamagePerLevel)}){Environment.NewLine}" + 
+                $"HP Regen. - {leftStatAlign.Align(stats.HpRegen)} (+ {leftScalingAlign.Align(stats.HpRegenPerLevel)}) | " +
+                $"Attack Speed  - {rightStatAlign.Align(stats.AttackSpeedOffset)} (+ {rightScalingAlign.Align(stats.AttackSpeedPerLevel)}){Environment.NewLine}" +
+                $"Mana      - {leftStatAlign.Align(stats.Mp)} (+ {leftScalingAlign.Align(stats.MpPerLevel)}) | " +
+                $"Armor         - {rightStatAlign.Align(stats.Armor)} (+ {rightScalingAlign.Align(stats.ArmorPerLevel)}){Environment.NewLine}" +
+                $"MP Regen. - {leftStatAlign.Align(stats.MpRegen)} (+ {leftScalingAlign.Align(stats.MpRegenPerLevel)}) | " +
+                $"Magic Resist  - {rightStatAlign.Align(stats.Spellblock)} (+ {rightScalingAlign.Align(stats.SpellblockPerLevel)}){Environment.NewLine}" +
+                $"Range     - {leftStatAlign.Align(stats.AttackRange)} {"".PadLeft(leftScalingAlign.GetFieldLength() + 4)} | " +
+                $"Move. Speed   - {rightStatAlign.Align(stats.MoveSpeed)}";
+            return text;
         }
     }
 }
