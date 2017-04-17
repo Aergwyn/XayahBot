@@ -36,11 +36,11 @@ namespace XayahBot.Command
         [RequireAdmin]
         [RequireContext(ContextType.DM)]
         [Summary("Updates a specific property.")]
-        public Task SetProperty(string name, [Remainder]string value = "")
+        public Task Property(string name, [Remainder]string value = "")
         {
             Logger.Log(LogSeverity.Warning, nameof(CSet), string.Format(this._logRequest, this.Context.User, "set property"));
 
-            Property property = Property.GetByName(name);
+            Property property = Utility.Property.GetByName(name);
             if (property != null)
             {
                 string oldValue = property.Value;
@@ -61,7 +61,7 @@ namespace XayahBot.Command
         [Command("game")]
         [RequireMod]
         [Summary("Updates the current game-status.")]
-        public async Task SetGame([Remainder] string status = "")
+        public async Task Game([Remainder] string status = "")
         {
             Logger.Log(LogSeverity.Debug, nameof(CSet), string.Format(this._logRequest, this.Context.User, "set game"));
             IMessageChannel channel = null;
@@ -79,9 +79,9 @@ namespace XayahBot.Command
                 return;
             }
             string game = string.IsNullOrWhiteSpace(status) ? null : status.Trim();
-            Property.GameActive.Value = game;
+            Utility.Property.GameActive.Value = game;
             this.Client.SetGameAsync(game);
-            Logger.Log(LogSeverity.Debug, nameof(CSet), string.Format(this._logChanged, Property.GameActive.Name, game));
+            Logger.Log(LogSeverity.Debug, nameof(CSet), string.Format(this._logChanged, Utility.Property.GameActive.Name, game));
         }
 #pragma warning restore 4014
     }

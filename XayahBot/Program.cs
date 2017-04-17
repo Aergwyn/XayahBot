@@ -37,7 +37,6 @@ namespace XayahBot
             this._commandService = new CommandService(new CommandServiceConfig
             {
                 DefaultRunMode = RunMode.Async
-                
             });
             this._client = new DiscordSocketClient(new DiscordSocketConfig
             {

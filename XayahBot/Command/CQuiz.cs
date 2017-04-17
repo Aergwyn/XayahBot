@@ -10,20 +10,9 @@ namespace XayahBot.Command
         [Command("quiz")]
         [RequireContext(ContextType.Guild)]
         [Summary("Asks a random question about a champion.")]
-        public Task Quiz()
+        public Task Quiz(/*string mode = ""*/)
         {
             QuizService.AskQuestionAsync(this.Context);
-            return Task.CompletedTask;
-        }
-#pragma warning restore 4014
-
-#pragma warning disable 4014 // Intentional
-        [Command("answer")]
-        [RequireContext(ContextType.Guild)]
-        [Summary("Answers a previously opened question.")]
-        public Task Answer([Remainder] string text)
-        {
-            QuizService.AnswerQuestionAsync(this.Context, text);
             return Task.CompletedTask;
         }
 #pragma warning restore 4014

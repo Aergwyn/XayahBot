@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using XayahBot.Utility;
 using XayahBot.Command.Attribute;
 
@@ -25,13 +24,13 @@ namespace XayahBot.Command
         [RequireAdmin]
         [RequireContext(ContextType.DM)]
         [Summary("Lists all or a specific property.")]
-        public Task GetProperty(string name = "")
+        public Task Property(string name = "")
         {
             Logger.Log(LogSeverity.Debug, nameof(CGet), string.Format(this._logRequest, this.Context.User, "get property"));
 
             if (!string.IsNullOrWhiteSpace(name))
             {
-                Property property = Property.GetByName(name);
+                Property property = Utility.Property.GetByName(name);
                 if (property != null)
                 {
                     ReplyAsync(string.Format(this._currentValue, property.Name, property.Value));
@@ -44,7 +43,7 @@ namespace XayahBot.Command
             else
             {
                 string values = $"__List of properties__{Environment.NewLine}```";
-                List<Property> displayList = Property.Values.Where(x => x.Updatable).ToList();
+                List<Property> displayList = Utility.Property.Values.Where(x => x.Updatable).ToList();
                 for (int i = 0; i < displayList.Count; i++)
                 {
                     if (i > 0)
@@ -52,7 +51,7 @@ namespace XayahBot.Command
                         values += Environment.NewLine;
                     }
                     Property property = displayList.ElementAt(i);
-                    values += $"{(property.Name + ":").PadRight(Property.Values.Where(x => x.Updatable).OrderByDescending(x => x.Name.Length).First().Name.Length + 1, ' ')}\"{property.Value}\"";
+                    values += $"{(property.Name + ":").PadRight(Utility.Property.Values.Where(x => x.Updatable).OrderByDescending(x => x.Name.Length).First().Name.Length + 1, ' ')}\"{property.Value}\"";
                 }
                 values += "```";
                 ReplyAsync(values);

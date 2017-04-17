@@ -92,6 +92,10 @@ namespace XayahBot.Service
                     Logger.Log(LogSeverity.Error, nameof(QuizService), "Code returned with no question!");
                 }
             }
+            catch (Exception ex)
+            {
+                Logger.Log(new LogMessage(LogSeverity.Error, nameof(QuizService), "Exception in QuizService:AskQuestion", ex));
+            }
             finally
             {
                 _syncLock.Release();

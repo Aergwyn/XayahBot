@@ -38,7 +38,7 @@ namespace XayahBot.Utility
             {
                 if (i > 0)
                 {
-                    if (i < this.Answer.Count() - 1)
+                    if (i < this.Answer.Count() - 1 || this.Answer.Count() == 2)
                     {
                         text += " or ";
                     }
