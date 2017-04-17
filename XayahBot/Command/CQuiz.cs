@@ -9,7 +9,7 @@ namespace XayahBot.Command
 #pragma warning disable 4014 // Intentional
         [Command("quiz")]
         [RequireContext(ContextType.Guild)]
-        [Summary("Asks a random question about a champion (sponsored by Riot API).")]
+        [Summary("Asks a random question about a champion.")]
         public Task Quiz()
         {
             QuizService.AskQuestionAsync(this.Context);

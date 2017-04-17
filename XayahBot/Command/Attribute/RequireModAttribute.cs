@@ -15,7 +15,7 @@ namespace XayahBot.Command.Attribute
             }
             else
             {
-                return PreconditionResult.FromError("You must be a mod (explicitly for this bot) to run this command.");
+                return PreconditionResult.FromError("Insufficient (bot specific!) permission for command; required permission: mod");
             }
         }
 #pragma warning restore

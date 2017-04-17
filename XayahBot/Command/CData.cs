@@ -16,7 +16,7 @@ namespace XayahBot.Command
 
 #pragma warning disable 4014 // Intentional
         [Command("champ"), Alias("c")]
-        [Summary("Displays data of the specified champion (sponsored by Riot API).")]
+        [Summary("Displays data of a specific champion. This command is able to search with partial names.")]
         public async Task Champ([Remainder] string name)
         {
             IMessageChannel channel = null;

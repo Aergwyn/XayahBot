@@ -13,9 +13,8 @@ namespace XayahBot
     public class Program
     {
         private readonly DiscordSocketClient _client;
-
+        private readonly CommandService _commandService;
         private readonly IDependencyMap _dependencyMap = new DependencyMap();
-        private readonly CommandService _commandService = new CommandService();
 
         //
 
@@ -35,9 +34,14 @@ namespace XayahBot
                 Directory.CreateDirectory(path);
             }
             //
+            this._commandService = new CommandService(new CommandServiceConfig
+            {
+                DefaultRunMode = RunMode.Async
+                
+            });
             this._client = new DiscordSocketClient(new DiscordSocketConfig
             {
-                LogLevel = LogSeverity.Info,
+                LogLevel = LogSeverity.Info
             });
         }
 
@@ -127,8 +131,8 @@ namespace XayahBot
                     {
                         Logger.Log(LogSeverity.Debug, nameof(Program), $"Command failed: {result.ErrorReason}");
                     }
-                    // Mostly for debugging
-                    //await context.Channel.SendMessageAsync(result.ErrorReason);
+                   // Mostly for debugging
+                   //await context.Channel.SendMessageAsync(result.ErrorReason);
                 }
             }
         }

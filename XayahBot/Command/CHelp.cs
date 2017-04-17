@@ -47,16 +47,15 @@ namespace XayahBot.Command
             }
             if (channel == null)
             {
-                Logger.Log(LogSeverity.Error, nameof(CProperty), string.Format(this._logNoReplyChannel, this.Context.User));
+                Logger.Log(LogSeverity.Error, nameof(CGet), string.Format(this._logNoReplyChannel, this.Context.User));
                 return;
             }
             string message = string.Empty;
-
             string prefix = Property.CmdPrefix.Value;
             List<HelpLine> normalCmdList = new List<HelpLine>();
             List<HelpLine> modCmdList = new List<HelpLine>();
             List<HelpLine> adminCmdList = new List<HelpLine>();
-            foreach (CommandInfo cmd in this.CmdService.Commands)
+            foreach (CommandInfo cmd in this.CmdService.Commands) // Sort commands in permission groups
             {
                 if (cmd.Preconditions.Contains(new RequireAdminAttribute()))
                 {
@@ -93,11 +92,12 @@ namespace XayahBot.Command
 
         private HelpLine GetCommandStringSimple(CommandInfo cmd)
         {
-            string command = $".{string.Join("|.", cmd.Aliases)}";
+            string command = this.ListAliases(cmd.Aliases);
             foreach (ParameterInfo param in cmd.Parameters)
             {
                 if (param.IsOptional)
                 {
+                    //cmd.Aliases.Perm
                     command += $" [<{param.Name}>]";
                 }
                 else
@@ -110,6 +110,32 @@ namespace XayahBot.Command
                 Command = command,
                 Summary = cmd.Summary
             };
+        }
+
+        private string ListAliases(IReadOnlyList<string> aliases)
+        {
+            string result = Property.CmdPrefix.Value;
+            Dictionary<int, HashSet<string>> builder = new Dictionary<int, HashSet<string>>();
+            foreach (string alias in aliases)
+            {
+                string[] parts = alias.Split(' ');
+                for (int i = 0; i < parts.Count(); i++)
+                {
+                    if (builder.ContainsKey(i))
+                    {
+                        builder[i].Add(parts.ElementAt(i));
+                    }
+                    else
+                    {
+                        builder.Add(i, new HashSet<string> { parts.ElementAt(i) });
+                    }
+                }
+            }
+            foreach (HashSet<string> partList in builder.Values)
+            {
+                result += $"{string.Join("|", partList)} ";
+            }
+            return result.Trim();
         }
 
         private string GetCommandBlockString(List<HelpLine> cmdList)

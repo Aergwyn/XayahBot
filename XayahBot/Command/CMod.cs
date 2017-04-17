@@ -23,7 +23,7 @@ namespace XayahBot.Command
         [Command("add")]
         [RequireAdmin]
         [RequireContext(ContextType.DM)]
-        [Summary("Adds specified person to the mod list.")]
+        [Summary("Adds aspecific person to the mod list.")]
         public Task Add(string name)
         {
             Logger.Log(LogSeverity.Info, nameof(CMod), string.Format(this._logRequest, this.Context.User, "mod add"));
@@ -42,7 +42,7 @@ namespace XayahBot.Command
         [Command("remove")]
         [RequireAdmin]
         [RequireContext(ContextType.DM)]
-        [Summary("Removes specified person from the mod list.")]
+        [Summary("Removes a specific person from the mod list.")]
         public Task Remove(string name)
         {
             Logger.Log(LogSeverity.Info, nameof(CMod), string.Format(this._logRequest, this.Context.User, "mod remove"));

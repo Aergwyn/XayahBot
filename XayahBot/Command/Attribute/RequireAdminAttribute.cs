@@ -15,7 +15,7 @@ namespace XayahBot.Command.Attribute
             }
             else
             {
-                return PreconditionResult.FromError("You must be an admin (explicitly for this bot) to run this command.");
+                return PreconditionResult.FromError("Insufficient (bot specific!) permission for command; required permission: admin");
             }
         }
 #pragma warning restore
