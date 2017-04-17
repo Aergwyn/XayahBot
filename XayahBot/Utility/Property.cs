@@ -20,6 +20,7 @@ namespace XayahBot.Utility
         public static readonly Property GameActive = new Property("game_active", "with Rakan");
         public static readonly Property GameShutdown = new Property("game_shutdown", "shutting down...");
         public static readonly Property QuizLastReset = new Property("quiz_lastreset", "1/2017");
+        public static readonly Property QuizLeaderboardCd = new Property("quiz_leaderboardcd", "5"); // Minutes
         public static readonly Property QuizMatch = new Property("quiz_match", "70"); // Percentage
         public static readonly Property QuizMaxTries = new Property("quiz_maxtries", "10");
         public static readonly Property QuizTimeout = new Property("quiz_timeout", "10"); // Minutes
@@ -42,6 +43,7 @@ namespace XayahBot.Utility
                 yield return GameActive;
                 yield return GameShutdown;
                 yield return QuizLastReset;
+                yield return QuizLeaderboardCd;
                 yield return QuizMatch;
                 yield return QuizMaxTries;
                 yield return QuizTimeout;

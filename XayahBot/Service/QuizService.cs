@@ -20,19 +20,26 @@ namespace XayahBot.Service
 
         //
 
-        private static List<string> _fullAnswerList = new List<string>() {
+        private static List<string> _fullAnswerList = new List<string>{
             "Wow. {0} was actually correct.",
             "{0} was first to provide the right answer.",
-            "{0} won the cookie!",
+            "{0} won the cookie!"
         };
-        private static List<string> _partialAnswerList = new List<string>(){
+        private static List<string> _partialAnswerList = new List<string>{
             "Wow. {0} was actually somewhat right. {1} would've been the full answer.",
             "{0} barely made it. Actually it was {1} but I'm nice.",
-            "*yawn* {0} finally did it! Guessing {1} isn't so hard, no?",
+            "*yawn* {0} finally did it! Guessing {1} isn't so hard, no?"
         };
-
-        private static string _questionTimeout = "Oh. So much time passed and no one was able to guess it. {0} would've done it though. *sigh*";
-        private static string _questionMaxTries = "Seems like this question was too hard. No one knew the answer was {0}. Oh well.";
+        private static List<string> _questionTimeoutList = new List<string>{
+            "Oh. So much time passed and no one was able to guess it. {0} would've done it though. *sigh*",
+            "Too late... way way too late. Answer was {0} though.",
+            "I forgot the question ages ago. I still know the answers though: {0}."
+        };
+        private static List<string> _questionMaxTriesList = new List<string>{
+            "Seems like this question was too hard. No one knew the answer was {0}. Oh well.",
+            "Too hard I suppose. Memorize {0} then.",
+            "How about {0}? Maybe next time I can think of something easier."
+        };
 
         private static string _championBasicNameQ = "Which champion got the title \"{0}\"?";
         private static string _championBasicTitleQ = "Name the title of {0} with at least {1}% accuracy!";
@@ -67,7 +74,7 @@ namespace XayahBot.Service
                     if (entry.TimeAsked.AddMinutes(int.Parse(Property.QuizTimeout.Value)) < DateTime.UtcNow)
                     {
                         _questionMap.Remove(context.Guild.Id);
-                        question = string.Format(_questionTimeout, entry.GetAllAnswers());
+                        question = string.Format(_questionTimeoutList.ElementAt(RNG.Next(_questionTimeoutList.Count) - 1), entry.GetAllAnswers());
                     }
                     else
                     {
@@ -121,7 +128,7 @@ namespace XayahBot.Service
                         if (!string.IsNullOrWhiteSpace(correctAnswer))
                         {
                             success = true;
-                            response = string.Format(GetRandomAnswer(_fullAnswerList), context.User.Mention);
+                            response = string.Format(_fullAnswerList.ElementAt(RNG.Next(_fullAnswerList.Count) - 1), context.User.Mention);
                         }
                     }
                     else // Partial Match
@@ -133,12 +140,12 @@ namespace XayahBot.Service
                             if (percentage >= 100)
                             {
                                 success = true;
-                                response = string.Format(GetRandomAnswer(_fullAnswerList), context.User.Mention);
+                                response = string.Format(_fullAnswerList.ElementAt(RNG.Next(_fullAnswerList.Count) - 1), context.User.Mention);
                             }
                             else if (percentage >= int.Parse(Property.QuizMatch.Value))
                             {
                                 success = true;
-                                response = string.Format(GetRandomAnswer(_partialAnswerList), context.User.Mention, correctAnswer);
+                                response = string.Format(_partialAnswerList.ElementAt(RNG.Next(_partialAnswerList.Count) - 1), context.User.Mention, correctAnswer);
                             }
                         }
                     }
@@ -153,12 +160,12 @@ namespace XayahBot.Service
                         if (entry.TimesFailed >= int.Parse(Property.QuizMaxTries.Value))
                         {
                             _questionMap.Remove(context.Guild.Id);
-                            response = string.Format(_questionMaxTries, entry.GetAllAnswers());
+                            response = string.Format(_questionMaxTriesList.ElementAt(RNG.Next(_questionMaxTriesList.Count) - 1), entry.GetAllAnswers());
                         }
                         else if (entry.TimeAsked.AddMinutes(int.Parse(Property.QuizTimeout.Value)) < DateTime.UtcNow)
                         {
                             _questionMap.Remove(context.Guild.Id);
-                            response = string.Format(_questionTimeout, entry.GetAllAnswers());
+                            response = string.Format(_questionTimeoutList.ElementAt(RNG.Next(_questionTimeoutList.Count) - 1), entry.GetAllAnswers());
                         }
                     }
                 }
@@ -177,13 +184,6 @@ namespace XayahBot.Service
             }
         }
 #pragma warning restore 4014
-
-        //
-
-        private static string GetRandomAnswer(List<string> list)
-        {
-            return list.ElementAt(RNG.Next(list.Count) - 1);
-        }
 
         //
 

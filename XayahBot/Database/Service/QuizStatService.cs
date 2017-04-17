@@ -9,6 +9,15 @@ namespace XayahBot.Database.Service
 {
     public static class QuizStatService
     {
+        public static List<TQuizStat> GetStatList(ulong guild)
+        {
+            CheckForReset();
+            using (Context db = new Context())
+            {
+                return db.QuizStats.Where(x => x.Guild.Equals(guild)).ToList();
+            }
+        }
+
         public static Task IncrementAnswerAsync(ulong guild, string user)
         {
             CheckForReset();
