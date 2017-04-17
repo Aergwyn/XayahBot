@@ -55,7 +55,7 @@ namespace XayahBot.Command
                 {
                     int width = leaderboard.First().Answers.ToString().Length;
                     message = "Most correctly answered questions this month...```";
-                    for (int i = 0; i < leaderboard.Count; i++)
+                    for (int i = 0; i < leaderboard.Count && i < int.Parse(Property.QuizLeaderboardMax.Value); i++)
                     {
                         if (i > 0)
                         {
