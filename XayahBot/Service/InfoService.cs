@@ -123,7 +123,7 @@ namespace XayahBot.Service
             List<decimal> rightStats = new List<decimal>()
             {
                 stats.AttackDamage,
-                stats.AttackSpeedOffset,
+                stats.GetBaseAttackSpeed(),
                 stats.Armor,
                 stats.Spellblock,
                 stats.MoveSpeed,
@@ -144,7 +144,7 @@ namespace XayahBot.Service
             string text = $"Health    - {leftStatAlign.Align(stats.Hp)} (+ {leftScalingAlign.Align(stats.HpPerLevel)}) | " +
                 $"Attack Damage - {rightStatAlign.Align(stats.AttackDamage)} (+ {rightScalingAlign.Align(stats.AttackDamagePerLevel)}){Environment.NewLine}" + 
                 $"HP Regen. - {leftStatAlign.Align(stats.HpRegen)} (+ {leftScalingAlign.Align(stats.HpRegenPerLevel)}) | " +
-                $"Attack Speed  - {rightStatAlign.Align(stats.AttackSpeedOffset)} (+ {rightScalingAlign.Align(stats.AttackSpeedPerLevel)}){Environment.NewLine}" +
+                $"Attack Speed  - {rightStatAlign.Align(stats.GetBaseAttackSpeed())} (+ {rightScalingAlign.Align(stats.AttackSpeedPerLevel)}){Environment.NewLine}" +
                 $"Mana      - {leftStatAlign.Align(stats.Mp)} (+ {leftScalingAlign.Align(stats.MpPerLevel)}) | " +
                 $"Armor         - {rightStatAlign.Align(stats.Armor)} (+ {rightScalingAlign.Align(stats.ArmorPerLevel)}){Environment.NewLine}" +
                 $"MP Regen. - {leftStatAlign.Align(stats.MpRegen)} (+ {leftScalingAlign.Align(stats.MpRegenPerLevel)}) | " +

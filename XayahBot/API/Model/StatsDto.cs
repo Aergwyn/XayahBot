@@ -1,4 +1,6 @@
-﻿namespace XayahBot.API.Model
+﻿using System;
+
+namespace XayahBot.API.Model
 {
     public class StatsDto
     {
@@ -22,5 +24,12 @@
         public decimal MpRegenPerLevel { get; set; }
         public decimal Spellblock { get; set; }
         public decimal SpellblockPerLevel { get; set; }
+
+        //
+
+        public decimal GetBaseAttackSpeed()
+        {
+            return Math.Round(0.625M / (1 + this.AttackSpeedOffset), 3, MidpointRounding.AwayFromZero);
+        }
     }
 }

@@ -9,6 +9,7 @@ using Newtonsoft.Json.Linq;
 using XayahBot.API.Model;
 using XayahBot.Utility;
 using XayahBot.Database.Service;
+using System.Globalization;
 
 namespace XayahBot.Service
 {
@@ -347,25 +348,31 @@ namespace XayahBot.Service
             switch (RNG.Next(6))
             {
                 case 1:
-                    entry = new QuizEntry(string.Format(_championStatsArmorQ, champion.Name, level), ((int)Math.Round(stats.Armor + (stats.ArmorPerLevel * (level - 1)), 0, MidpointRounding.AwayFromZero)).ToString());
+                    entry = new QuizEntry(string.Format(_championStatsArmorQ, champion.Name, level), GetCalculateDStat(stats.Armor, stats.ArmorPerLevel, level));
                     break;
                 case 2:
-                    entry = new QuizEntry(string.Format(_championStatsRangeQ, champion.Name), ((int)stats.AttackRange).ToString());
+                    entry = new QuizEntry(string.Format(_championStatsRangeQ, champion.Name), stats.AttackRange.ToString("G0", CultureInfo.InvariantCulture));
                     break;
                 case 3:
-                    entry = new QuizEntry(string.Format(_championStatsHpQ, champion.Name, level), ((int)Math.Round(stats.Hp + (stats.HpPerLevel * (level - 1)), 0, MidpointRounding.AwayFromZero)).ToString());
+                    entry = new QuizEntry(string.Format(_championStatsHpQ, champion.Name, level), GetCalculateDStat(stats.Hp, stats.HpPerLevel, level));
                     break;
                 case 4:
-                    entry = new QuizEntry(string.Format(_championStatsSpeedQ, champion.Name), ((int)stats.MoveSpeed).ToString());
+                    entry = new QuizEntry(string.Format(_championStatsSpeedQ, champion.Name), stats.MoveSpeed.ToString("G0", CultureInfo.InvariantCulture));
                     break;
                 case 5:
-                    entry = new QuizEntry(string.Format(_championStatsMpQ, champion.Name, level), ((int)Math.Round(stats.Mp + (stats.MpPerLevel * (level - 1)), 0, MidpointRounding.AwayFromZero)).ToString());
+                    entry = new QuizEntry(string.Format(_championStatsMpQ, champion.Name, level), GetCalculateDStat(stats.Mp, stats.MpPerLevel, level));
                     break;
                 case 6:
-                    entry = new QuizEntry(string.Format(_championStatsMrQ, champion.Name, level), ((int)Math.Round(stats.Spellblock + (stats.SpellblockPerLevel * (level - 1)), 0, MidpointRounding.AwayFromZero)).ToString());
+                    entry = new QuizEntry(string.Format(_championStatsMrQ, champion.Name, level), GetCalculateDStat(stats.Spellblock, stats.SpellblockPerLevel, level));
                     break;
             }
             return entry;
+        }
+
+        // League stat growth formula (+ ceiling the value to represent ingame behaviour)
+        private static string GetCalculateDStat(decimal stat, decimal scaling, int level)
+        {
+            return Math.Ceiling(stat + scaling * (level - 1) * (0.685M + 0.0175M * level)).ToString("G0", CultureInfo.InvariantCulture);
         }
     }
 }
