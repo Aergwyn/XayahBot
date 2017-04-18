@@ -9,7 +9,7 @@ namespace XayahBot.Command
 {
     public class CAre : ModuleBase
     {
-        private readonly List<string> _responses = new List<string>()
+        private readonly List<string> _responseList = new List<string>
         {
             // Positive
             "Yes, totally!",
@@ -33,14 +33,14 @@ namespace XayahBot.Command
             "Just... no.",
             "Oh, hell NO.",
         };
-        private readonly List<string> _noQuestion = new List<string>()
+        private readonly List<string> _noQuestionList = new List<string>
         {
             "Did you not learn how to correctly phrase a question?",
             "I could sell you a beautiful set of question marks.",
             "Was that for me?",
             "I nearly thought you were asking me something.",
         };
-        private readonly List<string> _noSentence = new List<string>()
+        private readonly List<string> _noSentenceList = new List<string>
         {
             "I hate lazy people like you that can't finish a sentence properly.",
             "I think you missed the point. Like... literally.",
@@ -60,15 +60,15 @@ namespace XayahBot.Command
             text = text.Trim();
             if (text.EndsWith("?"))
             {
-                response = this._responses.ElementAt(RNG.Next(this._responses.Count) - 1);
+                response = this._responseList.ElementAt(RNG.Next(this._responseList.Count) - 1);
             }
             else if (text.EndsWith(".") || text.EndsWith("!"))
             {
-                response = this._noQuestion.ElementAt(RNG.Next(this._noQuestion.Count) - 1);
+                response = this._noQuestionList.ElementAt(RNG.Next(this._noQuestionList.Count) - 1);
             }
             else
             {
-                response = this._noSentence.ElementAt(RNG.Next(this._noSentence.Count) - 1);
+                response = this._noSentenceList.ElementAt(RNG.Next(this._noSentenceList.Count) - 1);
             }
             ReplyAsync(response);
             return Task.CompletedTask;

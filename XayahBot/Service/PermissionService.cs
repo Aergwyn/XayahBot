@@ -44,50 +44,61 @@ namespace XayahBot.Service
 
         //
 
-        public static int ToggleMod(string name)
+        public static bool AddMod(string name)
         {
-            return ToggleValue(Property.CfgMods, name);
+            return Add(Property.CfgMods, name);
         }
 
-        public static int ToggleIgnore(string name)
+        public static bool RemoveMod(string name)
         {
-            return ToggleValue(Property.CfgIgnore, name);
+            return Remove(Property.CfgMods, name);
+        }
+
+        public static bool AddIgnore(string name)
+        {
+            return Add(Property.CfgIgnore, name);
+        }
+
+        public static bool RemoveIgnore(string name)
+        {
+            return Remove(Property.CfgIgnore, name);
         }
 
         //
 
-        private static int ToggleValue(Property property, string name)
+        private static bool Add(Property property, string name)
         {
-            int status = 2; // failed
-            if (!string.IsNullOrWhiteSpace(name) && Regex.IsMatch(name, "^.+#[0-9]{4}$"))
+            if (!property.Value.Split(',').Contains(name)) // does not contain name, add
             {
-                if (!property.Value.Split(',').Contains(name)) // does not contain name, add
+                List<string> list = property.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                list.Add(name);
+                property.Value = string.Join(",", list);
+                return true;
+            }
+            return false;
+        }
+
+        private static bool Remove(Property property, string name)
+        {
+            if (property.Value.Split(',').Contains(name)) // does not contain name, add
+            {
+                List<string> list = property.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                if (list.Count > 0)
                 {
-                    List<string> list = property.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                    list.Add(name);
-                    property.Value = string.Join(",", list);
-                    status = 0; // success, added
-                }
-                else // does contain mod, remove
-                {
-                    List<string> list = property.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                    if (list.Count > 0)
+                    int preRemoveCount = list.Count;
+                    List<string> matches = list.Where(x => x.ToLower().Equals(name.ToLower())).ToList(); // Also removes duplicates, should not happen but you never know
+                    foreach (string mod in matches)
                     {
-                        int preRemoveCount = list.Count;
-                        List<string> matches = list.Where(x => x.ToLower().Equals(name.ToLower())).ToList(); // Also removes duplicates, should not happen but you never know
-                        foreach (string mod in matches)
-                        {
-                            list.Remove(mod);
-                        }
-                        if (list.Count != preRemoveCount)
-                        {
-                            property.Value = string.Join(",", list);
-                        }
+                        list.Remove(mod);
                     }
-                    status = 1; // success, removed
+                    if (list.Count != preRemoveCount)
+                    {
+                        property.Value = string.Join(",", list);
+                        return true;
+                    }
                 }
             }
-            return status;
+            return false;
         }
     }
 }

@@ -32,29 +32,38 @@ namespace XayahBot.Database.Service
             }
         }
 
-        public static async Task<int> ToggleChannelAsync(ulong guild, ulong channelId, string channelName)
+        public static async Task<bool> AddChannelAsync(ulong guild, ulong channelId, string channelName)
         {
-            int status = 2; // failed
             using (GeneralContext db = new GeneralContext())
             {
                 TIgnoredChannel match = db.IgnoredChannel.FirstOrDefault(x => x.Guild.Equals(guild) && x.ChannelId.Equals(channelId));
                 if (match == null)
                 {
                     db.IgnoredChannel.Add(new TIgnoredChannel { Guild = guild, ChannelId = channelId, ChannelName = channelName });
-                    status = 0; // success, added
                 }
-                else
+                if (await db.SaveChangesAsync() > 0)
                 {
-                    db.Remove(match);
-                    status = 1; // success, removed
-                }
-                int changes = await db.SaveChangesAsync();
-                if (changes == 0)
-                {
-                    status = 2;
+                    return true;
                 }
             }
-            return status;
+            return false;
+        }
+
+        public static async Task<bool> RemoveChannelAsync(ulong guild, ulong channelId)
+        {
+            using (GeneralContext db = new GeneralContext())
+            {
+                TIgnoredChannel match = db.IgnoredChannel.FirstOrDefault(x => x.Guild.Equals(guild) && x.ChannelId.Equals(channelId));
+                if (match != null)
+                {
+                    db.Remove(match);
+                }
+                if (await db.SaveChangesAsync() > 0)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
