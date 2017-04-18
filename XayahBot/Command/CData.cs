@@ -3,7 +3,6 @@ using Discord;
 using Discord.Commands;
 using XayahBot.Service;
 using XayahBot.Utility;
-using System;
 
 namespace XayahBot.Command
 {
@@ -16,7 +15,7 @@ namespace XayahBot.Command
 
 #pragma warning disable 4014 // Intentional
         [Command("champ"), Alias("c")]
-        [Summary("Displays data of a specific champion. This command is able to search with partial names.")]
+        [Summary("Displays data of a specific champion. Name does not have to be exact.")]
         public async Task Champ([Remainder] string name)
         {
             IMessageChannel channel = null;

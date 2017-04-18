@@ -9,7 +9,7 @@ namespace XayahBot.Database.Service
     {
         public static string GetValue(Property property)
         {
-            using (Context db = new Context())
+            using (GeneralContext db = new GeneralContext())
             {
                 TProperty dbProperty = db.Properties.FirstOrDefault(x => x.Name.Equals(property.Name));
                 if (dbProperty != null)
@@ -22,12 +22,12 @@ namespace XayahBot.Database.Service
 
         public static Task SetValueAsync(Property property)
         {
-            using (Context db = new Context())
+            using (GeneralContext db = new GeneralContext())
             {
                 TProperty dbProperty = db.Properties.FirstOrDefault(x => x.Name.Equals(property.Name));
                 if (dbProperty == null)
                 {
-                    db.Properties.Add(new TProperty() { Name = property.Name, Value = property.Value });
+                    db.Properties.Add(new TProperty { Name = property.Name, Value = property.Value });
                 }
                 else
                 {

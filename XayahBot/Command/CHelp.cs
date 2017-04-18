@@ -47,7 +47,7 @@ namespace XayahBot.Command
             }
             if (channel == null)
             {
-                Logger.Log(LogSeverity.Error, nameof(CGet), string.Format(this._logNoReplyChannel, this.Context.User));
+                Logger.Log(LogSeverity.Error, nameof(CHelp), string.Format(this._logNoReplyChannel, this.Context.User));
                 return;
             }
             string message = string.Empty;

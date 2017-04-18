@@ -12,7 +12,7 @@ namespace XayahBot.Database.Service
         public static List<TQuizStat> GetStatList(ulong guild)
         {
             CheckForReset();
-            using (Context db = new Context())
+            using (GeneralContext db = new GeneralContext())
             {
                 return db.QuizStats.Where(x => x.Guild.Equals(guild)).ToList();
             }
@@ -21,12 +21,12 @@ namespace XayahBot.Database.Service
         public static Task IncrementAnswerAsync(ulong guild, string user)
         {
             CheckForReset();
-            using (Context db = new Context())
+            using (GeneralContext db = new GeneralContext())
             {
                 TQuizStat quizStat = db.QuizStats.FirstOrDefault(x => x.Guild.Equals(guild) && x.User.Equals(user));
                 if (quizStat == null)
                 {
-                    db.QuizStats.Add(new TQuizStat() { Guild = guild, User = user, Answers = 1 });
+                    db.QuizStats.Add(new TQuizStat { Guild = guild, User = user, Answers = 1 });
                 }
                 else
                 {
@@ -48,7 +48,7 @@ namespace XayahBot.Database.Service
                 DateTime lastReset = new DateTime(int.Parse(lastResetValue.ElementAt(1)), int.Parse(lastResetValue.ElementAt(0)), 1, 0, 0, 0);
                 if (lastReset.AddMonths(1) < now)
                 {
-                    using (Context db = new Context())
+                    using (GeneralContext db = new GeneralContext())
                     {
                         foreach (TQuizStat quizStat in db.QuizStats)
                         {

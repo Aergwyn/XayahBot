@@ -15,7 +15,8 @@ namespace XayahBot.Utility
         public static readonly Property FileRiotApiKey = new Property("file_riotapikey", "riotapikey.txt", false);
         public static readonly Property FileToken = new Property("file_token", "token.txt", false);
         // Changeable "Enums" with default values
-        public static readonly Property ConfigMods = new Property("cfg_mods", "");
+        public static readonly Property CfgIgnore = new Property("cfg_ignore", "");
+        public static readonly Property CfgMods = new Property("cfg_mods", "");
         public static readonly Property DataLongevity = new Property("data_longevity", "24"); // Hours
         public static readonly Property GameActive = new Property("game_active", "with Rakan");
         public static readonly Property GameShutdown = new Property("game_shutdown", "shutting down...");
@@ -39,7 +40,8 @@ namespace XayahBot.Utility
                 yield return FileRiotApiKey;
                 yield return FileToken;
                 //
-                yield return ConfigMods;
+                yield return CfgIgnore;
+                yield return CfgMods;
                 yield return DataLongevity;
                 yield return GameActive;
                 yield return GameShutdown;

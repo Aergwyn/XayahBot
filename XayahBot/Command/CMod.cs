@@ -4,57 +4,77 @@ using Discord.Commands;
 using XayahBot.Service;
 using XayahBot.Utility;
 using XayahBot.Command.Attribute;
+using System;
+using System.Linq;
 
 namespace XayahBot.Command
 {
     [Group("mod")]
+    [RequireContext(ContextType.DM)]
     public class CMod : ModuleBase
     {
-        private readonly string _logRequest = "\"{0}\" requested \"{1}\".";
-        private readonly string _modAddSuccess = "Added `{0}` to list of mods.";
-        private readonly string _logModAddSuccess = "Added \"{0}\" to list of mods.";
-        private readonly string _modAddFailed = "Failed to add `{0}`.";
-        private readonly string _modRemoveSuccess = "Removed `{0}` from list of mods.";
-        private readonly string _logModRemoveSuccess = "Removed \"{0}\" from list of mods.";
-        private readonly string _modRemoveFailed = "Failed to remove `{0}`.";
+        private readonly string _logRequest = "\"{0}\" requested \"mod toggle\" command.";
+        private readonly string _logAddSuccess = "Added \"{0}\" to the list of mods.";
+        private readonly string _logRemoveSuccess = "Removed \"{0}\" from the list of mods.";
+
+        private readonly string _emptyModList = "The mod list is empty right now.";
+        private readonly string _addSuccess = "Added `{0}` to the list of mods.";
+        private readonly string _removeSuccess = "Removed `{0}` from the list of mods.";
+        private readonly string _toggleFailed = "Failed to change mod status of `{0}`.";
 
         //
 
-        [Command("add")]
-        [RequireAdmin]
-        [RequireContext(ContextType.DM)]
-        [Summary("Adds aspecific person to the mod list.")]
-        public Task Add(string name)
+        [Command("list")]
+        [RequireMod]
+        [Summary("Lists all current mods.")]
+        public Task List()
         {
-            Logger.Log(LogSeverity.Info, nameof(CMod), string.Format(this._logRequest, this.Context.User, "mod add"));
-            if (PermissionService.AddMod(name))
+            string message = string.Empty;
+            string[] mods = Property.CfgMods.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            message = $"__List of mods__{Environment.NewLine}```";
+            if (mods.Count() > 0)
             {
-                ReplyAsync(string.Format(this._modAddSuccess, name));
-                Logger.Log(LogSeverity.Warning, nameof(CMod), string.Format(this._logModAddSuccess, name));
+                for (int i = 0; i < mods.Count(); i++)
+                {
+                    string mod = mods.ElementAt(i);
+                    if (i > 0)
+                    {
+                        message += Environment.NewLine;
+                    }
+                    message += mod;
+                }
             }
             else
             {
-                ReplyAsync(string.Format(this._modAddFailed, name));
+                message = this._emptyModList;
             }
+            message += "```";
+            ReplyAsync(message);
             return Task.CompletedTask;
         }
 
-        [Command("remove")]
+        [Command("toggle")]
         [RequireAdmin]
-        [RequireContext(ContextType.DM)]
-        [Summary("Removes a specific person from the mod list.")]
-        public Task Remove(string name)
+        [Summary("Adds/Removes a specific user to/from the mod list.")]
+        public Task Toggle(string name)
         {
-            Logger.Log(LogSeverity.Info, nameof(CMod), string.Format(this._logRequest, this.Context.User, "mod remove"));
-            if (PermissionService.RemoveMod(name))
+            string message = string.Empty;
+            Logger.Log(LogSeverity.Info, nameof(CMod), string.Format(this._logRequest, this.Context.User));
+            switch (PermissionService.ToggleMod(name))
             {
-                ReplyAsync(string.Format(this._modRemoveSuccess, name));
-                Logger.Log(LogSeverity.Info, nameof(CMod), string.Format(this._logModRemoveSuccess, name));
+                case 0:
+                    message = string.Format(this._addSuccess, name);
+                    Logger.Log(LogSeverity.Warning, nameof(CMod), string.Format(this._logAddSuccess, name));
+                    break;
+                case 1:
+                    message = string.Format(this._removeSuccess, name);
+                    Logger.Log(LogSeverity.Warning, nameof(CMod), string.Format(this._logRemoveSuccess, name));
+                    break;
+                case 2:
+                    message = string.Format(this._toggleFailed, name);
+                    break;
             }
-            else
-            {
-                ReplyAsync(string.Format(this._modRemoveFailed, name));
-            }
+            ReplyAsync(message);
             return Task.CompletedTask;
         }
     }
