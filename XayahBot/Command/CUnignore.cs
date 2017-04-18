@@ -26,7 +26,8 @@ namespace XayahBot.Command
         {
             "Maybe I over did it.",
             "Well, that's just an invasion of privacy!",
-            "Humans... they’re so very blind."
+            "Don't embarass me!",
+            "But is it really okay?"
         };
 
         //

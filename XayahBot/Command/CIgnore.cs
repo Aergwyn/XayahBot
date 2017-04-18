@@ -28,7 +28,8 @@ namespace XayahBot.Command
         {
             "I warned you. Oh wait... did I? Crap. My fault.",
             "All out of second chances, sorry!",
-            "And they won't be needing that anymore."
+            "And they won't be needing that anymore.",
+            "My last nerve is long gone."
         };
 
         //
