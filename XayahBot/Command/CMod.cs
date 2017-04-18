@@ -10,7 +10,6 @@ using System.Linq;
 namespace XayahBot.Command
 {
     [Group("mod")]
-    [RequireContext(ContextType.DM)]
     public class CMod : ModuleBase
     {
         private readonly string _logRequest = "\"{0}\" requested \"mod toggle\" command.";
@@ -25,13 +24,14 @@ namespace XayahBot.Command
         //
 
         [Command("list")]
+        [RequireContext(ContextType.DM)]
         [RequireMod]
         [Summary("Lists all current mods.")]
         public Task List()
         {
             string message = string.Empty;
             string[] mods = Property.CfgMods.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            message = $"__List of mods__{Environment.NewLine}```";
+            message += $"__List of mods__{Environment.NewLine}```";
             if (mods.Count() > 0)
             {
                 for (int i = 0; i < mods.Count(); i++)
@@ -46,7 +46,7 @@ namespace XayahBot.Command
             }
             else
             {
-                message = this._emptyModList;
+                message += this._emptyModList;
             }
             message += "```";
             ReplyAsync(message);
@@ -54,6 +54,7 @@ namespace XayahBot.Command
         }
 
         [Command("toggle")]
+        [RequireContext(ContextType.DM)]
         [RequireAdmin]
         [Summary("Adds/Removes a specific user to/from the mod list.")]
         public Task Toggle(string name)

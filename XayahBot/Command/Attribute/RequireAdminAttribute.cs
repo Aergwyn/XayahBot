@@ -9,13 +9,13 @@ namespace XayahBot.Command.Attribute
 #pragma warning disable 1998 // Intentional
         public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IDependencyMap map)
         {
-            if (PermissionService.IsAdmin(context as CommandContext))
+            if (PermissionService.IsAdmin(context.User))
             {
                 return PreconditionResult.FromSuccess();
             }
             else
             {
-                return PreconditionResult.FromError("Insufficient (bot specific!) permission for command; required permission: admin");
+                return PreconditionResult.FromError("You need the admin permission (for this bot) to execute this command.");
             }
         }
 #pragma warning restore

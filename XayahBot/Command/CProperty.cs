@@ -11,7 +11,6 @@ using XayahBot.Utility;
 namespace XayahBot.Command
 {
     [Group("prop")]
-    [RequireContext(ContextType.DM)]
     public class CProperty : ModuleBase
     {
         private readonly string _logRequest = "\"{0}\" requested \"property set\".";
@@ -24,6 +23,7 @@ namespace XayahBot.Command
         //
 
         [Command("get")]
+        [RequireContext(ContextType.DM)]
         [RequireAdmin]
         [Summary("Lists all or a specific property.")]
         public Task Get(string name = "")
@@ -63,6 +63,7 @@ namespace XayahBot.Command
         //
 
         [Command("set")]
+        [RequireContext(ContextType.DM)]
         [RequireAdmin]
         [Summary("Updates a specific property.")]
         public Task Property(string name, [Remainder]string value = "")

@@ -7,11 +7,11 @@ using XayahBot.Database.Service;
 using System.Linq;
 using System;
 using XayahBot.Utility;
+using XayahBot.Command.Attribute;
 
 namespace XayahBot.Command
 {
     [Group("quiz")]
-    [RequireContext(ContextType.Guild)]
     public class CQuiz : ModuleBase
     {
         private static DateTime _lastLeaderboardPost;
@@ -33,6 +33,9 @@ namespace XayahBot.Command
 
 #pragma warning disable 4014 // Intentional
         [Command("ask")]
+        [RequireContext(ContextType.Guild)]
+        [CheckIgnoredUser]
+        [CheckIgnoredChannel]
         [Summary("Asks a random question about a champion.")]
         public Task Ask()
         {
@@ -42,6 +45,9 @@ namespace XayahBot.Command
 #pragma warning restore 4014
 
         [Command("stats")]
+        [RequireContext(ContextType.Guild)]
+        [CheckIgnoredUser]
+        [CheckIgnoredChannel]
         [Summary("Lists users in descending order regarding their correct answers this month.")]
         public Task Stats()
         {

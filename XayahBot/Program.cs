@@ -118,15 +118,17 @@ namespace XayahBot
                 IResult result = await this._commandService.ExecuteAsync(context, pos, this._dependencyMap);
                 if (!result.IsSuccess)
                 {
-                    if (result.ErrorReason.Contains("Invalid context for command"))
+                    if (result.ErrorReason.Contains("Invalid context for command") ||
+                        result.ErrorReason.Contains("permission (for this bot) to execute") ||
+                        result.ErrorReason.Contains("on the ignore list for this bot"))
                     {
                         IMessageChannel dmChannel = await context.User.CreateDMChannelAsync();
                         if (dmChannel != null)
                         {
-                            dmChannel.SendMessageAsync($"This did not work. Reason: `{result.ErrorReason}`");
+                            dmChannel.SendMessageAsync($"This did not work! Reason: `{result.ErrorReason}`");
                         }
                     }
-                    else
+                    else if(result.Error != CommandError.UnknownCommand)
                     {
                         Logger.Log(LogSeverity.Debug, nameof(Program), $"Command failed: {result.ErrorReason}");
                     }

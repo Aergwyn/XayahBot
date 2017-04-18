@@ -1,21 +1,21 @@
-﻿using System.Threading.Tasks;
-using Discord.Commands;
+﻿using Discord.Commands;
+using System.Threading.Tasks;
 using XayahBot.Service;
 
 namespace XayahBot.Command.Attribute
 {
-    public class RequireModAttribute : PreconditionAttribute
+    public class CheckIgnoredUserAttribute : PreconditionAttribute
     {
 #pragma warning disable 1998 // Intentional
         public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IDependencyMap map)
         {
-            if (PermissionService.IsAdminOrMod(context.User))
+            if (PermissionService.IsIgnored(context.User))
             {
-                return PreconditionResult.FromSuccess();
+                return PreconditionResult.FromError("You are on the ignore list for this bot and can't execute this command.");
             }
             else
             {
-                return PreconditionResult.FromError("You need the mod permission (for this bot) to execute this command.");
+                return PreconditionResult.FromSuccess();
             }
         }
 #pragma warning restore

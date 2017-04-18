@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
 using XayahBot.Utility;
+using XayahBot.Command.Attribute;
 
 namespace XayahBot.Command
 {
@@ -50,16 +51,18 @@ namespace XayahBot.Command
         //
         
         [Command("are"), Alias("is", "am")]
+        [CheckIgnoredUser]
+        [CheckIgnoredChannel]
         [Summary("Triggers an 8ball-esque response.")]
-        public Task Are([Remainder] string message = "")
+        public Task Are([Remainder] string text = "")
         {
             string response = string.Empty;
-            message = message.Trim();
-            if (message.EndsWith("?"))
+            text = text.Trim();
+            if (text.EndsWith("?"))
             {
                 response = this._responses.ElementAt(RNG.Next(this._responses.Count) - 1);
             }
-            else if (message.EndsWith(".") || message.EndsWith("!"))
+            else if (text.EndsWith(".") || text.EndsWith("!"))
             {
                 response = this._noQuestion.ElementAt(RNG.Next(this._noQuestion.Count) - 1);
             }

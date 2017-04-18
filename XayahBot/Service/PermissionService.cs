@@ -4,28 +4,38 @@ using System.Text.RegularExpressions;
 using Discord.Commands;
 using XayahBot.Utility;
 using System;
+using Discord;
 
 namespace XayahBot.Service
 {
     public static class PermissionService
     {
-        public static bool IsAdmin(CommandContext context)
+        public static bool IsAdmin(IUser user)
         {
-            return Property.Author.Equals(context.User.ToString());
+            return Property.Author.Equals(user.ToString());
         }
 
-        public static bool IsMod(CommandContext context)
+        public static bool IsMod(IUser user)
         {
-            if (Property.CfgMods.Value.Split(',').FirstOrDefault(x => x.Equals(context.User.ToString())) != null)
+            if (Property.CfgMods.Value.Split(',').FirstOrDefault(x => x.Equals(user.ToString())) != null)
             {
                 return true;
             }
             return false;
         }
 
-        public static bool IsAdminOrMod(CommandContext context)
+        public static bool IsAdminOrMod(IUser user)
         {
-            if (IsAdmin(context) || IsMod(context))
+            if (IsAdmin(user) || IsMod(user))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static bool IsIgnored(IUser user)
+        {
+            if (Property.CfgIgnore.Value.Split(',').FirstOrDefault(x => x.Equals(user.ToString())) != null)
             {
                 return true;
             }

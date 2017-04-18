@@ -7,13 +7,13 @@ using XayahBot.Utility;
 
 namespace XayahBot.Command
 {
-    public class CStatus : ModuleBase
+    public class CGame : ModuleBase
     {
         public DiscordSocketClient Client { get; set; }
 
         //
 
-        public CStatus(DiscordSocketClient client)
+        public CGame(DiscordSocketClient client)
         {
             this.Client = client;
         }
@@ -27,10 +27,10 @@ namespace XayahBot.Command
         //
 
 #pragma warning disable 4014 // Intentional
-        [Command("status")]
+        [Command("game")]
         [RequireMod]
-        [Summary("Updates the current status.")]
-        public async Task Status([Remainder] string status = "")
+        [Summary("Updates the current game.")]
+        public async Task Game([Remainder] string text = "")
         {
             Logger.Log(LogSeverity.Debug, nameof(CProperty), string.Format(this._logRequest, this.Context.User));
             IMessageChannel channel = null;
@@ -47,7 +47,7 @@ namespace XayahBot.Command
                 Logger.Log(LogSeverity.Error, nameof(CProperty), string.Format(this._logNoReplyChannel, this.Context.User));
                 return;
             }
-            string game = string.IsNullOrWhiteSpace(status) ? null : status.Trim();
+            string game = string.IsNullOrWhiteSpace(text) ? null : text.Trim();
             Property.GameActive.Value = game;
             this.Client.SetGameAsync(game);
             Logger.Log(LogSeverity.Debug, nameof(CProperty), string.Format(this._logChanged, game));
