@@ -27,13 +27,6 @@ namespace XayahBot
 
         private Program()
         {
-            // Pre Start Stuff
-            string path = Property.FilePath.Value;
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-            //
             this._commandService = new CommandService(new CommandServiceConfig
             {
                 DefaultRunMode = RunMode.Async

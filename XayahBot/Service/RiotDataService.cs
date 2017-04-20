@@ -31,7 +31,7 @@ namespace XayahBot.Service
                     RawChampionList = await new ChampionListController().Get();
                     LastRawChampionListRequest = DateTime.UtcNow;
                 }
-                return RawChampionList.Copy(); // Try to return a copy to keep our data save from changes
+                return RawChampionList.Copy(); // Try to return a copy to keep our data safe from changes
             }
             finally
             {
@@ -74,7 +74,7 @@ namespace XayahBot.Service
                         LastChampionsRequests[id] = DateTime.UtcNow;
                     }
                 }
-                return champion.Copy(); // Try to return a copy to keep our data save from changes
+                return champion.Copy(); // Try to return a copy to keep our data safe from changes
             }
             finally
             {
