@@ -8,7 +8,7 @@ namespace XayahBot.API.Controller
     {
         public async Task<ChampionListDto> Get()
         {
-            return await FetchAsync("champions?dataById=true&");
+            return await FetchAsync(Region.EUW, "champions?dataById=true&");
         }
     }
 }

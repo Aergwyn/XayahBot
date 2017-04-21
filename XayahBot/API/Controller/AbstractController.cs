@@ -12,7 +12,7 @@ namespace XayahBot.API.Controller
 {
     public abstract class AbstractController<T>
     {
-        protected abstract string GetBaseUrl();
+        protected abstract string GetFunctionUrl();
 
         //
 
@@ -22,15 +22,20 @@ namespace XayahBot.API.Controller
         {
             if (string.IsNullOrWhiteSpace(this._apiKey))
             {
-                this._apiKey = File.ReadLines(Property.FilePath.Value + Property.FileRiotApiKey.Value).ElementAt(0);
+                this._apiKey = File.ReadLines(Property.FilePath.Value + Property.FileRiotApiKey.Value).ElementAt(0); // I'm not gonna show it
             }
             return $"api_key={_apiKey}";
         }
 
         //
 
+        protected async Task<T> FetchAsync(Region region)
+        {
+            return await FetchAsync(region, string.Empty);
+        }
+
 #pragma warning disable 4014 // Intentional
-        protected async Task<T> FetchAsync(string dataString)
+        protected async Task<T> FetchAsync(Region region, string dataString)
         {
             if (dataString == null) // I don't care about the dataString but it can't be null after this point
             {
@@ -43,7 +48,7 @@ namespace XayahBot.API.Controller
                 try
                 {
                     // Set Base-URI and tell the client which form of data we expect
-                    client.BaseAddress = new Uri(GetBaseUrl());
+                    client.BaseAddress = new Uri($"https://{region.ApiName}.api.riotgames.com/lol/{GetFunctionUrl()}");
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     // Request json

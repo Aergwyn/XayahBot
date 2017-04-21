@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using XayahBot.API.Controller;
@@ -13,11 +12,12 @@ namespace XayahBot.Service
     public static class RiotDataService
     {
         private static SemaphoreSlim _syncLock = new SemaphoreSlim(1, 1);
-        private static DateTime LastRawChampionListRequest { get; set; }
-        private static ChampionListDto RawChampionList { get; set; } // Just to get IDs
 
-        private static Dictionary<int, DateTime> LastChampionsRequests { get; set; }
-        private static List<ChampionDto> Champions { get; set; } // Contains detailed data
+        private static DateTime _lastRawChampionListRequest;
+        private static ChampionListDto _rawChampionList; // Just to get IDs
+
+        private static Dictionary<int, DateTime> _lastChampionsRequests;
+        private static List<ChampionDto> _champions = new List<ChampionDto>(); // Contains detailed data
 
         //
 
@@ -26,12 +26,12 @@ namespace XayahBot.Service
             await _syncLock.WaitAsync();
             try
             {
-                if (RawChampionList == null || LastRawChampionListRequest.AddHours(int.Parse(Property.DataLongevity.Value)) < DateTime.UtcNow)
+                if (_rawChampionList == null || _lastRawChampionListRequest.AddHours(int.Parse(Property.DataLongevity.Value)) < DateTime.UtcNow)
                 {
-                    RawChampionList = await new ChampionListController().Get();
-                    LastRawChampionListRequest = DateTime.UtcNow;
+                    _rawChampionList = await new ChampionListController().Get();
+                    _lastRawChampionListRequest = DateTime.UtcNow;
                 }
-                return RawChampionList.Copy(); // Try to return a copy to keep our data safe from changes
+                return _rawChampionList.Copy(); // Try to return a copy to keep our data safe from changes
             }
             finally
             {
@@ -44,34 +44,30 @@ namespace XayahBot.Service
             await _syncLock.WaitAsync();
             try
             {
-                if (Champions == null)
+                if (_lastChampionsRequests == null)
                 {
-                    Champions = new List<ChampionDto>();
+                    _lastChampionsRequests = new Dictionary<int, DateTime>();
                 }
-                if (LastChampionsRequests == null)
-                {
-                    LastChampionsRequests = new Dictionary<int, DateTime>();
-                }
-                ChampionDto champion = Champions.FirstOrDefault(x => x.Id.Equals(id)); // Look if we got the data already
-                LastChampionsRequests.TryGetValue(id, out DateTime lastUpdate);
+                ChampionDto champion = _champions.FirstOrDefault(x => x.Id.Equals(id)); // Look if we got the data already
+                _lastChampionsRequests.TryGetValue(id, out DateTime lastUpdate);
                 if (champion == null || (lastUpdate != null && lastUpdate.AddHours(int.Parse(Property.DataLongevity.Value)) < DateTime.UtcNow))
                 {
                     if (champion != null)
                     {
-                        Champions.Remove(champion); // Remove if we are here to update existing
+                        _champions.Remove(champion); // Remove if we are here to update existing
                     }
                     champion = await new ChampionController().Get(id);
                     if (champion != null)
                     {
-                        Champions.Add(champion); // Only add if we actually got data
+                        _champions.Add(champion); // Only add if we actually got data
                     }
-                    if (!LastChampionsRequests.ContainsKey(id)) // Add/Update timestamp
+                    if (!_lastChampionsRequests.ContainsKey(id)) // Add/Update timestamp
                     {
-                        LastChampionsRequests.Add(id, DateTime.UtcNow);
+                        _lastChampionsRequests.Add(id, DateTime.UtcNow);
                     }
                     else
                     {
-                        LastChampionsRequests[id] = DateTime.UtcNow;
+                        _lastChampionsRequests[id] = DateTime.UtcNow;
                     }
                 }
                 return champion.Copy(); // Try to return a copy to keep our data safe from changes

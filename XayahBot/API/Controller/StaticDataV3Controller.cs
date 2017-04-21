@@ -2,9 +2,9 @@
 {
     public abstract class StaticDataV3Controller<T> : AbstractController<T>
     {
-        protected override string GetBaseUrl()
+        protected override string GetFunctionUrl() // EUW Default
         {
-            return "https://euw1.api.riotgames.com/lol/static-data/v3/";
+            return "static-data/v3/";
         }
     }
 }

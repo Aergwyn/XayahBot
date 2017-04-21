@@ -16,7 +16,7 @@ namespace XayahBot.Service
     public static class QuizService
     {
         private static SemaphoreSlim _syncLock = new SemaphoreSlim(1, 1);
-        private static Dictionary<ulong, QuizEntry> _questionMap = new Dictionary<ulong, QuizEntry>(); // Saves question per guild
+        private static Dictionary<ulong, QuizEntry> _questionMap = new Dictionary<ulong, QuizEntry>(); // Saves questions per guild
 
         //
 
@@ -26,9 +26,9 @@ namespace XayahBot.Service
             "{0} won the cookie!"
         };
         private static List<string> _partialAnswerList = new List<string>{
-            "Wow. {0} was actually somewhat right. {1} would've been the full answer.",
-            "{0} barely made it. Actually it was {1} but I'm nice.",
-            "*yawn* {0} finally did it! Guessing {1} isn't so hard, no?"
+            "Wow. {0} was actually somewhat right. `{1}` would've been the full answer.",
+            "{0} barely made it. Actually it was `{1}` but I'm nice.",
+            "*yawn* {0} finally did it! Guessing `{1}` isn't so hard, no?"
         };
         private static List<string> _questionTimeoutList = new List<string>{
             "Oh. So much time passed and no one was able to guess it. {0} would've done it though. *sigh*",
@@ -220,10 +220,10 @@ namespace XayahBot.Service
             switch (RNG.Next(4))
             {
                 case 1:
-                    entry = new QuizEntry(string.Format(_championBasicNameQ, champion.Title, Property.QuizMatch), int.Parse(Property.QuizMatch.Value), champion.Name);
+                    entry = new QuizEntry(string.Format(_championBasicNameQ, champion.Title), int.Parse(Property.QuizMatch.Value), champion.Name);
                     break;
                 case 2:
-                    entry = new QuizEntry(string.Format(_championBasicTitleQ, champion.Name), champion.Title);
+                    entry = new QuizEntry(string.Format(_championBasicTitleQ, champion.Name, Property.QuizMatch), champion.Title);
                     break;
                 case 3:
                     entry = new QuizEntry(string.Format(_championBasicResourceQ, champion.Name), champion.ParType);

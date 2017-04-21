@@ -7,6 +7,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using XayahBot.Utility;
+using XayahBot.Service;
 
 namespace XayahBot
 {
@@ -45,11 +46,7 @@ namespace XayahBot
 
             await InitCommandsAsync();
 
-            string token = string.Empty; // I'm not gonna show it here
-            using (StreamReader reader = new StreamReader(new FileStream(Property.FilePath.Value + Property.FileToken.Value, FileMode.Open)))
-            {
-                token = reader.ReadLine();
-            }
+            string token = File.ReadLines(Property.FilePath.Value + Property.FileToken.Value).ElementAt(0); // I'm not gonna show it
             if (!string.IsNullOrWhiteSpace(token))
             {
                 await this._client.LoginAsync(TokenType.Bot, token);
@@ -92,12 +89,13 @@ namespace XayahBot
             string game = Property.GameActive.Value;
             if (!string.IsNullOrWhiteSpace(game))
             {
-                this._client.SetGameAsync(Property.GameActive.Value);
+                this._client.SetGameAsync(game);
             }
             else
             {
                 this._client.SetGameAsync(null); // May not be needed but if bot restarts you overwrite status at least
             }
+            //RiotStatusService.StartAsync(this._client);
             return Task.CompletedTask;
         }
 
