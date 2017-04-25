@@ -48,11 +48,11 @@ namespace XayahBot.Command
         [RequireContext(ContextType.Guild)]
         [CheckIgnoredUser]
         [CheckIgnoredChannel]
-        [Summary("Lists users in descending order regarding their correct answers this month.")]
+        [Summary("Displays the quiz leaderboard for this month.")]
         public Task Stats()
         {
             string message = string.Empty;
-            List<TQuizStat> leaderboard = QuizStatService.GetStatList(this.Context.Guild.Id).OrderByDescending(x => x.Answers).ToList();
+            List<TLeaderboardEntry> leaderboard = LeaderboardService.GetLeaderboard(this.Context.Guild.Id).OrderByDescending(x => x.Answers).ToList();
             if (leaderboard.Count > 0)
             {
                 if (_lastLeaderboardPost.AddMinutes(int.Parse(Property.QuizLeaderboardCd.Value)) < DateTime.UtcNow)
@@ -65,20 +65,20 @@ namespace XayahBot.Command
                         {
                             message += Environment.NewLine;
                         }
-                        TQuizStat stat = leaderboard.ElementAt(i);
-                        message += $"{stat.Answers.ToString().PadLeft(width)} - {stat.User}";
+                        TLeaderboardEntry entry = leaderboard.ElementAt(i);
+                        message += $"{entry.Answers.ToString().PadLeft(width)} - {entry.UserName}";
                     }
                     message += "```";
                     _lastLeaderboardPost = DateTime.UtcNow;
                 }
                 else
                 {
-                    message = this._recentlyPosted.ElementAt(RNG.Next(this._recentlyPosted.Count) - 1);
+                    message = RNG.FromList(this._recentlyPosted);
                 }
             }
             else
             {
-                 message = this._emptyLeaderboard.ElementAt(RNG.Next(this._emptyLeaderboard.Count) - 1);
+                message = RNG.FromList(this._emptyLeaderboard);
             }
             ReplyAsync(message);
             return Task.CompletedTask;

@@ -2,7 +2,6 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using System.Threading.Tasks;
-using XayahBot.Command.Attribute;
 using XayahBot.Utility;
 
 namespace XayahBot.Command
@@ -28,7 +27,8 @@ namespace XayahBot.Command
 
 #pragma warning disable 4014 // Intentional
         [Command("game")]
-        [RequireMod]
+        [RequireOwner]
+        [RequireContext(ContextType.DM)]
         [Summary("Updates the current game.")]
         public async Task Game([Remainder] string text = "")
         {

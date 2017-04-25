@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -11,16 +12,14 @@ using XayahBot.Utility;
 
 namespace XayahBot.Command
 {
-    [Group("unignore")]
     public class CUnignore : ModuleBase
     {
-        private readonly string _logNoReplyChannel = "Could not reply to \"{0}\" because no appropriate channel could be found!";
-        private readonly string _logRequest = "\"{0}\" requested \"unignore {1}\" command.";
+        private readonly string _logRequest = "\"{0}\" requested \"unignore\" command.";
         private readonly string _logUnignoreSuccess = "Removed \"{0}\" from the ignore list.";
 
         private readonly string _unignoreSuccess = "Removed `{0}` from the ignore list.";
         private readonly string _unignoreFailed = "Failed to remove `{0}` from the ignore list.";
-        private readonly string _noMention = "You need to mention a channel that you want to unignore...";
+        private readonly string _unignoreNotExisting = "`{0}` was never on the ignore list.";
 
         private readonly List<string> _unignoredReactionList = new List<string>
         {
@@ -33,91 +32,53 @@ namespace XayahBot.Command
         //
 
 #pragma warning disable 4014 // Intentional
-        [Command("channel"), Alias("c")]
+        [Command("unignore")]
         [RequireMod]
         [RequireContext(ContextType.Guild)]
-        [Summary("Unignores commands from a specific (mentioned) channel.")]
-        public async Task Channel(string mention)
+        [Summary("Removes all mentioned user and channel from the ignore list.")]
+        public async Task Channel([Remainder] string text)
         {
-            IMessageChannel replyChannel = await this.GetReplyChannel();
-            if (replyChannel == null)
-            {
-                Logger.Log(LogSeverity.Error, nameof(CUnignore), string.Format(this._logNoReplyChannel, this.Context.User));
-                return;
-            }
             string message = string.Empty;
-            Logger.Log(LogSeverity.Info, nameof(CUnignore), string.Format(this._logRequest, this.Context.User, "channel"));
-            if (this.Context.Message.MentionedChannelIds.Count > 0)
+            Logger.Log(LogSeverity.Info, nameof(CUnignore), string.Format(this._logRequest, this.Context.User));
+            foreach (ulong userId in this.Context.Message.MentionedUserIds)
             {
-                ulong channelId = this.Context.Message.MentionedChannelIds.First();
-                string resolvedMessage = this.Context.Message.Resolve();
-                int index = resolvedMessage.IndexOf('#');
-                string channelName = resolvedMessage.Substring(index);
-                if (await IgnoredChannelService.RemoveChannelAsync(this.Context.Guild.Id, channelId))
-                {
-                    message = string.Format(this._unignoreSuccess, channelName);
-                    Logger.Log(LogSeverity.Warning, nameof(CUnignore), string.Format(this._logUnignoreSuccess, channelName));
-                }
-                else
-                {
-                    message = string.Format(this._unignoreFailed, channelName);
-                }
+                IUser user = await this.Context.Guild.GetUserAsync(userId);
+                message += await RemoveIgnore(user.Id, user.ToString()) + Environment.NewLine;
             }
-            else
+            foreach (ulong channelId in this.Context.Message.MentionedChannelIds)
             {
-                message = this._noMention;
+                IChannel channel = await this.Context.Guild.GetChannelAsync(channelId);
+                message += await RemoveIgnore(channel.Id, channel.Name) + Environment.NewLine;
             }
-            replyChannel.SendMessageAsync(message);
-        }
-#pragma warning restore 4014
-
-#pragma warning disable 4014 // Intentional
-        [Command("user"), Alias("u")]
-        [RequireMod]
-        [Summary("Unignores commands from a specific user.")]
-        public async Task User(string user)
-        {
-            IMessageChannel channel = await this.GetReplyChannel();
-            if (channel == null)
+            if (!string.IsNullOrWhiteSpace(message))
             {
-                Logger.Log(LogSeverity.Error, nameof(CUnignore), string.Format(this._logNoReplyChannel, this.Context.User));
-                return;
+                message += RNG.FromList(this._unignoredReactionList);
             }
-            string message = string.Empty;
-            string reaction = string.Empty;
-            Logger.Log(LogSeverity.Info, nameof(CUnignore), string.Format(this._logRequest, this.Context.User, "user"));
-            if (PermissionService.RemoveIgnore(user))
-            {
-                message = string.Format(this._unignoreSuccess, user);
-                Logger.Log(LogSeverity.Warning, nameof(CUnignore), string.Format(this._logUnignoreSuccess, user));
-                reaction = this._unignoredReactionList.ElementAt(RNG.Next(this._unignoredReactionList.Count) - 1);
-            }
-            else
-            {
-                message = string.Format(this._unignoreFailed, user);
-            }
-            channel.SendMessageAsync(message);
-            if (!this.Context.IsPrivate && !string.IsNullOrWhiteSpace(reaction))
-            {
-                ReplyAsync(reaction);
-            }
+            ReplyAsync(message);
         }
 #pragma warning restore 4014
 
         //
 
-        private async Task<IMessageChannel> GetReplyChannel()
+#pragma warning disable 4014 // Intentional
+        private async Task<string> RemoveIgnore(ulong subjectId, string subjectName)
         {
-            IMessageChannel channel = null;
-            if (this.Context.IsPrivate)
+            string message = string.Empty;
+            switch (await IgnoreService.RemoveSubjectAsync(this.Context.Guild.Id, subjectId))
             {
-                channel = this.Context.Channel;
+                case 0:
+                    message = string.Format(this._unignoreSuccess, subjectName);
+                    Logger.Log(LogSeverity.Warning, nameof(CUnignore), string.Format(this._logUnignoreSuccess, subjectName));
+                    break;
+                case 1:
+                    message = string.Format(this._unignoreFailed, subjectName);
+                    break;
+                case 2:
+                    message = string.Format(this._unignoreNotExisting, subjectName);
+                    break;
             }
-            else
-            {
-                channel = await this.Context.Message.Author.CreateDMChannelAsync();
-            }
-            return channel;
+            return message;
         }
+#pragma warning restore 4014
     }
 }

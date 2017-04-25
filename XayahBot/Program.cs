@@ -43,6 +43,9 @@ namespace XayahBot
         {
             this._client.Log += Logger.Log;
             this._client.Ready += this.HandleReady;
+            //this._client.ChannelUpdated
+            //this._client.ChannelDestroyed
+            //this._client.LeftGuild
 
             await InitCommandsAsync();
 

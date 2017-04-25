@@ -6,8 +6,13 @@ namespace XayahBot.Database.Model
     public class GeneralContext : DbContext
     {
         public DbSet<TProperty> Properties { get; set; }
-        public DbSet<TQuizStat> QuizStats { get; set; }
-        public DbSet<TIgnoredChannel> IgnoredChannel { get; set; }
+
+        //
+
+        public DbSet<TLeaderboardEntry> Leaderboard { get; set; }
+        public DbSet<TIgnoreEntry> IgnoreList { get; set; }
+
+        //
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

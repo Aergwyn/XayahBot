@@ -1,6 +1,6 @@
 ﻿using Discord.Commands;
 using System.Threading.Tasks;
-using XayahBot.Service;
+using XayahBot.Database.Service;
 
 namespace XayahBot.Command.Attribute
 {
@@ -9,7 +9,7 @@ namespace XayahBot.Command.Attribute
 #pragma warning disable 1998 // Intentional
         public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IDependencyMap map)
         {
-            if (PermissionService.IsIgnored(context.User))
+            if (IgnoreService.IsIgnored(context.Guild.Id, context.User.Id))
             {
                 return PreconditionResult.FromError("You are on the ignore list for this bot and can't execute this command.");
             }

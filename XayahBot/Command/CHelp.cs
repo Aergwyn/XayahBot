@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using XayahBot.Command.Attribute;
 using XayahBot.Service;
+using XayahBot.Database.Service;
 
 namespace XayahBot.Command
 {
@@ -55,13 +56,13 @@ namespace XayahBot.Command
             List<HelpLine> reducedCmdList = new List<HelpLine>();
             List<HelpLine> normalCmdList = new List<HelpLine>();
             List<HelpLine> modCmdList = new List<HelpLine>();
-            List<HelpLine> adminCmdList = new List<HelpLine>();
+            List<HelpLine> ownerCmdList = new List<HelpLine>();
             foreach (CommandInfo cmd in this.CmdService.Commands) // Sort commands in permission groups
             {
                 HelpLine line = this.GetCommandStringSimple(cmd);
-                if (cmd.Preconditions.Contains(new RequireAdminAttribute()))
+                if (cmd.Preconditions.Contains(new RequireOwnerAttribute()))
                 {
-                    adminCmdList.Add(line);
+                    ownerCmdList.Add(line);
                 }
                 else if (cmd.Preconditions.Contains(new RequireModAttribute()))
                 {
@@ -77,7 +78,7 @@ namespace XayahBot.Command
                 }
             }
             message = "__**Command List**__```";
-            if (PermissionService.IsIgnored(this.Context.User))
+            if (IgnoreService.IsIgnored(this.Context.Guild.Id, this.Context.User.Id))
             {
                 message += this.GetCommandBlockString(reducedCmdList);
             }
@@ -85,15 +86,15 @@ namespace XayahBot.Command
             {
                 message += this.GetCommandBlockString(normalCmdList);
             }
-            if (PermissionService.IsAdminOrMod(this.Context.User) && modCmdList.Count > 0)
+            if (PermissionService.IsAdminOrMod(this.Context) && modCmdList.Count > 0)
             {
                 message += $"```{Environment.NewLine}__Mod-Commands__```";
                 message += this.GetCommandBlockString(modCmdList);
             }
-            if (PermissionService.IsAdmin(this.Context.User) && adminCmdList.Count > 0)
+            if (PermissionService.IsAdmin(this.Context) && ownerCmdList.Count > 0)
             {
                 message += $"```{Environment.NewLine}__Admin-Commands__```";
-                message += this.GetCommandBlockString(adminCmdList);
+                message += this.GetCommandBlockString(ownerCmdList);
             }
             message += $"```{Environment.NewLine}{string.Format(_finishHelp, Property.Author)}";
 

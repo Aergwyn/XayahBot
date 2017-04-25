@@ -60,15 +60,15 @@ namespace XayahBot.Command
             text = text.Trim();
             if (text.EndsWith("?"))
             {
-                response = this._responseList.ElementAt(RNG.Next(this._responseList.Count) - 1);
+                response = RNG.FromList(this._responseList);
             }
             else if (text.EndsWith(".") || text.EndsWith("!"))
             {
-                response = this._noQuestionList.ElementAt(RNG.Next(this._noQuestionList.Count) - 1);
+                response = RNG.FromList(this._noQuestionList);
             }
             else
             {
-                response = this._noSentenceList.ElementAt(RNG.Next(this._noSentenceList.Count) - 1);
+                response = RNG.FromList(this._noSentenceList);
             }
             ReplyAsync(response);
             return Task.CompletedTask;

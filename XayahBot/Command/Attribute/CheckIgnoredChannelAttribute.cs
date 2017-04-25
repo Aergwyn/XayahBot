@@ -9,9 +9,9 @@ namespace XayahBot.Command.Attribute
 #pragma warning disable 1998 // Intentional
         public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IDependencyMap map)
         {
-            if (IgnoredChannelService.IsChannelIgnored(context.Channel.Id))
+            if (IgnoreService.IsIgnored(context.Guild.Id, context.Channel.Id))
             {
-                return PreconditionResult.FromError("This channel is on the ignore list for this bot and can't accept some commands here.");
+                return PreconditionResult.FromError("This channel is on the ignore list for this bot and can't accept some commands.");
             }
             else
             {

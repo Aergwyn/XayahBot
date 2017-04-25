@@ -7,26 +7,26 @@ using XayahBot.Utility;
 
 namespace XayahBot.Database.Service
 {
-    public static class QuizStatService
+    public static class LeaderboardService
     {
-        public static List<TQuizStat> GetStatList(ulong guild)
+        public static List<TLeaderboardEntry> GetLeaderboard(ulong guild)
         {
             CheckForReset();
             using (GeneralContext db = new GeneralContext())
             {
-                return db.QuizStats.Where(x => x.Guild.Equals(guild)).ToList();
+                return db.Leaderboard.Where(x => x.Guild.Equals(guild)).ToList();
             }
         }
 
-        public static Task IncrementAnswerAsync(ulong guild, string user)
+        public static Task IncrementAnswerAsync(ulong guild, ulong userId, string userName)
         {
             CheckForReset();
             using (GeneralContext db = new GeneralContext())
             {
-                TQuizStat quizStat = db.QuizStats.FirstOrDefault(x => x.Guild.Equals(guild) && x.User.Equals(user));
+                TLeaderboardEntry quizStat = db.Leaderboard.FirstOrDefault(x => x.Guild.Equals(guild) && x.UserName.Equals(userName));
                 if (quizStat == null)
                 {
-                    db.QuizStats.Add(new TQuizStat { Guild = guild, User = user, Answers = 1 });
+                    db.Leaderboard.Add(new TLeaderboardEntry { Guild = guild, UserId = userId, UserName = userName, Answers = 1 });
                 }
                 else
                 {
@@ -45,14 +45,13 @@ namespace XayahBot.Database.Service
             {
                 DateTime now = DateTime.UtcNow;
                 string[] lastResetValue = Property.QuizLastReset.Value.Split('/');
-                DateTime lastReset = new DateTime(int.Parse(lastResetValue.ElementAt(1)), int.Parse(lastResetValue.ElementAt(0)), 1, 0, 0, 0);
-                if (lastReset.AddMonths(1) < now)
+                if (new DateTime(int.Parse(lastResetValue.ElementAt(1)), int.Parse(lastResetValue.ElementAt(0)), 1, 0, 0, 0).AddMonths(1) < now)
                 {
                     using (GeneralContext db = new GeneralContext())
                     {
-                        foreach (TQuizStat quizStat in db.QuizStats)
+                        foreach (TLeaderboardEntry entry in db.Leaderboard)
                         {
-                            db.Remove(quizStat);
+                            db.Remove(entry);
                         }
                         db.SaveChangesAsync();
                     }

@@ -74,7 +74,7 @@ namespace XayahBot.Service
                     if (entry.TimeAsked.AddMinutes(int.Parse(Property.QuizTimeout.Value)) < DateTime.UtcNow)
                     {
                         _questionMap.Remove(context.Guild.Id);
-                        question = string.Format(_questionTimeoutList.ElementAt(RNG.Next(_questionTimeoutList.Count) - 1), entry.GetAllAnswers());
+                        question = string.Format(RNG.FromList(_questionTimeoutList), entry.GetAllAnswers());
                     }
                     else
                     {
@@ -98,10 +98,6 @@ namespace XayahBot.Service
                 {
                     Logger.Log(LogSeverity.Error, nameof(QuizService), "Code returned with no question!");
                 }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(new LogMessage(LogSeverity.Error, nameof(QuizService), "Exception in QuizService:AskQuestion", ex));
             }
             finally
             {
@@ -128,7 +124,7 @@ namespace XayahBot.Service
                         if (!string.IsNullOrWhiteSpace(correctAnswer))
                         {
                             success = true;
-                            response = string.Format(_fullAnswerList.ElementAt(RNG.Next(_fullAnswerList.Count) - 1), context.User.Mention);
+                            response = string.Format(RNG.FromList(_fullAnswerList), context.User.Mention);
                         }
                     }
                     else // Partial Match
@@ -140,19 +136,19 @@ namespace XayahBot.Service
                             if (percentage >= 100)
                             {
                                 success = true;
-                                response = string.Format(_fullAnswerList.ElementAt(RNG.Next(_fullAnswerList.Count) - 1), context.User.Mention);
+                                response = string.Format(RNG.FromList(_fullAnswerList), context.User.Mention);
                             }
                             else if (percentage >= int.Parse(Property.QuizMatch.Value))
                             {
                                 success = true;
-                                response = string.Format(_partialAnswerList.ElementAt(RNG.Next(_partialAnswerList.Count) - 1), context.User.Mention, correctAnswer);
+                                response = string.Format(RNG.FromList(_partialAnswerList), context.User.Mention, correctAnswer);
                             }
                         }
                     }
                     if (success)
                     {
                         _questionMap.Remove(context.Guild.Id);
-                        QuizStatService.IncrementAnswerAsync(context.Guild.Id, context.User.ToString());
+                        LeaderboardService.IncrementAnswerAsync(context.Guild.Id, context.User.Id, context.User.ToString());
                     }
                     else
                     {
@@ -160,12 +156,12 @@ namespace XayahBot.Service
                         if (entry.TimesFailed >= int.Parse(Property.QuizMaxTries.Value))
                         {
                             _questionMap.Remove(context.Guild.Id);
-                            response = string.Format(_questionMaxTriesList.ElementAt(RNG.Next(_questionMaxTriesList.Count) - 1), entry.GetAllAnswers());
+                            response = string.Format(RNG.FromList(_questionMaxTriesList), entry.GetAllAnswers());
                         }
                         else if (entry.TimeAsked.AddMinutes(int.Parse(Property.QuizTimeout.Value)) < DateTime.UtcNow)
                         {
                             _questionMap.Remove(context.Guild.Id);
-                            response = string.Format(_questionTimeoutList.ElementAt(RNG.Next(_questionTimeoutList.Count) - 1), entry.GetAllAnswers());
+                            response = string.Format(RNG.FromList(_questionTimeoutList), entry.GetAllAnswers());
                         }
                     }
                 }

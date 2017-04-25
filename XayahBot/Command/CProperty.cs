@@ -1,11 +1,9 @@
 ﻿using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using XayahBot.Command.Attribute;
 using XayahBot.Utility;
 
 namespace XayahBot.Command
@@ -16,46 +14,29 @@ namespace XayahBot.Command
         private readonly string _logRequest = "\"{0}\" requested \"property set\".";
         private readonly string _logChanged = "\"{0}\" changed to \"{1}\".";
 
-        private readonly string _currentValue = "```{0}:\"{1}\"```";
         private readonly string _notFound = "Could not find property with name `{0}`!";
         private readonly string _changed = $"Property changed...{Environment.NewLine}```Old: {{0}}:\"{{1}}\"{Environment.NewLine}New: {{0}}:\"{{2}}\"```";
 
         //
 
         [Command("get")]
+        [RequireOwner]
         [RequireContext(ContextType.DM)]
-        [RequireAdmin]
-        [Summary("Lists all or a specific property.")]
-        public Task Get(string name = "")
+        [Summary("Displays all properties.")]
+        public Task Get()
         {
-            string message = string.Empty;
-            if (!string.IsNullOrWhiteSpace(name))
+            List<Property> displayList = Utility.Property.Values.Where(x => x.Updatable).ToList();
+            string message = $"__List of properties__{Environment.NewLine}```";
+            for (int i = 0; i < displayList.Count; i++)
             {
-                Property property = Utility.Property.GetByName(name);
-                if (property != null)
+                if (i > 0)
                 {
-                     message = string.Format(this._currentValue, property.Name, property.Value);
+                    message += Environment.NewLine;
                 }
-                else
-                {
-                     message = string.Format(this._notFound, name);
-                }
+                Property property = displayList.ElementAt(i);
+                message += $"{(property.Name + ":").PadRight(Utility.Property.Values.Where(x => x.Updatable).OrderByDescending(x => x.Name.Length).First().Name.Length + 1, ' ')}\"{property.Value}\"";
             }
-            else
-            {
-                message = $"__List of properties__{Environment.NewLine}```";
-                List<Property> displayList = Utility.Property.Values.Where(x => x.Updatable).ToList();
-                for (int i = 0; i < displayList.Count; i++)
-                {
-                    if (i > 0)
-                    {
-                        message += Environment.NewLine;
-                    }
-                    Property property = displayList.ElementAt(i);
-                    message += $"{(property.Name + ":").PadRight(Utility.Property.Values.Where(x => x.Updatable).OrderByDescending(x => x.Name.Length).First().Name.Length + 1, ' ')}\"{property.Value}\"";
-                }
-                message += "```";
-            }
+            message += "```";
             ReplyAsync(message);
             return Task.CompletedTask;
         }
@@ -63,8 +44,8 @@ namespace XayahBot.Command
         //
 
         [Command("set")]
+        [RequireOwner]
         [RequireContext(ContextType.DM)]
-        [RequireAdmin]
         [Summary("Updates a specific property.")]
         public Task Property(string name, [Remainder]string value = "")
         {

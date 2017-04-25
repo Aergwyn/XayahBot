@@ -14,116 +14,48 @@ namespace XayahBot.Command
     [Group("list")]
     public class CList : ModuleBase
     {
-        private readonly string _logNoReplyChannel = "Could not reply to \"{0}\" because no appropriate channel could be found!";
-
-        private readonly string _emptyModList = "The mod list is empty right now.";
-        private readonly string _emptyIgnoreList = "This ignore list is empty right now.";
+        private readonly string _emptyIgnoreList = "This list is empty right now.";
 
         //
 
-#pragma warning disable 4014 // Intentional
-        [Command("mod")]
-        [RequireMod]
-        [Summary("Lists all current mods.")]
-        public async Task Mod()
-        {
-            IMessageChannel channel = await this.GetReplyChannel();
-            if (channel == null)
-            {
-                Logger.Log(LogSeverity.Error, nameof(CIgnore), string.Format(this._logNoReplyChannel, this.Context.User));
-                return;
-            }
-            string message = string.Empty;
-            string[] mods = Property.CfgMods.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            message += $"__List of mods__{Environment.NewLine}```";
-            if (mods.Count() > 0)
-            {
-                for (int i = 0; i < mods.Count(); i++)
-                {
-                    string mod = mods.ElementAt(i);
-                    if (i > 0)
-                    {
-                        message += Environment.NewLine;
-                    }
-                    message += mod;
-                }
-            }
-            else
-            {
-                message += this._emptyModList;
-            }
-            message += "```";
-            channel.SendMessageAsync(message);
-        }
-#pragma warning restore 4014
-
-#pragma warning disable 4014 // Intentional
         [Command("ignore")]
         [RequireMod]
-        [Summary("Lists all ignored use and channel.")]
-        public async Task Ignore()
+        [RequireContext(ContextType.Guild)]
+        [Summary("Displays the ignore list.")]
+        public Task Ignore()
         {
-            IMessageChannel channel = await this.GetReplyChannel();
-            if (channel == null)
-            {
-                Logger.Log(LogSeverity.Error, nameof(CIgnore), string.Format(this._logNoReplyChannel, this.Context.User));
-                return;
-            }
             string message = string.Empty;
-            string[] userList = Property.CfgIgnore.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            List<TIgnoredChannel> channelList = IgnoredChannelService.GetChannelList();
+            List<TIgnoreEntry> ignoreList = IgnoreService.GetIgnoreList(this.Context.Guild.Id);
             message = $"__Ignored user__{Environment.NewLine}```";
-            if (userList.Count() > 0)
-            {
-                for (int i = 0; i < userList.Count(); i++)
-                {
-                    if (i > 0)
-                    {
-                        message += Environment.NewLine;
-                    }
-                    message += userList.ElementAt(i);
-                }
-            }
-            else
-            {
-                message += this._emptyIgnoreList;
-            }
+            message += this.ListIgnore(ignoreList.Where(x => !x.IsChannel).ToList());
             message += $"```{Environment.NewLine}__Ignored channel__{Environment.NewLine}```";
-            if (channelList.Count > 0)
-            {
-                for (int i = 0; i < channelList.Count(); i++)
-                {
-                    if (i > 0)
-                    {
-                        message += Environment.NewLine;
-                    }
-                    TIgnoredChannel item = channelList.ElementAt(i);
-                    message += $"{item.ChannelId} - {item.ChannelName}";
-                }
-            }
-            else
-            {
-                message += this._emptyIgnoreList;
-            }
+            message += this.ListIgnore(ignoreList.Where(x => x.IsChannel).ToList());
             message += "```";
-            channel.SendMessageAsync(message);
+            ReplyAsync(message);
+            return Task.CompletedTask;
         }
-#pragma warning restore 4014
 
         //
 
-        private async Task<IMessageChannel> GetReplyChannel()
+        private string ListIgnore(List<TIgnoreEntry> list)
         {
-            IMessageChannel channel = null;
-            if (this.Context.IsPrivate)
+            string text = string.Empty;
+            if (list.Count > 0)
             {
-                channel = this.Context.Channel;
+                for (int i = 0; i < list.Count; i++)
+                {
+                    if (i > 0)
+                    {
+                        text += Environment.NewLine;
+                    }
+                    text += list.ElementAt(i).SubjectName;
+                }
             }
             else
             {
-                channel = await this.Context.Message.Author.CreateDMChannelAsync();
+                text += this._emptyIgnoreList;
             }
-            return channel;
+            return text;
         }
     }
 }

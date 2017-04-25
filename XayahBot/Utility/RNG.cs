@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace XayahBot.Utility
 {
@@ -22,5 +24,12 @@ namespace XayahBot.Utility
         {
             return _numberGen.Next(min, max + 1);
         } // Returns min to max
+
+        //
+
+        public static T FromList<T>(List<T> list)
+        {
+            return list.ElementAt(Next(list.Count) - 1);
+        }
     }
 }
