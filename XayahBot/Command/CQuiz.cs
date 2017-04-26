@@ -18,12 +18,14 @@ namespace XayahBot.Command
 
         //
 
-        private readonly List<string> _recentlyPosted = new List<string>{
+        private readonly List<string> _recentlyPosted = new List<string>
+        {
             "... I just posted it. Not even a few minutes ago. Go look for it!",
             "I refuse to post it again!",
             "Again? But I just did!"
         };
-        private readonly List<string> _emptyLeaderboard = new List<string>{
+        private readonly List<string> _emptyLeaderboard = new List<string>
+        {
             "Unlucky. No one had any success so far.",
             "I could show something if anyone would be able to answer the questions.",
             "The leaderboard is empty so far."

@@ -55,7 +55,8 @@ namespace XayahBot.Service
                 bool _checked = false;
                 while (this._running)
                 {
-                    if (DateTime.UtcNow.Minute % 5 == 0) // Interval in minutes
+                    // Interval in minutes
+                    if (DateTime.UtcNow.Minute % 5 == 0)
                     {
                         if (!_checked)
                         {

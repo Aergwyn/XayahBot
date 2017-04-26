@@ -14,7 +14,9 @@ namespace XayahBot.Utility
 
         //
 
-        public QuizEntry(string question, params string[] answer) : this(question, 100, answer) { }
+        public QuizEntry(string question, params string[] answer) : this(question, 100, answer)
+        {
+        }
 
         public QuizEntry(string question, int matchPercentage, params string[] answer)
         {
@@ -34,7 +36,7 @@ namespace XayahBot.Utility
         public string GetAllAnswers()
         {
             string text = string.Empty;
-            for(int i = 0; i < this.Answer.Count(); i++)
+            for (int i = 0; i < this.Answer.Count(); i++)
             {
                 if (i > 0)
                 {

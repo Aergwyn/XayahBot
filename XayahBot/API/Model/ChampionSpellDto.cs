@@ -51,7 +51,7 @@ namespace XayahBot.API.Model
         public string GetVarsString()
         {
             List<string> varList = new List<string>();
-            List<string> coEffList = new List<string>();
+            List<string> coeffList = new List<string>();
             if (this.Vars != null)
             {
                 foreach (SpellVarsDto var in this.Vars)
@@ -60,10 +60,10 @@ namespace XayahBot.API.Model
                     {
                         foreach (decimal coEff in var.CoEff)
                         {
-                            coEffList.Add($"{(coEff * 100).ToString("G0", CultureInfo.InvariantCulture)}%");
+                            coeffList.Add($"{(coEff * 100).ToString("G0", CultureInfo.InvariantCulture)}%");
                         }
-                        varList.Add(string.Join(",", coEffList));
-                        coEffList.Clear();
+                        varList.Add(string.Join(",", coeffList));
+                        coeffList.Clear();
                     }
                 }
             }

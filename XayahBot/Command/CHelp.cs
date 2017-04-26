@@ -57,7 +57,8 @@ namespace XayahBot.Command
             List<HelpLine> normalCmdList = new List<HelpLine>();
             List<HelpLine> modCmdList = new List<HelpLine>();
             List<HelpLine> ownerCmdList = new List<HelpLine>();
-            foreach (CommandInfo cmd in this.CmdService.Commands) // Sort commands in permission groups
+            // Sort commands in permission groups
+            foreach (CommandInfo cmd in this.CmdService.Commands)
             {
                 HelpLine line = this.GetCommandStringSimple(cmd);
                 if (cmd.Preconditions.Contains(new RequireOwnerAttribute()))

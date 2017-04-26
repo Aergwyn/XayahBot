@@ -20,22 +20,26 @@ namespace XayahBot.Service
 
         //
 
-        private static List<string> _fullAnswerList = new List<string>{
+        private static List<string> _fullAnswerList = new List<string>
+        {
             "Wow. {0} was actually correct.",
             "{0} was first to provide the right answer.",
             "{0} won the cookie!"
         };
-        private static List<string> _partialAnswerList = new List<string>{
+        private static List<string> _partialAnswerList = new List<string>
+        {
             "Wow. {0} was actually somewhat right. `{1}` would've been the full answer.",
             "{0} barely made it. Actually it was `{1}` but I'm nice.",
             "*yawn* {0} finally did it! Guessing `{1}` isn't so hard, no?"
         };
-        private static List<string> _questionTimeoutList = new List<string>{
+        private static List<string> _questionTimeoutList = new List<string>
+        {
             "Oh. So much time passed and no one was able to guess it. {0} would've done it though. *sigh*",
             "Too late... way way too late. Answer was {0} though.",
             "I forgot the question ages ago. I still know the answers though: {0}."
         };
-        private static List<string> _questionMaxTriesList = new List<string>{
+        private static List<string> _questionMaxTriesList = new List<string>
+        {
             "Seems like this question was too hard. No one knew the answer was {0}. Oh well.",
             "Too hard I suppose. Memorize {0} then.",
             "How about {0}? Maybe next time I can think of something easier."
@@ -118,7 +122,8 @@ namespace XayahBot.Service
                 if (_questionMap.TryGetValue(context.Guild.Id, out QuizEntry entry))
                 {
                     string correctAnswer = string.Empty;
-                    if (entry.MatchPercentage >= 100) // Exact Match
+                    // Exact Match
+                    if (entry.MatchPercentage >= 100)
                     {
                         correctAnswer = entry.Answer.FirstOrDefault(x => x.ToLower().Equals(answer));
                         if (!string.IsNullOrWhiteSpace(correctAnswer))
@@ -127,10 +132,12 @@ namespace XayahBot.Service
                             response = string.Format(RNG.FromList(_fullAnswerList), context.User.Mention);
                         }
                     }
-                    else // Partial Match
+                    // Partial Match
+                    else
                     {
                         correctAnswer = entry.Answer.FirstOrDefault(x => x.ToLower().Contains(answer));
-                        if (!string.IsNullOrWhiteSpace(correctAnswer)) // Check if answer given is at least occuring in a correct answer
+                        // Check if answer given is at least occuring in a correct answer
+                        if (!string.IsNullOrWhiteSpace(correctAnswer))
                         {
                             int percentage = (int)Math.Round((decimal)answer.Length / correctAnswer.Length * 100, 0, MidpointRounding.AwayFromZero);
                             if (percentage >= 100)
@@ -238,7 +245,7 @@ namespace XayahBot.Service
             {
                 case 1:
                     List<string> answer = new List<string>();
-                    foreach(SkinDto skin in champion.Skins.Where(x => x.Num > 0))
+                    foreach (SkinDto skin in champion.Skins.Where(x => x.Num > 0))
                     {
                         answer.Add(skin.Name);
                     }
@@ -325,9 +332,9 @@ namespace XayahBot.Service
             {
                 foreach (SpellVarsDto spellVar in spell.Vars)
                 {
-                    foreach (decimal coEff in spellVar.CoEff)
+                    foreach (decimal scaling in spellVar.CoEff)
                     {
-                        int value = (int)Math.Round(coEff * 100, 0, MidpointRounding.AwayFromZero);
+                        int value = (int)Math.Round(scaling * 100, 0, MidpointRounding.AwayFromZero);
                         answer.Add(value.ToString());
                     }
                 }
@@ -372,7 +379,7 @@ namespace XayahBot.Service
         // League stat growth formula (+ ceiling the value to represent ingame behaviour)
         private static string GetCalculateDStat(decimal stat, decimal scaling, int level)
         {
-            return Math.Ceiling(stat + scaling * (level - 1) * (0.685M + 0.0175M * level)).ToString("G0", CultureInfo.InvariantCulture);
+            return Math.Ceiling(stat + (scaling * (level - 1) * (0.685M + 0.0175M * level))).ToString("G0", CultureInfo.InvariantCulture);
         }
     }
 }

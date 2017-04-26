@@ -24,7 +24,10 @@ namespace XayahBot.API.Model
 
         //
 
-        public ChampionDto() { } // for JSON
+        public ChampionDto()
+        {
+            // for JSON
+        }
 
         public ChampionDto(ChampionDto champion)
         {

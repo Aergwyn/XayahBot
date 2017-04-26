@@ -61,7 +61,8 @@ namespace XayahBot.Service
                     {
                         _champions.Add(champion); // Only add if we actually got data
                     }
-                    if (!_lastChampionsRequests.ContainsKey(id)) // Add/Update timestamp
+                    // Add/Update timestamp
+                    if (!_lastChampionsRequests.ContainsKey(id))
                     {
                         _lastChampionsRequests.Add(id, DateTime.UtcNow);
                     }
