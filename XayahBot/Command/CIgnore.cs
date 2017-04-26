@@ -70,7 +70,7 @@ namespace XayahBot.Command
         private async Task<string> AddIgnore(ulong subjectId, string subjectName, bool isChannel)
         {
             string message = string.Empty;
-            switch (await IgnoreService.AddSubjectAsync(this.Context.Guild.Id, subjectId, subjectName, isChannel))
+            switch (await IgnoreService.AddAsync(this.Context.Guild.Id, subjectId, subjectName, isChannel))
             {
                 case 0:
                     message = string.Format(this._ignoreSuccess, subjectName);

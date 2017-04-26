@@ -65,7 +65,7 @@ namespace XayahBot.Command
         private async Task<string> RemoveIgnore(ulong subjectId, string subjectName)
         {
             string message = string.Empty;
-            switch (await IgnoreService.RemoveSubjectAsync(this.Context.Guild.Id, subjectId))
+            switch (await IgnoreService.RemoveAsync(this.Context.Guild.Id, subjectId))
             {
                 case 0:
                     message = string.Format(this._unignoreSuccess, subjectName);

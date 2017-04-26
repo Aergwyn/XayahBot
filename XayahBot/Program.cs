@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable 4014
+
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -7,7 +9,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using XayahBot.Utility;
-using XayahBot.Service;
+using XayahBot.Database.Service;
 
 namespace XayahBot
 {
@@ -38,14 +40,13 @@ namespace XayahBot
             });
         }
 
-#pragma warning disable 4014 // Intentional
         private async Task StartAsync()
         {
             this._client.Log += Logger.Log;
             this._client.Ready += this.HandleReady;
-            //this._client.ChannelUpdated
-            //this._client.ChannelDestroyed
-            //this._client.LeftGuild
+            this._client.ChannelUpdated += this.HandleChannelUpdated;
+            this._client.ChannelDestroyed += this.HandleChannelDestroyed;
+            this._client.LeftGuild += this.HandleLeftGuild;
 
             await InitCommandsAsync();
 
@@ -73,7 +74,6 @@ namespace XayahBot
             }
             await Task.Delay(2500); // Wait a bit
         }
-#pragma warning restore 4014
 
         private async Task InitCommandsAsync()
         {
@@ -102,7 +102,25 @@ namespace XayahBot
             return Task.CompletedTask;
         }
 
-#pragma warning disable 4014 // Intentional
+        private Task HandleChannelUpdated(SocketChannel preUpdateChannel, SocketChannel postUpdateChannel)
+        {
+            IgnoreService.UpdateAsync(preUpdateChannel.Id, ((IChannel)postUpdateChannel).Name);
+            return Task.CompletedTask;
+        }
+
+        private Task HandleChannelDestroyed(SocketChannel deletedChannel)
+        {
+            IgnoreService.RemoveBySubjectIdAsync(deletedChannel.Id);
+            return Task.CompletedTask;
+        }
+
+        private Task HandleLeftGuild(SocketGuild leftGuild)
+        {
+            IgnoreService.RemoveByGuildAsync(leftGuild.Id);
+            LeaderboardService.RemoveByGuildAsync(leftGuild.Id);
+            return Task.CompletedTask;
+        }
+
         private async Task HandleCommand(SocketMessage arg)
         {
             int pos = 0;
@@ -131,6 +149,5 @@ namespace XayahBot
                 }
             }
         }
-#pragma warning restore 4014
     }
 }

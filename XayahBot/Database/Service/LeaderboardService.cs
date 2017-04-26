@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable 4014
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,18 +11,18 @@ namespace XayahBot.Database.Service
 {
     public static class LeaderboardService
     {
-        public static List<TLeaderboardEntry> GetLeaderboard(ulong guild)
+        public static async Task<List<TLeaderboardEntry>> GetLeaderboard(ulong guild)
         {
-            CheckForReset();
+            await CheckForResetAsync();
             using (GeneralContext db = new GeneralContext())
             {
                 return db.Leaderboard.Where(x => x.Guild.Equals(guild)).ToList();
             }
         }
 
-        public static Task IncrementAnswerAsync(ulong guild, ulong userId, string userName)
+        public static async Task IncrementAnswerAsync(ulong guild, ulong userId, string userName)
         {
-            CheckForReset();
+            await CheckForResetAsync();
             using (GeneralContext db = new GeneralContext())
             {
                 TLeaderboardEntry quizStat = db.Leaderboard.FirstOrDefault(x => x.Guild.Equals(guild) && x.UserName.Equals(userName));
@@ -34,12 +36,37 @@ namespace XayahBot.Database.Service
                 }
                 db.SaveChangesAsync();
             }
+        }
+
+        public static Task RemoveByGuildAsync(ulong guild)
+        {
+            using (GeneralContext db = new GeneralContext())
+            {
+                foreach (TLeaderboardEntry entry in db.Leaderboard.Where(x => x.Guild.Equals(guild)))
+                {
+                    db.Remove(entry);
+                }
+                db.SaveChangesAsync();
+            }
+            return Task.CompletedTask;
+        }
+
+        public static Task ResetAsync()
+        {
+            using (GeneralContext db = new GeneralContext())
+            {
+                foreach (TLeaderboardEntry entry in db.Leaderboard)
+                {
+                    db.Remove(entry);
+                }
+                db.SaveChangesAsync();
+            }
             return Task.CompletedTask;
         }
 
         //
 
-        private static void CheckForReset()
+        private static async Task CheckForResetAsync()
         {
             if (!string.IsNullOrWhiteSpace(Property.QuizLastReset.Value))
             {
@@ -47,14 +74,7 @@ namespace XayahBot.Database.Service
                 string[] lastResetValue = Property.QuizLastReset.Value.Split('/');
                 if (new DateTime(int.Parse(lastResetValue.ElementAt(1)), int.Parse(lastResetValue.ElementAt(0)), 1, 0, 0, 0).AddMonths(1) < now)
                 {
-                    using (GeneralContext db = new GeneralContext())
-                    {
-                        foreach (TLeaderboardEntry entry in db.Leaderboard)
-                        {
-                            db.Remove(entry);
-                        }
-                        db.SaveChangesAsync();
-                    }
+                    await ResetAsync();
                     Property.QuizLastReset.Value = $"{now.Month}/{now.Year}";
                 }
             }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable 4014
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -66,7 +68,6 @@ namespace XayahBot.Service
 
         //
 
-#pragma warning disable 4014 // Intentional
         public static async Task AskQuestionAsync(CommandContext context)
         {
             string question = string.Empty;
@@ -108,9 +109,7 @@ namespace XayahBot.Service
                 _syncLock.Release();
             }
         }
-#pragma warning restore 4014
 
-#pragma warning disable 4014 // Intentional
         public static async Task AnswerQuestionAsync(CommandContext context, string answer)
         {
             bool success = false;
@@ -184,7 +183,6 @@ namespace XayahBot.Service
                 _syncLock.Release();
             }
         }
-#pragma warning restore 4014
 
         //
 

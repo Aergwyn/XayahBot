@@ -15,7 +15,7 @@ namespace XayahBot.Database.Service
             }
         }
 
-        public static async Task<int> AddSubjectAsync(ulong guild, ulong subjectId, string subjectName, bool isChannel)
+        public static async Task<int> AddAsync(ulong guild, ulong subjectId, string subjectName, bool isChannel)
         {
             using (GeneralContext db = new GeneralContext())
             {
@@ -23,25 +23,41 @@ namespace XayahBot.Database.Service
                 if (match == null)
                 {
                     db.IgnoreList.Add(new TIgnoreEntry { Guild = guild, SubjectId = subjectId, SubjectName = subjectName, IsChannel = isChannel });
-                }
-                else
-                {
-                    return 2; // Already existing
-                }
-                if (await db.SaveChangesAsync() > 0)
-                {
-                    return 0; // Success
-                }
-                else
-                {
-                    return 1; // Insert failed
+                    if (await db.SaveChangesAsync() > 0)
+                    {
+                        return 0; // Success
+                    }
+                    else
+                    {
+                        return 1; // Insert failed
+                    }
                 }
             }
+            return 2; // Already existing
         }
 
-        // TODO UPDATE CHANNEL NAME
+        public static async Task<int> UpdateAsync(ulong subjectId, string newSubjectName)
+        {
+            using (GeneralContext db = new GeneralContext())
+            {
+                TIgnoreEntry match = db.IgnoreList.FirstOrDefault(x => x.SubjectId.Equals(subjectId));
+                if (match != null)
+                {
+                    match.SubjectName = newSubjectName;
+                    if (await db.SaveChangesAsync() > 0)
+                    {
+                        return 0; // Success
+                    }
+                    else
+                    {
+                        return 1; // Update failed
+                    }
+                }
+            }
+            return 2; // No entry found
+        }
 
-        public static async Task<int> RemoveSubjectAsync(ulong guild, ulong subjectId)
+        public static async Task<int> RemoveAsync(ulong guild, ulong subjectId)
         {
             using (GeneralContext db = new GeneralContext())
             {
@@ -49,6 +65,54 @@ namespace XayahBot.Database.Service
                 if (match != null)
                 {
                     db.Remove(match);
+                    if (await db.SaveChangesAsync() > 0)
+                    {
+                        return 0; // Success
+                    }
+                    else
+                    {
+                        return 1; // Delete failed
+                    }
+                }
+            }
+            return 2; // No entry found
+        }
+
+        public static async Task<int> RemoveByGuildAsync(ulong guild)
+        {
+            using (GeneralContext db = new GeneralContext())
+            {
+                List<TIgnoreEntry> matches = db.IgnoreList.Where(x => x.Guild.Equals(guild)).ToList();
+                if (matches.Count > 0)
+                {
+                    foreach (TIgnoreEntry match in matches)
+                    {
+                        db.Remove(match);
+                    }
+                    if (await db.SaveChangesAsync() > 0)
+                    {
+                        return 0; // Success
+                    }
+                    else
+                    {
+                        return 1; // Delete failed
+                    }
+                }
+            }
+            return 2; // No entry found
+        }
+
+        public static async Task<int> RemoveBySubjectIdAsync(ulong subjectId)
+        {
+            using (GeneralContext db = new GeneralContext())
+            {
+                List<TIgnoreEntry> matches = db.IgnoreList.Where(x => x.SubjectId.Equals(subjectId)).ToList();
+                if (matches.Count > 0)
+                {
+                    foreach (TIgnoreEntry match in matches)
+                    {
+                        db.Remove(match);
+                    }
                     if (await db.SaveChangesAsync() > 0)
                     {
                         return 0; // Success
