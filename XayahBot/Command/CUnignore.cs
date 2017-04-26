@@ -40,8 +40,11 @@ namespace XayahBot.Command
             Logger.Log(LogSeverity.Info, nameof(CUnignore), string.Format(this._logRequest, this.Context.User));
             foreach (ulong userId in this.Context.Message.MentionedUserIds.Distinct())
             {
-                IUser user = await this.Context.Guild.GetUserAsync(userId);
-                message += await RemoveIgnore(user.Id, user.ToString()) + Environment.NewLine;
+                if (!userId.Equals(this.Context.Client.CurrentUser.Id))
+                {
+                    IUser user = await this.Context.Guild.GetUserAsync(userId);
+                    message += await RemoveIgnore(user.Id, user.ToString()) + Environment.NewLine;
+                }
             }
             foreach (ulong channelId in this.Context.Message.MentionedChannelIds.Distinct())
             {
