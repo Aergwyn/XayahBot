@@ -58,9 +58,9 @@ namespace XayahBot.API.Model
                 {
                     if (var.CoEff != null)
                     {
-                        foreach (decimal coEff in var.CoEff)
+                        foreach (decimal scaling in var.CoEff)
                         {
-                            coeffList.Add($"{(coEff * 100).ToString("G0", CultureInfo.InvariantCulture)}%");
+                            coeffList.Add($"{(scaling * 100).ToString("G0", CultureInfo.InvariantCulture)}%");
                         }
                         varList.Add(string.Join(",", coeffList));
                         coeffList.Clear();
