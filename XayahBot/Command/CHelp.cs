@@ -15,13 +15,13 @@ namespace XayahBot.Command
 {
     public class CHelp : ModuleBase
     {
-        public CommandService CmdService { get; set; }
+        public CommandService CommandService { get; set; }
 
         //
 
-        public CHelp(CommandService cmdService)
+        public CHelp(CommandService commandService)
         {
-            this.CmdService = cmdService;
+            this.CommandService = commandService;
         }
 
         //
@@ -54,12 +54,11 @@ namespace XayahBot.Command
             }
             string message = string.Empty;
             string prefix = Property.CmdPrefix.Value;
-            List<HelpLine> reducedCmdList = new List<HelpLine>();
             List<HelpLine> normalCmdList = new List<HelpLine>();
             List<HelpLine> modCmdList = new List<HelpLine>();
             List<HelpLine> ownerCmdList = new List<HelpLine>();
             // Sort commands in permission groups
-            foreach (CommandInfo cmd in this.CmdService.Commands)
+            foreach (CommandInfo cmd in this.CommandService.Commands)
             {
                 HelpLine line = this.GetCommandStringSimple(cmd);
                 if (cmd.Preconditions.Contains(new RequireOwnerAttribute()))
@@ -72,22 +71,12 @@ namespace XayahBot.Command
                 }
                 else
                 {
-                    if (!cmd.Preconditions.Contains(new CheckIgnoredUserAttribute()))
-                    {
-                        reducedCmdList.Add(line);
-                    }
+
                     normalCmdList.Add(line);
                 }
             }
             message = "__**Command List**__```";
-            if (IgnoreService.IsIgnored(this.Context.Guild.Id, this.Context.User.Id))
-            {
-                message += this.GetCommandBlockString(reducedCmdList);
-            }
-            else
-            {
-                message += this.GetCommandBlockString(normalCmdList);
-            }
+            message += this.GetCommandBlockString(normalCmdList);
             if (PermissionService.IsAdminOrMod(this.Context) && modCmdList.Count > 0)
             {
                 message += $"```{Environment.NewLine}__Mod-Commands__```";
@@ -105,10 +94,10 @@ namespace XayahBot.Command
 
         //
 
-        private HelpLine GetCommandStringSimple(CommandInfo cmd)
+        private HelpLine GetCommandStringSimple(CommandInfo commandInfo)
         {
-            string command = this.ListAliases(cmd.Aliases);
-            foreach (ParameterInfo param in cmd.Parameters)
+            string command = this.ListAliases(commandInfo.Aliases);
+            foreach (ParameterInfo param in commandInfo.Parameters)
             {
                 if (param.IsOptional)
                 {
@@ -123,7 +112,7 @@ namespace XayahBot.Command
             return new HelpLine()
             {
                 Command = command,
-                Summary = cmd.Summary
+                Summary = commandInfo.Summary
             };
         }
 
@@ -153,17 +142,17 @@ namespace XayahBot.Command
             return result.Trim();
         }
 
-        private string GetCommandBlockString(List<HelpLine> cmdList)
+        private string GetCommandBlockString(List<HelpLine> helpList)
         {
             string text = string.Empty;
-            for (int i = 0; i < cmdList.Count; i++)
+            for (int i = 0; i < helpList.Count; i++)
             {
                 if (i > 0)
                 {
                     text += Environment.NewLine;
                 }
-                HelpLine line = cmdList.ElementAt(i);
-                text += $"{line.Command.PadRight(cmdList.OrderByDescending(x => x.Command.Length).First().Command.Length)} - {line.Summary}";
+                HelpLine line = helpList.ElementAt(i);
+                text += $"{line.Command.PadRight(helpList.OrderByDescending(x => x.Command.Length).First().Command.Length)} - {line.Summary}";
             }
             return text;
         }
