@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿#pragma warning disable 4014
+
+using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using XayahBot.Service;
@@ -13,7 +15,6 @@ namespace XayahBot.Command
 
         //
 
-#pragma warning disable 4014 // Intentional
         [Command("champ"), Alias("c")]
         [Summary("Displays data of a specific champion. Name does not have to be exact.")]
         public async Task Champ([Remainder] string name)
@@ -34,6 +35,5 @@ namespace XayahBot.Command
             }
             InfoService.GetChampionData(channel, name);
         }
-#pragma warning restore 4014
     }
 }

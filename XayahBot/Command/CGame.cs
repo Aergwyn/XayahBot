@@ -1,4 +1,6 @@
-﻿using Discord;
+﻿#pragma warning disable 4014
+
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System.Threading.Tasks;
@@ -25,7 +27,6 @@ namespace XayahBot.Command
 
         //
 
-#pragma warning disable 4014 // Intentional
         [Command("game")]
         [RequireOwner]
         [RequireContext(ContextType.DM)]
@@ -52,6 +53,5 @@ namespace XayahBot.Command
             this.Client.SetGameAsync(game);
             Logger.Log(LogSeverity.Debug, nameof(CProperty), string.Format(this._logChanged, game));
         }
-#pragma warning restore 4014
     }
 }

@@ -1,4 +1,6 @@
-﻿using Discord;
+﻿#pragma warning disable 4014
+
+using Discord;
 using Discord.Commands;
 using System;
 using System.Collections.Generic;
@@ -29,7 +31,6 @@ namespace XayahBot.Command
 
         //
 
-#pragma warning disable 4014 // Intentional
         [Command("unignore")]
         [RequireMod]
         [RequireContext(ContextType.Guild)]
@@ -57,11 +58,9 @@ namespace XayahBot.Command
                 ReplyAsync(RNG.FromList(this._unignoredReactionList));
             }
         }
-#pragma warning restore 4014
 
         //
 
-#pragma warning disable 4014 // Intentional
         private async Task<string> RemoveIgnore(ulong subjectId, string subjectName)
         {
             string message = string.Empty;
@@ -80,6 +79,5 @@ namespace XayahBot.Command
             }
             return message;
         }
-#pragma warning restore 4014
     }
 }

@@ -1,4 +1,6 @@
-﻿using Discord.Commands;
+﻿#pragma warning disable 1998
+
+using Discord.Commands;
 using System.Threading.Tasks;
 using XayahBot.Database.Service;
 
@@ -6,7 +8,6 @@ namespace XayahBot.Command.Attribute
 {
     public class CheckIgnoredChannelAttribute : PreconditionAttribute
     {
-#pragma warning disable 1998 // Intentional
         public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IDependencyMap map)
         {
             if (IgnoreService.IsIgnored(context.Guild.Id, context.Channel.Id))
@@ -18,6 +19,5 @@ namespace XayahBot.Command.Attribute
                 return PreconditionResult.FromSuccess();
             }
         }
-#pragma warning restore
     }
 }

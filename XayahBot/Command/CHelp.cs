@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable 4014
+
+using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -32,7 +34,6 @@ namespace XayahBot.Command
 
         //
 
-#pragma warning disable 4014 // Intentional
         [Command("help"), Alias("h")]
         [Summary("Displays the list of commands.")]
         public async Task Help()
@@ -101,7 +102,6 @@ namespace XayahBot.Command
 
             channel.SendMessageAsync(message);
         }
-#pragma warning restore 4014
 
         //
 

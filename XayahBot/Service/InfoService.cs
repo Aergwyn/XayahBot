@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable 4014
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -18,7 +20,6 @@ namespace XayahBot.Service
 
         //
 
-#pragma warning disable 4014 // Intentional
         public static async Task GetChampionData(IMessageChannel channel, string name)
         {
             if (!string.IsNullOrWhiteSpace(name))
@@ -93,7 +94,6 @@ namespace XayahBot.Service
                 channel.SendMessageAsync(_noInputGiven);
             }
         }
-#pragma warning restore 4014
 
         //
 

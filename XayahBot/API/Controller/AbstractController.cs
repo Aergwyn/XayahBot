@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable 4014
+
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -34,7 +36,6 @@ namespace XayahBot.API.Controller
             return await FetchAsync(region, string.Empty);
         }
 
-#pragma warning disable 4014 // Intentional
         protected async Task<T> FetchAsync(Region region, string dataString)
         {
             if (dataString == null) // I don't care about the dataString but it can't be null after this point
@@ -67,6 +68,5 @@ namespace XayahBot.API.Controller
                 return resultObject;
             }
         }
-#pragma warning restore 4014
     }
 }
