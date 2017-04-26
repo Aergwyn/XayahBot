@@ -3,11 +3,9 @@ using Discord.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using XayahBot.Command.Attribute;
 using XayahBot.Database.Service;
-using XayahBot.Service;
 using XayahBot.Utility;
 
 namespace XayahBot.Command
@@ -40,12 +38,12 @@ namespace XayahBot.Command
         {
             string message = string.Empty;
             Logger.Log(LogSeverity.Info, nameof(CUnignore), string.Format(this._logRequest, this.Context.User));
-            foreach (ulong userId in this.Context.Message.MentionedUserIds)
+            foreach (ulong userId in this.Context.Message.MentionedUserIds.Distinct())
             {
                 IUser user = await this.Context.Guild.GetUserAsync(userId);
                 message += await RemoveIgnore(user.Id, user.ToString()) + Environment.NewLine;
             }
-            foreach (ulong channelId in this.Context.Message.MentionedChannelIds)
+            foreach (ulong channelId in this.Context.Message.MentionedChannelIds.Distinct())
             {
                 IChannel channel = await this.Context.Guild.GetChannelAsync(channelId);
                 message += await RemoveIgnore(channel.Id, channel.Name) + Environment.NewLine;
