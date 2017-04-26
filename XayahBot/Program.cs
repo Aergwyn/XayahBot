@@ -117,7 +117,6 @@ namespace XayahBot
         private Task HandleLeftGuild(SocketGuild leftGuild)
         {
             IgnoreService.RemoveByGuildAsync(leftGuild.Id);
-            LeaderboardService.RemoveByGuildAsync(leftGuild.Id);
             return Task.CompletedTask;
         }
 

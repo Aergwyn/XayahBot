@@ -38,19 +38,6 @@ namespace XayahBot.Database.Service
             }
         }
 
-        public static Task RemoveByGuildAsync(ulong guild)
-        {
-            using (GeneralContext db = new GeneralContext())
-            {
-                foreach (TLeaderboardEntry entry in db.Leaderboard.Where(x => x.Guild.Equals(guild)))
-                {
-                    db.Remove(entry);
-                }
-                db.SaveChangesAsync();
-            }
-            return Task.CompletedTask;
-        }
-
         public static Task ResetAsync()
         {
             using (GeneralContext db = new GeneralContext())
