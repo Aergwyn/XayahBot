@@ -48,11 +48,11 @@ namespace XayahBot.Command
                 IChannel channel = await this.Context.Guild.GetChannelAsync(channelId);
                 message += await AddIgnore(channel.Id, channel.Name, true) + Environment.NewLine;
             }
+            ReplyAsync(message);
             if (!string.IsNullOrWhiteSpace(message))
             {
-                message += RNG.FromList(this._ignoredReactionList);
+                ReplyAsync(RNG.FromList(this._ignoredReactionList));
             }
-            ReplyAsync(message);
         }
 #pragma warning restore 4014
 
