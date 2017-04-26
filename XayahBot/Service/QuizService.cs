@@ -53,7 +53,7 @@ namespace XayahBot.Service
         private static string _championBasicTagQ = "List one tag of {0}!";
         private static string _championSkinNameQ = "Name a skin of {0} with at least {1}% accuracy! Also ignore the classic skin. That'd be too easy.";
         private static string _championSkinCountQ = "How many skins does {0} have in total?";
-        private static string _championSkinOrderQ = "Name the {0}{1} released skin for {2}? {3}% accuracy is enough. Oh, and exclude the classic skin. It doesn't count.";
+        private static string _championSkinOrderQ = "Name the {0}{1} released skin for {2}! {3}% accuracy is enough. Oh, and exclude the classic skin. It doesn't count.";
         private static string _championSpellNameQ = "Name one spell (or passive) of {0}!";
         private static string _championSpellCdQ = "What is the base cooldown on a rank {0} {1} from {2}?";
         private static string _championSpellRangeQ = "What is the range of a rank {0} {1} from {2}?";
