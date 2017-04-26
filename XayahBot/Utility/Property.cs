@@ -96,7 +96,9 @@ namespace XayahBot.Utility
 
         //
 
-        private Property(string name, string value) : this(name, value, true) { }
+        private Property(string name, string value) : this(name, value, true)
+        {
+        }
 
         private Property(string name, string value, bool updatable)
         {
@@ -105,7 +107,6 @@ namespace XayahBot.Utility
             this.Updatable = updatable;
             this.Loaded = !updatable;
         }
-
 
         //
 

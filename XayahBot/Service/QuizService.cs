@@ -122,7 +122,6 @@ namespace XayahBot.Service
                 if (_questionMap.TryGetValue(context.Guild.Id, out QuizEntry entry))
                 {
                     string correctAnswer = string.Empty;
-                    // Exact Match
                     if (entry.MatchPercentage >= 100)
                     {
                         correctAnswer = entry.Answer.FirstOrDefault(x => x.ToLower().Equals(answer));
@@ -132,7 +131,6 @@ namespace XayahBot.Service
                             response = string.Format(RNG.FromList(_fullAnswerList), context.User.Mention);
                         }
                     }
-                    // Partial Match
                     else
                     {
                         correctAnswer = entry.Answer.FirstOrDefault(x => x.ToLower().Contains(answer));
@@ -379,7 +377,7 @@ namespace XayahBot.Service
         // League stat growth formula (+ ceiling the value to represent ingame behaviour)
         private static string GetCalculateDStat(decimal stat, decimal scaling, int level)
         {
-            return Math.Ceiling(stat + (scaling * (level - 1) * (0.685M + 0.0175M * level))).ToString("G0", CultureInfo.InvariantCulture);
+            return Math.Ceiling(stat + (scaling * (level - 1) * (0.685M + (0.0175M * level)))).ToString("G0", CultureInfo.InvariantCulture);
         }
     }
 }
