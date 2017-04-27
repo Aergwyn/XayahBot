@@ -38,11 +38,12 @@ namespace XayahBot.Command
         private string ListIgnore(List<TIgnoreEntry> list)
         {
             string text = string.Empty;
-            if (list.Count > 0)
+            IOrderedEnumerable<TIgnoreEntry> orderedList = list.OrderBy(x => x.SubjectName);
+            if (orderedList.Count() > 0)
             {
-                for (int i = 0; i < list.Count; i++)
+                for (int i = 0; i < orderedList.Count(); i++)
                 {
-                    text += Environment.NewLine + list.ElementAt(i).SubjectName;
+                    text += Environment.NewLine + orderedList.ElementAt(i).SubjectName;
                 }
             }
             else
