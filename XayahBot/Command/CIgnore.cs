@@ -52,7 +52,7 @@ namespace XayahBot.Command
                 IChannel channel = await this.Context.Guild.GetChannelAsync(channelId);
                 message += await AddIgnore(channel.Id, channel.Name, true) + Environment.NewLine;
             }
-            ReplyAsync(message);
+            await ReplyAsync(message);
             if (!string.IsNullOrWhiteSpace(message))
             {
                 ReplyAsync(RNG.FromList(this._ignoredReactionList));
