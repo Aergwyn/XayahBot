@@ -71,7 +71,6 @@ namespace XayahBot.Command
                 }
                 else
                 {
-
                     normalCmdList.Add(line);
                 }
             }
