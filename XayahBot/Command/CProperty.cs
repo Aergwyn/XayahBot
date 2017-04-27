@@ -15,7 +15,7 @@ namespace XayahBot.Command
         private readonly string _logChanged = "\"{0}\" changed to \"{1}\".";
 
         private readonly string _notFound = "Could not find property with name `{0}`!";
-        private readonly string _changed = $"Property changed...{Environment.NewLine}```Old: {{0}}:\"{{1}}\"{Environment.NewLine}New: {{0}}:\"{{2}}\"```";
+        private readonly string _changed = $"Property changed...{Environment.NewLine}```{Environment.NewLine}Old: {{0}}:\"{{1}}\"{Environment.NewLine}New: {{0}}:\"{{2}}\"```";
 
         //
 
@@ -29,12 +29,10 @@ namespace XayahBot.Command
             string message = $"__List of properties__{Environment.NewLine}```";
             for (int i = 0; i < displayList.Count; i++)
             {
-                if (i > 0)
-                {
-                    message += Environment.NewLine;
-                }
                 Property property = displayList.ElementAt(i);
-                message += $"{(property.Name + ":").PadRight(Utility.Property.Values.Where(x => x.Updatable).OrderByDescending(x => x.Name.Length).First().Name.Length + 1, ' ')}\"{property.Value}\"";
+                message += $"{Environment.NewLine}" +
+                    $"{(property.Name + ":").PadRight(Utility.Property.Values.Where(x => x.Updatable).OrderByDescending(x => x.Name.Length).First().Name.Length + 1, ' ')}" +
+                    $"\"{property.Value}\"";
             }
             message += "```";
             ReplyAsync(message);

@@ -147,12 +147,8 @@ namespace XayahBot.Command
             string text = string.Empty;
             for (int i = 0; i < helpList.Count; i++)
             {
-                if (i > 0)
-                {
-                    text += Environment.NewLine;
-                }
                 HelpLine line = helpList.ElementAt(i);
-                text += $"{line.Command.PadRight(helpList.OrderByDescending(x => x.Command.Length).First().Command.Length)} - {line.Summary}";
+                text += $"{Environment.NewLine}{line.Command.PadRight(helpList.OrderByDescending(x => x.Command.Length).First().Command.Length)} - {line.Summary}";
             }
             return text;
         }

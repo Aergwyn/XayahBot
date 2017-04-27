@@ -1,5 +1,4 @@
-﻿using Discord;
-using Discord.Commands;
+﻿using Discord.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +6,6 @@ using System.Threading.Tasks;
 using XayahBot.Command.Attribute;
 using XayahBot.Database.Model;
 using XayahBot.Database.Service;
-using XayahBot.Utility;
 
 namespace XayahBot.Command
 {
@@ -44,11 +42,7 @@ namespace XayahBot.Command
             {
                 for (int i = 0; i < list.Count; i++)
                 {
-                    if (i > 0)
-                    {
-                        text += Environment.NewLine;
-                    }
-                    text += list.ElementAt(i).SubjectName;
+                    text += Environment.NewLine + list.ElementAt(i).SubjectName;
                 }
             }
             else
