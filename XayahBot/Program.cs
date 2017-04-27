@@ -44,7 +44,7 @@ namespace XayahBot
         {
             this._client.Log += Logger.Log;
 
-            await InitCommandsAsync();
+            await InitializeAsync();
 
             string token = File.ReadLines(Property.FilePath.Value + Property.FileToken.Value).ElementAt(0); // I'm not gonna show it
             if (!string.IsNullOrWhiteSpace(token))
@@ -71,17 +71,16 @@ namespace XayahBot
             await Task.Delay(2500); // Wait a bit
         }
 
-        private async Task InitCommandsAsync()
+        private async Task InitializeAsync()
         {
-            // EventHandler
             this._client.Ready += this.HandleReady;
             this._client.ChannelUpdated += this.HandleChannelUpdated;
             this._client.ChannelDestroyed += this.HandleChannelDestroyed;
             this._client.LeftGuild += this.HandleLeftGuild;
             this._client.MessageReceived += this.HandleMessageReceived;
-            // Map
+
             this._dependencyMap.Add(this._client);
-            // Command
+
             await this._commandService.AddModulesAsync(Assembly.GetEntryAssembly());
         }
 
@@ -96,9 +95,9 @@ namespace XayahBot
             }
             else
             {
-                this._client.SetGameAsync(null); // May not be needed but if bot restarts you overwrite status at least
+                this._client.SetGameAsync(null);
             }
-            //RiotStatusService.StartAsync(this._client);
+            //RiotStatusService.StartAsync(this._client); WiP
             return Task.CompletedTask;
         }
 
@@ -135,17 +134,12 @@ namespace XayahBot
                         result.ErrorReason.Contains("can only be run by the owner"))
                     {
                         IMessageChannel dmChannel = await context.User.CreateDMChannelAsync();
-                        if (dmChannel != null)
-                        {
-                            dmChannel.SendMessageAsync($"This did not work! Reason: `{result.ErrorReason}`");
-                        }
+                        dmChannel?.SendMessageAsync($"This did not work! Reason: `{result.ErrorReason}`");
                     }
                     else if(result.Error != CommandError.UnknownCommand)
                     {
                         Logger.Log(LogSeverity.Debug, nameof(Program), $"Command failed: {result.ErrorReason}");
                     }
-                   // Mostly for debugging
-                   //await context.Channel.SendMessageAsync(result.ErrorReason);
                 }
             }
         }
