@@ -84,7 +84,7 @@ namespace XayahBot.Command
             }
             if (PermissionService.IsAdmin(this.Context) && ownerCmdList.Count > 0)
             {
-                message += $"```{Environment.NewLine}__Admin-Commands__```";
+                message += $"```{Environment.NewLine}__Owner-Commands__```";
                 message += this.GetCommandBlockString(ownerCmdList);
             }
             message += $"```{Environment.NewLine}{string.Format(_finishHelp, Property.Author)}";

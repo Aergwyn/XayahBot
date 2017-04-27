@@ -43,10 +43,6 @@ namespace XayahBot
         private async Task StartAsync()
         {
             this._client.Log += Logger.Log;
-            this._client.Ready += this.HandleReady;
-            this._client.ChannelUpdated += this.HandleChannelUpdated;
-            this._client.ChannelDestroyed += this.HandleChannelDestroyed;
-            this._client.LeftGuild += this.HandleLeftGuild;
 
             await InitCommandsAsync();
 
@@ -78,7 +74,11 @@ namespace XayahBot
         private async Task InitCommandsAsync()
         {
             // EventHandler
-            this._client.MessageReceived += this.HandleCommand;
+            this._client.Ready += this.HandleReady;
+            this._client.ChannelUpdated += this.HandleChannelUpdated;
+            this._client.ChannelDestroyed += this.HandleChannelDestroyed;
+            this._client.LeftGuild += this.HandleLeftGuild;
+            this._client.MessageReceived += this.HandleMessageReceived;
             // Map
             this._dependencyMap.Add(this._client);
             // Command
@@ -120,7 +120,7 @@ namespace XayahBot
             return Task.CompletedTask;
         }
 
-        private async Task HandleCommand(SocketMessage arg)
+        private async Task HandleMessageReceived(SocketMessage arg)
         {
             int pos = 0;
             if (arg is SocketUserMessage message && (message.HasCharPrefix(char.Parse(Property.CmdPrefix.Value), ref pos) || message.HasMentionPrefix(message.Discord.CurrentUser, ref pos)))
@@ -130,8 +130,9 @@ namespace XayahBot
                 if (!result.IsSuccess)
                 {
                     if (result.ErrorReason.Contains("Invalid context for command") ||
-                        result.ErrorReason.Contains("permission (for this bot) to execute") ||
-                        result.ErrorReason.Contains("on the ignore list for this bot"))
+                        result.ErrorReason.Contains("have the required permission") ||
+                        result.ErrorReason.Contains("on the ignore list for this bot") ||
+                        result.ErrorReason.Contains("can only be run by the owner"))
                     {
                         IMessageChannel dmChannel = await context.User.CreateDMChannelAsync();
                         if (dmChannel != null)
