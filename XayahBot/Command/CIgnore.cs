@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using XayahBot.Command.Attribute;
 using XayahBot.Database.Service;
 using XayahBot.Utility;
+using XayahBot.Service;
 
 namespace XayahBot.Command
 {
@@ -41,7 +42,7 @@ namespace XayahBot.Command
             Logger.Log(LogSeverity.Info, nameof(CIgnore), string.Format(this._logRequest, this.Context.User));
             foreach (ulong userId in this.Context.Message.MentionedUserIds.Distinct())
             {
-                if (!userId.Equals(this.Context.Client.CurrentUser.Id))
+                if (!userId.Equals(this.Context.Client.CurrentUser.Id) && !PermissionService.IsAdmin(this.Context))
                 {
                     IUser user = await this.Context.Guild.GetUserAsync(userId);
                     message += await AddIgnore(user.Id, user.ToString()) + Environment.NewLine;
@@ -52,9 +53,9 @@ namespace XayahBot.Command
                 IChannel channel = await this.Context.Guild.GetChannelAsync(channelId);
                 message += await AddIgnore(channel.Id, channel.Name, true) + Environment.NewLine;
             }
-            await ReplyAsync(message);
             if (!string.IsNullOrWhiteSpace(message))
             {
+                await ReplyAsync(message);
                 ReplyAsync(RNG.FromList(this._ignoredReactionList));
             }
         }
