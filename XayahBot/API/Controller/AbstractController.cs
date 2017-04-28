@@ -53,7 +53,7 @@ namespace XayahBot.API.Controller
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     // Request json
-                    Logger.Log(LogSeverity.Debug, nameof(AbstractController<T>), $"Requesting data from \"{client.BaseAddress + dataString}\".");
+                    Logger.Debug($"Requesting data from \"{client.BaseAddress + dataString}\".");
                     HttpResponseMessage response = await client.GetAsync(dataString + GetApiKeyAsync());
                     response.EnsureSuccessStatusCode();
                     // Set response and deserialize json to generic type T
@@ -62,7 +62,7 @@ namespace XayahBot.API.Controller
                 }
                 catch (Exception ex)
                 {
-                    await Logger.Log(new LogMessage(LogSeverity.Warning, nameof(AbstractController<T>), ex.Message, ex));
+                    await Logger.Warning(ex.Message, ex);
                     resultObject = default(T);
                 }
                 return resultObject;

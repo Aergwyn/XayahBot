@@ -33,7 +33,7 @@ namespace XayahBot.Command
         [Summary("Updates the current game.")]
         public async Task Game([Remainder] string text = "")
         {
-            Logger.Log(LogSeverity.Debug, nameof(CProperty), string.Format(this._logRequest, this.Context.User));
+            Logger.Debug(string.Format(this._logRequest, this.Context.User));
             IMessageChannel channel = null;
             if (this.Context.IsPrivate)
             {
@@ -45,13 +45,13 @@ namespace XayahBot.Command
             }
             if (channel == null)
             {
-                Logger.Log(LogSeverity.Error, nameof(CProperty), string.Format(this._logNoReplyChannel, this.Context.User));
+                Logger.Error(string.Format(this._logNoReplyChannel, this.Context.User));
                 return;
             }
             string game = string.IsNullOrWhiteSpace(text) ? null : text.Trim();
             Property.GameActive.Value = game;
             this.Client.SetGameAsync(game);
-            Logger.Log(LogSeverity.Debug, nameof(CProperty), string.Format(this._logChanged, game));
+            Logger.Debug(string.Format(this._logChanged, game));
         }
     }
 }

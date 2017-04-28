@@ -66,7 +66,7 @@ namespace XayahBot
             }
             else
             {
-                Logger.Log(new LogMessage(LogSeverity.Error, nameof(Program), "No token supplied."));
+                Logger.Error("No token supplied.");
             }
             await Task.Delay(2500); // Wait a bit
         }
@@ -138,7 +138,7 @@ namespace XayahBot
                     }
                     else if(result.Error != CommandError.UnknownCommand)
                     {
-                        Logger.Log(LogSeverity.Debug, nameof(Program), $"Command failed: {result.ErrorReason}");
+                        Logger.Debug($"Command failed: {result.ErrorReason}");
                     }
                 }
             }

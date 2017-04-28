@@ -39,7 +39,7 @@ namespace XayahBot.Command
         public async Task Channel([Remainder] string text)
         {
             string message = string.Empty;
-            Logger.Log(LogSeverity.Info, nameof(CUnignore), string.Format(this._logRequest, this.Context.User));
+            Logger.Info(string.Format(this._logRequest, this.Context.User));
             foreach (ulong userId in this.Context.Message.MentionedUserIds.Distinct())
             {
                 if (!userId.Equals(this.Context.Client.CurrentUser.Id) && !PermissionService.IsAdmin(this.Context))
@@ -69,7 +69,7 @@ namespace XayahBot.Command
             {
                 case 0:
                     message = string.Format(this._unignoreSuccess, subjectName);
-                    Logger.Log(LogSeverity.Warning, nameof(CUnignore), string.Format(this._logUnignoreSuccess, subjectName));
+                    Logger.Warning(string.Format(this._logUnignoreSuccess, subjectName));
                     break;
                 case 1:
                     message = string.Format(this._unignoreFailed, subjectName);

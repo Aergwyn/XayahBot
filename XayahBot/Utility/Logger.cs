@@ -6,14 +6,29 @@ namespace XayahBot.Utility
 {
     public static class Logger
     {
-        public static Task Log(string source, string message)
+        public static Task Debug(object message, Exception exception = null)
         {
-            return Log(new LogMessage(LogSeverity.Info, source, message));
+            return Log(LogSeverity.Debug, message?.ToString(), exception);
         }
 
-        public static Task Log(LogSeverity level, string source, string message)
+        public static Task Info(object message, Exception exception = null)
         {
-            return Log(new LogMessage(level, source, message));
+            return Log(LogSeverity.Info, message?.ToString(), exception);
+        }
+
+        public static Task Warning(object message, Exception exception = null)
+        {
+            return Log(LogSeverity.Warning, message?.ToString(), exception);
+        }
+
+        public static Task Error(object message, Exception exception = null)
+        {
+            return Log(LogSeverity.Warning, message?.ToString(), exception);
+        }
+
+        public static Task Log(LogSeverity severity, string message, Exception exception = null)
+        {
+            return Log(new LogMessage(severity, nameof(Logger), message, exception));
         }
 
         public static Task Log(LogMessage message)
@@ -36,10 +51,10 @@ namespace XayahBot.Utility
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     break;
             }
-            Console.WriteLine($"{GetTimeString()} {ToSize(message.Severity, 4)} {ToSize(message.Source, 10)}: {message.Message}");
+            Console.WriteLine($"{GetTimeString()} {PadText(message.Severity, 4)}: {message.Message}");
             if (message.Exception != null)
             {
-                Console.WriteLine($"{GetTimeString()} {ToSize(message.Severity, 4)} {ToSize(message.Source, 10)}: {message.Exception}");
+                Console.WriteLine($"{GetTimeString()} {PadText(message.Severity, 4)}: {message.Exception}");
             }
             Console.ForegroundColor = color;
             return Task.CompletedTask;
@@ -50,25 +65,26 @@ namespace XayahBot.Utility
         private static string GetTimeString()
         {
             DateTime stamp = DateTime.Now;
-            return $"{ToSize(stamp.Hour, 2, '0', true)}:{ToSize(stamp.Minute, 2, '0', true)}:{ToSize(stamp.Second, 2, '0', true)}.{ToSize(stamp.Millisecond, 3, '0', true)}";
+            return $"{PadNumber(stamp.Day, 2)}.{PadNumber(stamp.Month, 2)}. " +
+                $"{PadNumber(stamp.Hour, 2)}:{PadNumber(stamp.Minute, 2)}:{PadNumber(stamp.Second, 2)}.{PadNumber(stamp.Millisecond, 3)}";
         }
 
-        private static string ToSize(object value, int size)
+        private static string PadText(object text, int size)
         {
-            return ToSize(value, size, ' ', false);
+            string result = text?.ToString() ?? string.Empty;
+            result = result.PadRight(size);
+            return CutDown(result, size);
         }
 
-        private static string ToSize(object value, int size, char padChar, bool padLeft)
+        private static string PadNumber(object number, int size)
         {
-            string text = value != null ? value.ToString() : string.Empty;
-            if (padLeft)
-            {
-                text = text.PadLeft(size, padChar);
-            }
-            else
-            {
-                text = text.PadRight(size, padChar);
-            }
+            string result = number?.ToString() ?? string.Empty;
+            result = result.PadLeft(size, '0');
+            return CutDown(result, size);
+        }
+
+        private static string CutDown(string text, int size)
+        {
             if (text.Length > size)
             {
                 text = text.Substring(0, size);

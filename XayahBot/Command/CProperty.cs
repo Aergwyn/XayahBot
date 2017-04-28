@@ -48,14 +48,14 @@ namespace XayahBot.Command
         public Task Property(string name, [Remainder]string value = "")
         {
             string message = string.Empty;
-            Logger.Log(LogSeverity.Warning, nameof(CProperty), string.Format(this._logRequest, this.Context.User));
+            Logger.Warning(string.Format(this._logRequest, this.Context.User));
             Property property = Utility.Property.GetByName(name);
             if (property != null)
             {
                 string oldValue = property.Value;
                 property.Value = value.Trim();
                 message = string.Format(this._changed, property.Name, oldValue, property.Value);
-                Logger.Log(LogSeverity.Warning, nameof(CProperty), string.Format(this._logChanged, property.Name, property.Value));
+                Logger.Warning(string.Format(this._logChanged, property.Name, property.Value));
             }
             else
             {

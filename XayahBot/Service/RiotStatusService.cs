@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using XayahBot.API.Controller;
 using XayahBot.API.Model;
-using XayahBot.Utility;
+using XayahBot.API;
 
 namespace XayahBot.Service
 {

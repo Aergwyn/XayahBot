@@ -30,7 +30,7 @@ namespace XayahBot.Command
             }
             if (channel == null)
             {
-                Logger.Log(LogSeverity.Error, nameof(CData), string.Format(this._logNoReplyChannel, this.Context.User));
+                Logger.Error(string.Format(this._logNoReplyChannel, this.Context.User));
                 return;
             }
             InfoService.GetChampionData(channel, name);

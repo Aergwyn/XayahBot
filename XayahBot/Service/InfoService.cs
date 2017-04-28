@@ -81,7 +81,7 @@ namespace XayahBot.Service
                         message += "```";
 
                         channel.SendMessageAsync(message);
-                        Logger.Log(LogSeverity.Debug, nameof(InfoService), $"Posting champion data. Message length: {message.Length}");
+                        Logger.Debug($"Posting champion data. Message length: {message.Length}");
                     }
                 }
                 else

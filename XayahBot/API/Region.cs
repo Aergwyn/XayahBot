@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace XayahBot.Utility
+namespace XayahBot.API
 {
     public class Region
     {
