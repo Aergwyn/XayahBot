@@ -1,8 +1,6 @@
 ﻿#pragma warning disable 4014
 
 using System;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
@@ -15,9 +13,11 @@ namespace XayahBot
 {
     public class Program
     {
-        private readonly DiscordSocketClient _client;
-        private readonly CommandService _commandService;
-        private readonly IDependencyMap _dependencyMap = new DependencyMap();
+        private DiscordSocketClient _client;
+        private CommandService _commandService;
+        private IDependencyMap _dependencyMap = new DependencyMap();
+
+        private FileReader _fileReader = new FileReader();
 
         //
 
@@ -46,7 +46,7 @@ namespace XayahBot
 
             await InitializeAsync();
 
-            string token = File.ReadLines(Property.FilePath.Value + Property.FileToken.Value).ElementAt(0); // I'm not gonna show it
+            string token = this._fileReader.ReadFirstLine(Property.FilePath.Value + Property.FileToken.Value);
             if (!string.IsNullOrWhiteSpace(token))
             {
                 await this._client.LoginAsync(TokenType.Bot, token);
