@@ -67,11 +67,11 @@ namespace XayahBot.API
         private async Task<T> GetFromApiAsync<T>(ApiRequest request)
         {
             T result = default(T);
-            using (HttpClient client = this.SetupClient())
+            using (HttpClient client = this.SetupHttpClient())
             {
                 try
                 {
-                    HttpResponseMessage response = await client.GetAsync(this.GetUrl(request));
+                    HttpResponseMessage response = await client.GetAsync(this.BuildUrl(request));
                     response.EnsureSuccessStatusCode();
                     string responseString = await response.Content.ReadAsStringAsync() ?? string.Empty;
                     result = JsonConvert.DeserializeObject<T>(responseString);
@@ -84,7 +84,7 @@ namespace XayahBot.API
             return result;
         }
 
-        private HttpClient SetupClient()
+        private HttpClient SetupHttpClient()
         {
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Clear();
@@ -92,7 +92,7 @@ namespace XayahBot.API
             return client;
         }
 
-        private string GetUrl(ApiRequest request)
+        private string BuildUrl(ApiRequest request)
         {
             string url = $"{this.GetBaseUrl()}/{request.Resource}?{string.Join("&", request.Arguments)}";
             if (request.Arguments.Count() > 0)
