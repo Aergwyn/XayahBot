@@ -49,7 +49,7 @@ namespace XayahBot.Command
         {
             string message = string.Empty;
             Logger.Warning(string.Format(this._logRequest, this.Context.User));
-            Property property = Utility.Property.GetByName(name);
+            Property property = Utility.Property.GetUpdatableByName(name);
             if (property != null)
             {
                 string oldValue = property.Value;

@@ -50,11 +50,11 @@ namespace XayahBot.Utility
             }
         }
 
-        public static Property GetByName(string text)
+        public static Property GetUpdatableByName(string name)
         {
-            if (!string.IsNullOrWhiteSpace(text))
+            if (!string.IsNullOrWhiteSpace(name))
             {
-                return Values.Where(x => x.Updatable).FirstOrDefault(x => x.Name.ToLower().Equals(text.ToLower()));
+                return Values.Where(x => x.Updatable).FirstOrDefault(x => x.Name.ToLower().Equals(name.ToLower()));
             }
             return null;
         }
@@ -69,18 +69,14 @@ namespace XayahBot.Utility
             {
                 if (this.NeedInit())
                 {
-                    string newValue = PropertyService.GetValue(this);
-                    if (newValue != null)
-                    {
-                        this._value = newValue;
-                    }
+                    this._value = PropertyService.GetValue(this) ?? this._value;
                     this.Loaded = true;
                 }
                 return this._value;
             }
             set
             {
-                string realValue = value != null ? value.ToString() : string.Empty;
+                string realValue = value?.ToString() ?? string.Empty;
                 if (!realValue.Equals(this._value))
                 {
                     this._value = realValue;
@@ -91,16 +87,12 @@ namespace XayahBot.Utility
                 }
             }
         }
-        public bool Updatable { get; private set; }
-        public bool Loaded { get; private set; }
+        public bool Updatable { get; set; }
+        private bool Loaded { get; set; }
 
         //
 
-        private Property(string name, string value) : this(name, value, true)
-        {
-        }
-
-        private Property(string name, string value, bool updatable)
+        private Property(string name, string value, bool updatable = true)
         {
             this.Name = name;
             this._value = value;
