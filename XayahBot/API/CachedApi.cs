@@ -27,33 +27,15 @@ namespace XayahBot.API
 
         protected async Task<T> GetAsync<T>(ApiRequest request)
         {
-            T result = await this.GetFromCache<T>(request.CacheId);
-            if (result == null)
-            {
-                result = await this.GetFromApi<T>(request);
-                _cache.Add(request.CacheId, new CacheEntry(result));
-            }
-            return result;
-        }
-
-        //
-
-        private async Task<T> GetFromCache<T>(string cacheId)
-        {
             T result = default(T);
             await _lock.WaitAsync();
             try
             {
-                if (_cache.TryGetValue(cacheId, out CacheEntry entry))
+                result = this.GetFromCache<T>(request.CacheId);
+                if (result == null)
                 {
-                    if (entry.IsExpired())
-                    {
-                        _cache.Remove(cacheId);
-                    }
-                    else
-                    {
-                        result = (T)entry.Data;
-                    }
+                    result = await this.GetFromApiAsync<T>(request);
+                    _cache.Add(request.CacheId, new CacheEntry(result));
                 }
             }
             finally
@@ -63,7 +45,26 @@ namespace XayahBot.API
             return result;
         }
 
-        private async Task<T> GetFromApi<T>(ApiRequest request)
+        //
+
+        private T GetFromCache<T>(string cacheId)
+        {
+            T result = default(T);
+            if (_cache.TryGetValue(cacheId, out CacheEntry entry))
+            {
+                if (entry.IsExpired())
+                {
+                    _cache.Remove(cacheId);
+                }
+                else
+                {
+                    result = (T)entry.Data;
+                }
+            }
+            return result;
+        }
+
+        private async Task<T> GetFromApiAsync<T>(ApiRequest request)
         {
             T result = default(T);
             using (HttpClient client = this.SetupClient())
