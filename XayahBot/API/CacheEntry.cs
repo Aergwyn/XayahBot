@@ -14,6 +14,8 @@ namespace XayahBot.API
             this.ExpirationTime = DateTime.UtcNow.AddHours(int.Parse(Property.DataLongevity.Value));
         }
 
+        //
+
         public bool IsExpired()
         {
             if (DateTime.UtcNow > this.ExpirationTime)

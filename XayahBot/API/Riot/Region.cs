@@ -7,9 +7,7 @@ namespace XayahBot.API
         public static readonly Region EUW = new Region("EUW", "euw1");
         public static readonly Region NA = new Region("NA", "na1");
 
-        //
-
-        public IEnumerable<Region> Values
+        public static IEnumerable<Region> Values
         {
             get
             {
@@ -22,8 +20,6 @@ namespace XayahBot.API
 
         public string Name { get; private set; }
         public string Platform { get; private set; }
-
-        //
 
         private Region(string name, string platform)
         {
