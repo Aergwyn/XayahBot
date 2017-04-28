@@ -5,13 +5,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Discord;
 using Discord.Commands;
 using Newtonsoft.Json.Linq;
-using XayahBot.API.Model;
 using XayahBot.Utility;
 using XayahBot.Database.Service;
 using System.Globalization;
+using XayahBot.API.Riot.Model;
+using XayahBot.API.Riot;
+using XayahBot.API;
 
 namespace XayahBot.Service
 {
@@ -189,9 +190,9 @@ namespace XayahBot.Service
         private static async Task<QuizEntry> AskChampionAsync()
         {
             QuizEntry entry = null;
-            ChampionListDto championList = await RiotDataService.GetChampionListAsync();
+            ChampionListDto championList = await new RiotStaticDataApi(Region.EUW).GetChampionsAsync();
             int id = championList.Data.ElementAt(RNG.Next(championList.Data.Count) - 1).Value.Id; // Get random champion id from list
-            ChampionDto champion = await RiotDataService.GetChampionDetailsAsync(id); // Get/Update data of champion
+            ChampionDto champion = await new RiotStaticDataApi(Region.EUW).GetChampionAsync(id); // Get/Update data of champion
             if (champion != null)
             {
                 switch (RNG.Next(4))

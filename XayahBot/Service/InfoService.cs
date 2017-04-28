@@ -6,9 +6,10 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
-using XayahBot.API.Model;
+using XayahBot.API;
+using XayahBot.API.Riot;
+using XayahBot.API.Riot.Model;
 using XayahBot.Utility;
-using System.Globalization;
 
 namespace XayahBot.Service
 {
@@ -25,8 +26,7 @@ namespace XayahBot.Service
             if (!string.IsNullOrWhiteSpace(name))
             {
                 name = name.Trim();
-                ChampionListDto championList = await RiotDataService.GetChampionListAsync();
-
+                ChampionListDto championList = await new RiotStaticDataApi(Region.EUW).GetChampionsAsync();
                 List<ChampionDto> matches = championList.Data.Values.Where(x => x.Name.ToLower().Contains(name.ToLower()) || FilterName(x.Name).ToLower().Contains(name.ToLower())).ToList();
                 matches.Sort((a, b) => a.Name.CompareTo(b.Name));
                 if (matches.Count > 0)
@@ -43,7 +43,7 @@ namespace XayahBot.Service
                     }
                     else
                     {
-                        ChampionDto champion = await RiotDataService.GetChampionDetailsAsync(matches.ElementAt(0).Id);
+                        ChampionDto champion = await new RiotStaticDataApi(Region.EUW).GetChampionAsync(matches.ElementAt(0).Id);
                         champion.Tags.Sort();
                         List<SkinDto> skins = champion.Skins.Where(x => x.Num > 0).ToList();
                         skins.Sort((a, b) => a.Num.CompareTo(b.Num));

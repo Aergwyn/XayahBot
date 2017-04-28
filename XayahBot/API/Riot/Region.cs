@@ -21,31 +21,21 @@ namespace XayahBot.API
         //
 
         public string Name { get; private set; }
-        public string ApiName { get; private set; }
+        public string Platform { get; private set; }
 
         //
 
-        private Region(string name, string apiName)
+        private Region(string name, string platform)
         {
             this.Name = name;
-            this.ApiName = apiName;
+            this.Platform = platform;
         }
 
         //
 
-        #region Overrides
-
         public override bool Equals(object obj)
         {
-            if (obj != null)
-            {
-                string comp = obj.ToString();
-                if (this.ToString().Equals(comp))
-                {
-                    return true;
-                }
-            }
-            return false;
+            return this.ToString().Equals(obj?.ToString());
         }
 
         public override int GetHashCode()
@@ -57,7 +47,5 @@ namespace XayahBot.API
         {
             return this.Name;
         }
-
-        #endregion
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace XayahBot.API.Model
+namespace XayahBot.API.Riot.Model
 {
     public class SpellVarsDto
     {

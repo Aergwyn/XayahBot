@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace XayahBot.API.Model
+namespace XayahBot.API.Riot.Model
 {
     public class StatsDto
     {

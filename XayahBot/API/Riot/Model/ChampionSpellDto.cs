@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 
-namespace XayahBot.API.Model
+namespace XayahBot.API.Riot.Model
 {
     public class ChampionSpellDto
     {

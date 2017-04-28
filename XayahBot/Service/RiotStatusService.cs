@@ -2,9 +2,8 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using XayahBot.API.Controller;
-using XayahBot.API.Model;
 using XayahBot.API;
+using XayahBot.API.Riot.Model;
 
 namespace XayahBot.Service
 {
@@ -53,16 +52,18 @@ namespace XayahBot.Service
             {
                 this._running = true;
                 bool _checked = false;
+
+                RiotStatusApi statusEuw = new RiotStatusApi(Region.EUW);
+                RiotStatusApi statusNa = new RiotStatusApi(Region.NA);
+
                 while (this._running)
                 {
-                    // Interval in minutes
                     if (DateTime.UtcNow.Minute % 5 == 0)
                     {
                         if (!_checked)
                         {
-                            LolStatusV3Controller controller = new LolStatusV3Controller();
-                            AnalyzeData(await controller.Get(Region.EUW));
-                            AnalyzeData(await controller.Get(Region.NA));
+                            AnalyzeData(await statusEuw.GetStatusAsync());
+                            AnalyzeData(await statusNa.GetStatusAsync());
                             _checked = true;
                         }
                     }
@@ -72,7 +73,7 @@ namespace XayahBot.Service
                     }
                     if (this._running)
                     {
-                        await Task.Delay(20000); // Cycle every 20 seconds
+                        await Task.Delay(20000);
                     }
                 }
             }
@@ -87,7 +88,7 @@ namespace XayahBot.Service
                 message += $"__Status {status.Name}__{Environment.NewLine}";
                 bool post = false;
                 string subMsg = string.Empty;
-                foreach (API.Model.Service srvc in status.Services)
+                foreach (API.Riot.Model.Service srvc in status.Services)
                 {
                     message += $"----{srvc.Name} | {srvc.Status}{Environment.NewLine}";
                     foreach (Incident inc in srvc.Incidents.Where(x => x.Updates.Count > 0))
