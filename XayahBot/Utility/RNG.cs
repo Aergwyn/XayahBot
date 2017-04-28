@@ -10,20 +10,15 @@ namespace XayahBot.Utility
 
         //
 
-        public static int Next()
-        {
-            return _numberGen.Next(1, 101);
-        } // Returns 1 to 100
-
-        public static int Next(int max)
+        public static int Next(int max = 100)
         {
             return _numberGen.Next(1, max + 1);
-        } // Returns 1 to max
+        }
 
         public static int Next(int min, int max)
         {
             return _numberGen.Next(min, max + 1);
-        } // Returns min to max
+        }
 
         //
 

@@ -113,8 +113,6 @@ namespace XayahBot.Utility
 
         //
 
-        #region Overrides
-
         public override bool Equals(object obj)
         {
             if (obj != null)
@@ -137,7 +135,5 @@ namespace XayahBot.Utility
         {
             return this.Value;
         }
-
-        #endregion
     }
 }
