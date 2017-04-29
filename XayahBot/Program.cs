@@ -45,7 +45,7 @@ namespace XayahBot
         {
             this._client.Log += Logger.Log;
 
-            await InitializeAsync();
+            await this.InitializeAsync();
 
             string token = this._fileReader.ReadFirstLine(Property.FilePath.Value + Property.FileToken.Value);
             if (!string.IsNullOrWhiteSpace(token))
@@ -132,20 +132,35 @@ namespace XayahBot
                 IResult result = await this._commandService.ExecuteAsync(context, pos, this._dependencyMap);
                 if (!result.IsSuccess)
                 {
-                    if (result.ErrorReason.Contains("Invalid context for command") ||
-                        result.ErrorReason.Contains("have the required permission") ||
-                        result.ErrorReason.Contains("on the ignore list for this bot") ||
-                        result.ErrorReason.Contains("can only be run by the owner"))
+                    if (this.IsUserError(result.Error))
                     {
                         IMessageChannel dmChannel = await context.User.CreateDMChannelAsync();
                         dmChannel?.SendMessageAsync($"This did not work! Reason: `{result.ErrorReason}`");
                     }
-                    else if(result.Error != CommandError.UnknownCommand)
+                    else if(this.IsInterestingError(result.Error))
                     {
                         Logger.Debug($"Command failed: {result.ErrorReason}");
                     }
                 }
             }
+        }
+
+        private bool IsUserError(CommandError? error)
+        {
+            if (error == CommandError.UnmetPrecondition)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool IsInterestingError(CommandError? error)
+        {
+            if (error == CommandError.Exception || error == CommandError.ObjectNotFound || error  == CommandError.ParseFailed)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

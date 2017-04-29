@@ -12,7 +12,7 @@ namespace XayahBot.Command.Attribute
         {
             if (map.Get<IgnoreService>().IsIgnored(context.Guild.Id, context.Channel.Id))
             {
-                return PreconditionResult.FromError("This channel is on the ignore list for this bot and can't accept some commands.");
+                return PreconditionResult.FromError("This channel is on the ignore list for this bot and can't accept some commands");
             }
             else
             {

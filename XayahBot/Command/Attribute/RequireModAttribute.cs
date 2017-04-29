@@ -16,7 +16,7 @@ namespace XayahBot.Command.Attribute
             }
             else
             {
-                return PreconditionResult.FromError("You don't have the required permission for this command.");
+                return PreconditionResult.FromError("You don't have the required permission for this command");
             }
         }
     }
