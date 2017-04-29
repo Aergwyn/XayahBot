@@ -12,7 +12,7 @@ using XayahBot.Utility;
 using XayahBot.Service;
 using XayahBot.Error;
 
-namespace XayahBot.Command
+namespace XayahBot.Command.Ignore
 {
     public class CUnignore : ModuleBase
     {
@@ -52,7 +52,7 @@ namespace XayahBot.Command
             Logger.Info(string.Format(this._logRequest, this.Context.User));
             foreach (ulong userId in this.Context.Message.MentionedUserIds.Distinct())
             {
-                if (!userId.Equals(this.Context.Client.CurrentUser.Id) && !PermissionService.IsAdmin(this.Context))
+                if (!userId.Equals(this.Context.Client.CurrentUser.Id) && !Permission.IsAdmin(this.Context))
                 {
                     IUser user = await this.Context.Guild.GetUserAsync(userId);
                     message += await RemoveIgnore(user.Id, user.ToString()) + Environment.NewLine;

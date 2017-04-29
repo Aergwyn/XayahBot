@@ -1,4 +1,4 @@
-﻿namespace XayahBot.Utility
+﻿namespace XayahBot.Command.Help
 {
     public class HelpLine
     {

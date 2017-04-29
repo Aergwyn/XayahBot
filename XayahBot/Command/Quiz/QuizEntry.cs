@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace XayahBot.Utility
+namespace XayahBot.Command.Quiz
 {
     public class QuizEntry
     {

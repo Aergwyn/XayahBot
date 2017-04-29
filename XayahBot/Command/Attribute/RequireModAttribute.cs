@@ -10,7 +10,7 @@ namespace XayahBot.Command.Attribute
     {
         public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IDependencyMap map)
         {
-            if (PermissionService.IsAdminOrMod(context))
+            if (Permission.IsAdminOrMod(context))
             {
                 return PreconditionResult.FromSuccess();
             }

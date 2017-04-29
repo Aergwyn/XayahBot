@@ -3,10 +3,9 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using XayahBot.Service;
 using XayahBot.Utility;
 
-namespace XayahBot.Command
+namespace XayahBot.Command.Data
 {
     [Group("data")]
     public class CData : ModuleBase

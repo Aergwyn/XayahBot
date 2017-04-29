@@ -14,7 +14,7 @@ using XayahBot.API.Riot.Model;
 using XayahBot.API.Riot;
 using XayahBot.API;
 
-namespace XayahBot.Service
+namespace XayahBot.Command.Quiz
 {
     public static class QuizService
     {

@@ -7,7 +7,7 @@ using XayahBot.Command.Attribute;
 using XayahBot.Database.Model;
 using XayahBot.Database.Service;
 
-namespace XayahBot.Command
+namespace XayahBot.Command.Ignore
 {
     [Group("list")]
     public class CList : ModuleBase

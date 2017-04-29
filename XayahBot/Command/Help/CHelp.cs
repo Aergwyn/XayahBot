@@ -9,9 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using XayahBot.Command.Attribute;
 using XayahBot.Service;
-using XayahBot.Database.Service;
 
-namespace XayahBot.Command
+namespace XayahBot.Command.Help
 {
     public class CHelp : ModuleBase
     {
@@ -74,12 +73,12 @@ namespace XayahBot.Command
             }
             message = "__**Command List**__```";
             message += this.GetCommandBlockString(normalCmdList);
-            if (PermissionService.IsAdminOrMod(this.Context) && modCmdList.Count > 0)
+            if (Permission.IsAdminOrMod(this.Context) && modCmdList.Count > 0)
             {
                 message += $"```{Environment.NewLine}__Mod-Commands__```";
                 message += this.GetCommandBlockString(modCmdList);
             }
-            if (PermissionService.IsAdmin(this.Context) && ownerCmdList.Count > 0)
+            if (Permission.IsAdmin(this.Context) && ownerCmdList.Count > 0)
             {
                 message += $"```{Environment.NewLine}__Owner-Commands__```";
                 message += this.GetCommandBlockString(ownerCmdList);

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using XayahBot.Command.Attribute;
 using XayahBot.Service;
 
-namespace XayahBot.Command
+namespace XayahBot.Command.Quiz
 {
     public class CAnswer : ModuleBase
     {

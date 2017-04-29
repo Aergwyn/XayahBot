@@ -11,7 +11,7 @@ using System;
 using XayahBot.Utility;
 using XayahBot.Command.Attribute;
 
-namespace XayahBot.Command
+namespace XayahBot.Command.Quiz
 {
     [Group("quiz")]
     public class CQuiz : ModuleBase

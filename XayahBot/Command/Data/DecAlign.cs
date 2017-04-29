@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 
-namespace XayahBot.Utility
+namespace XayahBot.Command.Data
 {
     public class DecAlign
     {

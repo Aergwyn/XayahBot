@@ -11,7 +11,7 @@ using XayahBot.API.Riot;
 using XayahBot.API.Riot.Model;
 using XayahBot.Utility;
 
-namespace XayahBot.Service
+namespace XayahBot.Command.Data
 {
     public static class InfoService
     {
