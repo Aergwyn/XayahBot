@@ -81,9 +81,6 @@ namespace XayahBot
             this._client.MessageReceived += this.HandleMessageReceived;
 
             this._dependencyMap.Add(this._client);
-            this._dependencyMap.Add(this._ignoreService);
-            this._dependencyMap.Add(new LeaderboardService());
-            this._dependencyMap.Add(new PropertyService());
 
             await this._commandService.AddModulesAsync(Assembly.GetEntryAssembly());
         }
@@ -92,15 +89,8 @@ namespace XayahBot
 
         private Task HandleReady()
         {
-            string game = Property.GameActive.Value;
-            if (!string.IsNullOrWhiteSpace(game))
-            {
-                this._client.SetGameAsync(game);
-            }
-            else
-            {
-                this._client.SetGameAsync(null);
-            }
+            string game = string.IsNullOrWhiteSpace(Property.GameActive.Value) ? null : Property.GameActive.Value;
+            this._client.SetGameAsync(game);
             //RiotStatusService.StartAsync(this._client); WiP
             return Task.CompletedTask;
         }

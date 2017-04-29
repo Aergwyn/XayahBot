@@ -16,14 +16,7 @@ namespace XayahBot.Command.Ignore
 
         //
 
-        private readonly IgnoreService _ignoreService;
-
-        public CList(IgnoreService ignoreService)
-        {
-            this._ignoreService = ignoreService;
-        }
-
-        //
+        private readonly IgnoreService _ignoreService = new IgnoreService();
 
         [Command("ignore")]
         [RequireMod]

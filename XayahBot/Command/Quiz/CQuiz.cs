@@ -33,14 +33,8 @@ namespace XayahBot.Command.Quiz
 
         private static DateTime _lastLeaderboardPost;
 
-        private readonly LeaderboardService _leaderboardService;
-
-        public CQuiz(LeaderboardService leaderboardService)
-        {
-            this._leaderboardService = leaderboardService;
-        }
-
-        //
+        private readonly RNG _random = new RNG();
+        private readonly LeaderboardService _leaderboardService = new LeaderboardService();
 
         [Command("ask")]
         [RequireContext(ContextType.Guild)]
@@ -82,12 +76,12 @@ namespace XayahBot.Command.Quiz
                 }
                 else
                 {
-                    message = RNG.FromList(this._recentlyPosted);
+                    message = this._random.FromList(this._recentlyPosted);
                 }
             }
             else
             {
-                message = RNG.FromList(this._emptyLeaderboard);
+                message = this._random.FromList(this._emptyLeaderboard);
             }
             ReplyAsync(message);
         }

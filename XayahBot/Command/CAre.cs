@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
 using XayahBot.Utility;
@@ -49,7 +48,9 @@ namespace XayahBot.Command
         };
 
         //
-        
+
+        private readonly RNG _random = new RNG();
+
         [Command("are"), Alias("is", "am")]
         [CheckIgnoredUser]
         [CheckIgnoredChannel]
@@ -58,20 +59,38 @@ namespace XayahBot.Command
         {
             string response = string.Empty;
             text = text.Trim();
-            if (text.EndsWith("?"))
+            if (this.IsQuestion(text))
             {
-                response = RNG.FromList(this._responseList);
+                response = this._random.FromList(this._responseList);
             }
-            else if (text.EndsWith(".") || text.EndsWith("!"))
+            else if (this.IsSentence(text))
             {
-                response = RNG.FromList(this._noQuestionList);
+                response = this._random.FromList(this._noQuestionList);
             }
             else
             {
-                response = RNG.FromList(this._noSentenceList);
+                response = this._random.FromList(this._noSentenceList);
             }
             ReplyAsync(response);
             return Task.CompletedTask;
+        }
+
+        private bool IsQuestion(string text)
+        {
+            if (text.EndsWith("?"))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool IsSentence(string text)
+        {
+            if (text.EndsWith(".") || text.EndsWith("!"))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

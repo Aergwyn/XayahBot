@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using XayahBot.Command.Attribute;
 using XayahBot.Database.Service;
 using XayahBot.Utility;
-using XayahBot.Service;
 using XayahBot.Error;
 
 namespace XayahBot.Command.Ignore
@@ -33,14 +32,8 @@ namespace XayahBot.Command.Ignore
 
         //
 
-        private readonly IgnoreService _ignoreService;
-
-        public CUnignore(IgnoreService ignoreService)
-        {
-            this._ignoreService = ignoreService;
-        }
-
-        //
+        private readonly RNG _random = new RNG();
+        private readonly IgnoreService _ignoreService = new IgnoreService();
 
         [Command("unignore")]
         [RequireMod]
@@ -66,7 +59,7 @@ namespace XayahBot.Command.Ignore
             if (!string.IsNullOrWhiteSpace(message))
             {
                 await ReplyAsync(message);
-                ReplyAsync(RNG.FromList(this._unignoredReactionList));
+                ReplyAsync(this._random.FromList(this._unignoredReactionList));
             }
         }
 
