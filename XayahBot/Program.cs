@@ -13,11 +13,12 @@ namespace XayahBot
 {
     public class Program
     {
-        private DiscordSocketClient _client;
-        private CommandService _commandService;
-        private IDependencyMap _dependencyMap = new DependencyMap();
+        private readonly DiscordSocketClient _client;
+        private readonly CommandService _commandService;
+        private readonly IDependencyMap _dependencyMap = new DependencyMap();
 
         private FileReader _fileReader = new FileReader();
+        private IgnoreService _ignoreService = new IgnoreService();
 
         //
 
@@ -68,7 +69,7 @@ namespace XayahBot
             {
                 Logger.Error("No token supplied.");
             }
-            await Task.Delay(2500); // Wait a bit
+            await Task.Delay(2500);
         }
 
         private async Task InitializeAsync()
@@ -80,6 +81,9 @@ namespace XayahBot
             this._client.MessageReceived += this.HandleMessageReceived;
 
             this._dependencyMap.Add(this._client);
+            this._dependencyMap.Add(this._ignoreService);
+            this._dependencyMap.Add(new LeaderboardService());
+            this._dependencyMap.Add(new PropertyService());
 
             await this._commandService.AddModulesAsync(Assembly.GetEntryAssembly());
         }
@@ -103,19 +107,19 @@ namespace XayahBot
 
         private Task HandleChannelUpdated(SocketChannel preUpdateChannel, SocketChannel postUpdateChannel)
         {
-            IgnoreService.UpdateAsync(preUpdateChannel.Id, ((IChannel)postUpdateChannel).Name);
+            this._ignoreService.UpdateAsync(preUpdateChannel.Id, ((IChannel)postUpdateChannel).Name);
             return Task.CompletedTask;
         }
 
         private Task HandleChannelDestroyed(SocketChannel deletedChannel)
         {
-            IgnoreService.RemoveBySubjectIdAsync(deletedChannel.Id);
+            this._ignoreService.RemoveBySubjectIdAsync(deletedChannel.Id);
             return Task.CompletedTask;
         }
 
         private Task HandleLeftGuild(SocketGuild leftGuild)
         {
-            IgnoreService.RemoveByGuildAsync(leftGuild.Id);
+            this._ignoreService.RemoveByGuildAsync(leftGuild.Id);
             return Task.CompletedTask;
         }
 

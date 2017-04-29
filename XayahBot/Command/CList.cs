@@ -16,6 +16,15 @@ namespace XayahBot.Command
 
         //
 
+        private readonly IgnoreService _ignoreService;
+
+        public CList(IgnoreService ignoreService)
+        {
+            this._ignoreService = ignoreService;
+        }
+
+        //
+
         [Command("ignore")]
         [RequireMod]
         [RequireContext(ContextType.Guild)]
@@ -23,7 +32,7 @@ namespace XayahBot.Command
         public Task Ignore()
         {
             string message = string.Empty;
-            List<TIgnoreEntry> ignoreList = IgnoreService.GetIgnoreList(this.Context.Guild.Id);
+            List<TIgnoreEntry> ignoreList = this._ignoreService.GetIgnoreList(this.Context.Guild.Id);
             message = $"__Ignored user__{Environment.NewLine}```";
             message += this.ListIgnore(ignoreList.Where(x => !x.IsChannel).ToList());
             message += $"```{Environment.NewLine}__Ignored channel__{Environment.NewLine}```";
@@ -32,8 +41,6 @@ namespace XayahBot.Command
             ReplyAsync(message);
             return Task.CompletedTask;
         }
-
-        //
 
         private string ListIgnore(List<TIgnoreEntry> list)
         {

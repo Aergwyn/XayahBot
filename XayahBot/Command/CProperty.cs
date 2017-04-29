@@ -39,8 +39,6 @@ namespace XayahBot.Command
             return Task.CompletedTask;
         }
 
-        //
-
         [Command("set")]
         [RequireOwner]
         [RequireContext(ContextType.DM)]

@@ -18,11 +18,6 @@ namespace XayahBot.Service
 {
     public static class QuizService
     {
-        private static SemaphoreSlim _syncLock = new SemaphoreSlim(1, 1);
-        private static Dictionary<ulong, QuizEntry> _questionMap = new Dictionary<ulong, QuizEntry>(); // Saves questions per guild
-
-        //
-
         private static List<string> _fullAnswerList = new List<string>
         {
             "Wow. {0} was actually correct.",
@@ -68,6 +63,10 @@ namespace XayahBot.Service
         private static string _championStatsMrQ = "How much magic resist does {0} have at level {1}?";
 
         //
+
+        private static SemaphoreSlim _syncLock = new SemaphoreSlim(1, 1);
+        private static Dictionary<ulong, QuizEntry> _questionMap = new Dictionary<ulong, QuizEntry>();
+        private static LeaderboardService _leaderboardService = new LeaderboardService();
 
         public static async Task AskQuestionAsync(CommandContext context)
         {
@@ -153,7 +152,7 @@ namespace XayahBot.Service
                     if (success)
                     {
                         _questionMap.Remove(context.Guild.Id);
-                        LeaderboardService.IncrementAnswerAsync(context.Guild.Id, context.User.Id, context.User.ToString());
+                        _leaderboardService.IncrementAnswerAsync(context.Guild.Id, context.User.Id, context.User.ToString());
                     }
                     else
                     {

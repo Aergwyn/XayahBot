@@ -12,8 +12,6 @@ namespace XayahBot.Utility
         public DateTime TimeAsked { get; private set; }
         public int TimesFailed { get; set; }
 
-        //
-
         public QuizEntry(string question, params string[] answer) : this(question, 100, answer)
         {
         }

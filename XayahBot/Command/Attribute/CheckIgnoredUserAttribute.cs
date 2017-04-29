@@ -10,7 +10,7 @@ namespace XayahBot.Command.Attribute
     {
         public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IDependencyMap map)
         {
-            if (IgnoreService.IsIgnored(context.Guild.Id, context.User.Id))
+            if (map.Get<IgnoreService>().IsIgnored(context.Guild.Id, context.User.Id))
             {
                 return PreconditionResult.FromError("You are on the ignore list for this bot and can't execute this command.");
             }

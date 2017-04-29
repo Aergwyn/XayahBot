@@ -2,137 +2,112 @@
 using System.Linq;
 using System.Threading.Tasks;
 using XayahBot.Database.Model;
+using XayahBot.Error;
 
 namespace XayahBot.Database.Service
 {
-    public static class IgnoreService
+    public class IgnoreService
     {
-        public static List<TIgnoreEntry> GetIgnoreList(ulong guild)
+        public List<TIgnoreEntry> GetIgnoreList(ulong guild)
         {
-            using (GeneralContext db = new GeneralContext())
+            using (GeneralContext database = new GeneralContext())
             {
-                return db.IgnoreList.Where(x => x.Guild.Equals(guild)).ToList();
+                return database.IgnoreList.Where(x => x.Guild.Equals(guild)).ToList();
             }
         }
 
-        public static async Task<int> AddAsync(ulong guild, ulong subjectId, string subjectName, bool isChannel)
+        public async Task AddAsync(TIgnoreEntry ignoreEntry)
         {
-            using (GeneralContext db = new GeneralContext())
+            using (GeneralContext database = new GeneralContext())
             {
-                TIgnoreEntry match = db.IgnoreList.FirstOrDefault(x => x.Guild.Equals(guild) && x.SubjectId.Equals(subjectId));
+                TIgnoreEntry match = database.IgnoreList.FirstOrDefault(x => x.Guild.Equals(ignoreEntry.Guild) && x.SubjectId.Equals(ignoreEntry.SubjectId));
                 if (match == null)
                 {
-                    db.IgnoreList.Add(new TIgnoreEntry { Guild = guild, SubjectId = subjectId, SubjectName = subjectName, IsChannel = isChannel });
-                    if (await db.SaveChangesAsync() > 0)
+                    database.IgnoreList.Add(ignoreEntry);
+                    if (await database.SaveChangesAsync() <= 0)
                     {
-                        return 0; // Success
-                    }
-                    else
-                    {
-                        return 1; // Insert failed
+                        throw new NotSavedException();
                     }
                 }
             }
-            return 2; // Already existing
+            throw new AlreadyExistingException();
         }
 
-        public static async Task<int> UpdateAsync(ulong subjectId, string newSubjectName)
+        public async Task UpdateAsync(ulong subjectId, string newSubjectName)
         {
-            using (GeneralContext db = new GeneralContext())
+            using (GeneralContext database = new GeneralContext())
             {
-                TIgnoreEntry match = db.IgnoreList.FirstOrDefault(x => x.SubjectId.Equals(subjectId));
+                TIgnoreEntry match = database.IgnoreList.FirstOrDefault(x => x.SubjectId.Equals(subjectId));
                 if (match != null)
                 {
                     match.SubjectName = newSubjectName;
-                    if (await db.SaveChangesAsync() > 0)
+                    if (await database.SaveChangesAsync() <= 0)
                     {
-                        return 0; // Success
-                    }
-                    else
-                    {
-                        return 1; // Update failed
+                        throw new NotSavedException();
                     }
                 }
             }
-            return 2; // No entry found
+            throw new NotExistingException();
         }
 
-        public static async Task<int> RemoveAsync(ulong guild, ulong subjectId)
+        public async Task RemoveAsync(ulong guild, ulong subjectId)
         {
-            using (GeneralContext db = new GeneralContext())
+            using (GeneralContext database = new GeneralContext())
             {
-                TIgnoreEntry match = db.IgnoreList.FirstOrDefault(x => x.Guild.Equals(guild) && x.SubjectId.Equals(subjectId));
+                TIgnoreEntry match = database.IgnoreList.FirstOrDefault(x => x.Guild.Equals(guild) && x.SubjectId.Equals(subjectId));
                 if (match != null)
                 {
-                    db.Remove(match);
-                    if (await db.SaveChangesAsync() > 0)
+                    database.Remove(match);
+                    if (await database.SaveChangesAsync() <= 0)
                     {
-                        return 0; // Success
-                    }
-                    else
-                    {
-                        return 1; // Delete failed
+                        throw new NotSavedException();
                     }
                 }
             }
-            return 2; // No entry found
+            throw new NotExistingException();
         }
 
-        public static async Task<int> RemoveByGuildAsync(ulong guild)
+        public async Task RemoveByGuildAsync(ulong guild)
         {
-            using (GeneralContext db = new GeneralContext())
+            using (GeneralContext database = new GeneralContext())
             {
-                List<TIgnoreEntry> matches = db.IgnoreList.Where(x => x.Guild.Equals(guild)).ToList();
+                List<TIgnoreEntry> matches = database.IgnoreList.Where(x => x.Guild.Equals(guild)).ToList();
                 if (matches.Count > 0)
                 {
-                    foreach (TIgnoreEntry match in matches)
+                    database.RemoveRange(matches);
+                    if (await database.SaveChangesAsync() <= 0)
                     {
-                        db.Remove(match);
-                    }
-                    if (await db.SaveChangesAsync() > 0)
-                    {
-                        return 0; // Success
-                    }
-                    else
-                    {
-                        return 1; // Delete failed
+                        throw new NotSavedException();
                     }
                 }
             }
-            return 2; // No entry found
+            throw new NotExistingException();
         }
 
-        public static async Task<int> RemoveBySubjectIdAsync(ulong subjectId)
+        public async Task RemoveBySubjectIdAsync(ulong subjectId)
         {
-            using (GeneralContext db = new GeneralContext())
+            using (GeneralContext database = new GeneralContext())
             {
-                List<TIgnoreEntry> matches = db.IgnoreList.Where(x => x.SubjectId.Equals(subjectId)).ToList();
+                List<TIgnoreEntry> matches = database.IgnoreList.Where(x => x.SubjectId.Equals(subjectId)).ToList();
                 if (matches.Count > 0)
                 {
-                    foreach (TIgnoreEntry match in matches)
+                    database.RemoveRange(matches);
+                    if (await database.SaveChangesAsync() <= 0)
                     {
-                        db.Remove(match);
-                    }
-                    if (await db.SaveChangesAsync() > 0)
-                    {
-                        return 0; // Success
-                    }
-                    else
-                    {
-                        return 1; // Delete failed
+                        throw new NotSavedException();
                     }
                 }
             }
-            return 2; // No entry found
+            throw new NotExistingException();
         }
 
         //
 
-        public static bool IsIgnored(ulong guild, ulong subjectId)
+        public bool IsIgnored(ulong guild, ulong subjectId)
         {
-            using (GeneralContext db = new GeneralContext())
+            using (GeneralContext database = new GeneralContext())
             {
-                if (db.IgnoreList.FirstOrDefault(x => x.Guild.Equals(guild) && x.SubjectId.Equals(subjectId)) != null)
+                if (database.IgnoreList.FirstOrDefault(x => x.Guild.Equals(guild) && x.SubjectId.Equals(subjectId)) != null)
                 {
                     return true;
                 }

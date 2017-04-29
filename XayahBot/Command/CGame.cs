@@ -10,20 +10,18 @@ namespace XayahBot.Command
 {
     public class CGame : ModuleBase
     {
-        public DiscordSocketClient Client { get; set; }
-
-        //
-
-        public CGame(DiscordSocketClient client)
-        {
-            this.Client = client;
-        }
-
-        //
-
         private readonly string _logRequest = "\"{0}\" requested \"status\".";
         private readonly string _logNoReplyChannel = "Could not reply to \"{0}\" because no appropriate channel could be found!";
         private readonly string _logChanged = "Status changed to \"{0}\".";
+
+        //
+
+        private readonly DiscordSocketClient _client;
+
+        public CGame(DiscordSocketClient client)
+        {
+            this._client = client;
+        }
 
         //
 
@@ -50,7 +48,7 @@ namespace XayahBot.Command
             }
             string game = string.IsNullOrWhiteSpace(text) ? null : text.Trim();
             Property.GameActive.Value = game;
-            this.Client.SetGameAsync(game);
+            this._client.SetGameAsync(game);
             Logger.Debug(string.Format(this._logChanged, game));
         }
     }

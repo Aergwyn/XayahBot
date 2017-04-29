@@ -10,6 +10,8 @@ using XayahBot.Command.Attribute;
 using XayahBot.Database.Service;
 using XayahBot.Utility;
 using XayahBot.Service;
+using XayahBot.Database.Model;
+using XayahBot.Error;
 
 namespace XayahBot.Command
 {
@@ -29,6 +31,15 @@ namespace XayahBot.Command
             "And they won't be needing that anymore.",
             "My last nerve is long gone."
         };
+
+        //
+
+        private readonly IgnoreService _ignoreService;
+
+        public CIgnore(IgnoreService ignoreService)
+        {
+            this._ignoreService = ignoreService;
+        }
 
         //
 
@@ -60,8 +71,6 @@ namespace XayahBot.Command
             }
         }
 
-        //
-
         private async Task<string> AddIgnore(ulong subjectId, string subjectName)
         {
             return await AddIgnore(subjectId, subjectName, false);
@@ -70,18 +79,25 @@ namespace XayahBot.Command
         private async Task<string> AddIgnore(ulong subjectId, string subjectName, bool isChannel)
         {
             string message = string.Empty;
-            switch (await IgnoreService.AddAsync(this.Context.Guild.Id, subjectId, subjectName, isChannel))
+            try
             {
-                case 0:
-                    message = string.Format(this._ignoreSuccess, subjectName);
-                    Logger.Warning(string.Format(this._logIgnoreSuccess, subjectName));
-                    break;
-                case 1:
-                    message = string.Format(this._ignoreFailed, subjectName);
-                    break;
-                case 2:
-                    message = string.Format(this._ignoreExisting, subjectName);
-                    break;
+                await this._ignoreService.AddAsync(new TIgnoreEntry
+                {
+                    Guild = this.Context.Guild.Id,
+                    IsChannel = isChannel,
+                    SubjectId = subjectId,
+                    SubjectName = subjectName
+                });
+                message = string.Format(this._ignoreSuccess, subjectName);
+                Logger.Warning(string.Format(this._logIgnoreSuccess, subjectName));
+            }
+            catch (AlreadyExistingException)
+            {
+                message = string.Format(this._ignoreExisting, subjectName);
+            }
+            catch (NotSavedException)
+            {
+                message = string.Format(this._ignoreFailed, subjectName);
             }
             return message;
         }

@@ -16,10 +16,6 @@ namespace XayahBot.Command
     [Group("quiz")]
     public class CQuiz : ModuleBase
     {
-        private static DateTime _lastLeaderboardPost;
-
-        //
-
         private readonly List<string> _recentlyPosted = new List<string>
         {
             "... I just posted it. Not even a few minutes ago. Go look for it!",
@@ -32,6 +28,17 @@ namespace XayahBot.Command
             "I could show something if anyone would be able to answer the questions.",
             "The leaderboard is empty so far."
         };
+
+        //
+
+        private static DateTime _lastLeaderboardPost;
+
+        private readonly LeaderboardService _leaderboardService;
+
+        public CQuiz(LeaderboardService leaderboardService)
+        {
+            this._leaderboardService = leaderboardService;
+        }
 
         //
 
@@ -54,7 +61,7 @@ namespace XayahBot.Command
         public async Task Stats()
         {
             string message = string.Empty;
-            List<TLeaderboardEntry> leaderboard = (await LeaderboardService.GetLeaderboard(this.Context.Guild.Id)).OrderByDescending(x => x.Answers).ToList();
+            List<TLeaderboardEntry> leaderboard = (await this._leaderboardService.GetLeaderboard(this.Context.Guild.Id)).OrderByDescending(x => x.Answers).ToList();
             if (leaderboard.Count > 0)
             {
                 if (_lastLeaderboardPost.AddMinutes(int.Parse(Property.QuizLeaderboardCd.Value)) < DateTime.UtcNow)

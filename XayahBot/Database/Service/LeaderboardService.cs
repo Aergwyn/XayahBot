@@ -9,57 +9,54 @@ using XayahBot.Utility;
 
 namespace XayahBot.Database.Service
 {
-    public static class LeaderboardService
+    public class LeaderboardService
     {
-        public static async Task<List<TLeaderboardEntry>> GetLeaderboard(ulong guild)
+        public async Task<List<TLeaderboardEntry>> GetLeaderboard(ulong guild)
         {
-            await CheckForResetAsync();
-            using (GeneralContext db = new GeneralContext())
+            await this.CheckForResetAsync();
+            using (GeneralContext database = new GeneralContext())
             {
-                return db.Leaderboard.Where(x => x.Guild.Equals(guild)).ToList();
+                return database.Leaderboard.Where(x => x.Guild.Equals(guild)).ToList();
             }
         }
 
-        public static async Task IncrementAnswerAsync(ulong guild, ulong userId, string userName)
+        public async Task IncrementAnswerAsync(ulong guild, ulong userId, string userName)
         {
-            await CheckForResetAsync();
-            using (GeneralContext db = new GeneralContext())
+            await this.CheckForResetAsync();
+            using (GeneralContext database = new GeneralContext())
             {
-                TLeaderboardEntry quizStat = db.Leaderboard.FirstOrDefault(x => x.Guild.Equals(guild) && x.UserName.Equals(userName));
-                if (quizStat == null)
+                TLeaderboardEntry match = database.Leaderboard.FirstOrDefault(x => x.Guild.Equals(guild) && x.UserName.Equals(userName));
+                if (match == null)
                 {
-                    db.Leaderboard.Add(new TLeaderboardEntry { Guild = guild, UserId = userId, UserName = userName, Answers = 1 });
+                    database.Leaderboard.Add(new TLeaderboardEntry { Guild = guild, UserId = userId, UserName = userName, Answers = 1 });
                 }
                 else
                 {
-                    quizStat.Answers++;
+                    match.Answers++;
                 }
-                db.SaveChangesAsync();
+                database.SaveChangesAsync();
             }
         }
 
-        public static Task ResetAsync()
+        public Task ResetAsync()
         {
-            using (GeneralContext db = new GeneralContext())
+            using (GeneralContext database = new GeneralContext())
             {
-                foreach (TLeaderboardEntry entry in db.Leaderboard)
-                {
-                    db.Remove(entry);
-                }
-                db.SaveChangesAsync();
+                database.Leaderboard.RemoveRange(database.Leaderboard);
+                database.SaveChangesAsync();
             }
             return Task.CompletedTask;
         }
 
         //
 
-        private static async Task CheckForResetAsync()
+        private async Task CheckForResetAsync()
         {
             if (!string.IsNullOrWhiteSpace(Property.QuizLastReset.Value))
             {
                 DateTime now = DateTime.UtcNow;
-                string[] lastResetValue = Property.QuizLastReset.Value.Split('/');
-                if (new DateTime(int.Parse(lastResetValue.ElementAt(1)), int.Parse(lastResetValue.ElementAt(0)), 1, 0, 0, 0).AddMonths(1) < now)
+                string[] lastReset = Property.QuizLastReset.Value.Split('/');
+                if (new DateTime(int.Parse(lastReset.ElementAt(1)), int.Parse(lastReset.ElementAt(0)), 1, 0, 0, 0).AddMonths(1) < now)
                 {
                     await ResetAsync();
                     Property.QuizLastReset.Value = $"{now.Month}/{now.Year}";

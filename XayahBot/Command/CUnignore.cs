@@ -10,6 +10,7 @@ using XayahBot.Command.Attribute;
 using XayahBot.Database.Service;
 using XayahBot.Utility;
 using XayahBot.Service;
+using XayahBot.Error;
 
 namespace XayahBot.Command
 {
@@ -29,6 +30,15 @@ namespace XayahBot.Command
             "Don't embarass me!",
             "But is it really okay?"
         };
+
+        //
+
+        private readonly IgnoreService _ignoreService;
+
+        public CUnignore(IgnoreService ignoreService)
+        {
+            this._ignoreService = ignoreService;
+        }
 
         //
 
@@ -60,23 +70,22 @@ namespace XayahBot.Command
             }
         }
 
-        //
-
         private async Task<string> RemoveIgnore(ulong subjectId, string subjectName)
         {
             string message = string.Empty;
-            switch (await IgnoreService.RemoveAsync(this.Context.Guild.Id, subjectId))
+            try
             {
-                case 0:
-                    message = string.Format(this._unignoreSuccess, subjectName);
-                    Logger.Warning(string.Format(this._logUnignoreSuccess, subjectName));
-                    break;
-                case 1:
-                    message = string.Format(this._unignoreFailed, subjectName);
-                    break;
-                case 2:
-                    message = string.Format(this._unignoreNotExisting, subjectName);
-                    break;
+                await this._ignoreService.RemoveAsync(this.Context.Guild.Id, subjectId);
+                message = string.Format(this._unignoreSuccess, subjectName);
+                Logger.Warning(string.Format(this._logUnignoreSuccess, subjectName));
+            }
+            catch (NotExistingException)
+            {
+                message = string.Format(this._unignoreNotExisting, subjectName);
+            }
+            catch (NotSavedException)
+            {
+                message = string.Format(this._unignoreFailed, subjectName);
             }
             return message;
         }

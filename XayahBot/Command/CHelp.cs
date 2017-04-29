@@ -15,22 +15,20 @@ namespace XayahBot.Command
 {
     public class CHelp : ModuleBase
     {
-        public CommandService CommandService { get; set; }
-
-        //
-
-        public CHelp(CommandService commandService)
-        {
-            this.CommandService = commandService;
-        }
-
-        //
-
         private readonly string _logNoReplyChannel = "Could not reply to \"{0}\" because no appropriate channel could be found!";
 
         private readonly string _finishHelp = "You can also trigger commands with mentioning me instead of the prefix. " +
             "Also always remember using a space between each argument!" + Environment.NewLine +
             "If you have problems, questions and/or suggestions do not hesitate to message {0}.";
+
+        //
+
+        private readonly CommandService _commandService;
+
+        public CHelp(CommandService commandService)
+        {
+            this._commandService = commandService;
+        }
 
         //
 
@@ -58,7 +56,7 @@ namespace XayahBot.Command
             List<HelpLine> modCmdList = new List<HelpLine>();
             List<HelpLine> ownerCmdList = new List<HelpLine>();
             // Sort commands in permission groups
-            foreach (CommandInfo cmd in this.CommandService.Commands)
+            foreach (CommandInfo cmd in this._commandService.Commands)
             {
                 HelpLine line = this.GetCommandStringSimple(cmd);
                 if (cmd.Preconditions.Contains(new RequireOwnerAttribute()))
@@ -90,8 +88,6 @@ namespace XayahBot.Command
 
             channel.SendMessageAsync(message);
         }
-
-        //
 
         private HelpLine GetCommandStringSimple(CommandInfo commandInfo)
         {

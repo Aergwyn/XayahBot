@@ -7,14 +7,13 @@ namespace XayahBot.Utility
 {
     public sealed class Property
     {
-        // Static "Enums" with set values
         public static readonly Property Author = new Property("author", "Aergwyn#8786", false);
         public static readonly Property CmdPrefix = new Property("cmd_prefix", ".", false);
         public static readonly Property DbName = new Property("db_name", "xayah.db", false);
         public static readonly Property FilePath = new Property("file_path", AppContext.BaseDirectory + "/", false);
         public static readonly Property FileRiotApiKey = new Property("file_riotapikey", "riotapikey.txt", false);
         public static readonly Property FileToken = new Property("file_token", "token.txt", false);
-        // Changeable "Enums" with default values
+
         public static readonly Property DataLongevity = new Property("data_longevity", "24"); // Hours
         public static readonly Property GameActive = new Property("game_active", "with Rakan");
         public static readonly Property GameShutdown = new Property("game_shutdown", "shutting down...");
@@ -24,8 +23,6 @@ namespace XayahBot.Utility
         public static readonly Property QuizMatch = new Property("quiz_match", "70"); // Percentage
         public static readonly Property QuizMaxTries = new Property("quiz_maxtries", "10");
         public static readonly Property QuizTimeout = new Property("quiz_timeout", "10"); // Minutes
-
-        //
 
         public static IEnumerable<Property> Values
         {
@@ -61,6 +58,8 @@ namespace XayahBot.Utility
 
         //
 
+        private PropertyService _propertyService = new PropertyService();
+
         public string Name { get; private set; }
         private string _value { get; set; }
         public string Value
@@ -69,7 +68,7 @@ namespace XayahBot.Utility
             {
                 if (this.NeedInit())
                 {
-                    this._value = PropertyService.GetValue(this) ?? this._value;
+                    this._value = this._propertyService.GetValue(this) ?? this._value;
                     this.Loaded = true;
                 }
                 return this._value;
@@ -82,15 +81,13 @@ namespace XayahBot.Utility
                     this._value = realValue;
                     if (this.Updatable)
                     {
-                        PropertyService.SetValueAsync(this);
+                        this._propertyService.SetValueAsync(this);
                     }
                 }
             }
         }
         public bool Updatable { get; set; }
         private bool Loaded { get; set; }
-
-        //
 
         private Property(string name, string value, bool updatable = true)
         {
@@ -110,8 +107,6 @@ namespace XayahBot.Utility
             }
             return true;
         }
-
-        //
 
         public override bool Equals(object obj)
         {

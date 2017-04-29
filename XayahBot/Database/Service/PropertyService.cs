@@ -5,13 +5,13 @@ using XayahBot.Utility;
 
 namespace XayahBot.Database.Service
 {
-    public static class PropertyService
+    public class PropertyService
     {
-        public static string GetValue(Property property)
+        public string GetValue(Property property)
         {
-            using (GeneralContext db = new GeneralContext())
+            using (GeneralContext database = new GeneralContext())
             {
-                TProperty dbProperty = db.Properties.FirstOrDefault(x => x.Name.Equals(property.Name));
+                TProperty dbProperty = database.Properties.FirstOrDefault(x => x.Name.Equals(property.Name));
                 if (dbProperty != null)
                 {
                     return dbProperty.Value;
@@ -20,20 +20,20 @@ namespace XayahBot.Database.Service
             return null;
         }
 
-        public static Task SetValueAsync(Property property)
+        public Task SetValueAsync(Property property)
         {
-            using (GeneralContext db = new GeneralContext())
+            using (GeneralContext database = new GeneralContext())
             {
-                TProperty dbProperty = db.Properties.FirstOrDefault(x => x.Name.Equals(property.Name));
+                TProperty dbProperty = database.Properties.FirstOrDefault(x => x.Name.Equals(property.Name));
                 if (dbProperty == null)
                 {
-                    db.Properties.Add(new TProperty { Name = property.Name, Value = property.Value });
+                    database.Properties.Add(new TProperty { Name = property.Name, Value = property.Value });
                 }
                 else
                 {
                     dbProperty.Value = property.Value;
                 }
-                db.SaveChangesAsync();
+                database.SaveChangesAsync();
             }
             return Task.CompletedTask;
         }
