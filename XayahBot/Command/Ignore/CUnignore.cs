@@ -1,6 +1,4 @@
-﻿#pragma warning disable 4014
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,11 +11,8 @@ using XayahBot.Utility;
 
 namespace XayahBot.Command.Ignore
 {
-    public class CUnignore : ModuleBase
+    public class CUnignore : LoggedModuleBase
     {
-        private readonly string _logRequest = "\"{0}\" requested \"unignore\" command.";
-        private readonly string _logUnignoreSuccess = "Removed \"{0}\" from the ignore list.";
-
         private readonly string _unignoreSuccess = "Removed `{0}` from the ignore list.";
         private readonly string _unignoreFailed = "Failed to remove `{0}` from the ignore list.";
         private readonly string _unignoreNotExisting = "`{0}` was never on the ignore list.";
@@ -43,10 +38,9 @@ namespace XayahBot.Command.Ignore
         public async Task Unignore([Remainder] string text)
         {
             string message = string.Empty;
-            Logger.Info(string.Format(this._logRequest, this.Context.User));
             foreach (ulong userId in this.Context.Message.MentionedUserIds.Distinct())
             {
-                if (!userId.Equals(this.Context.Client.CurrentUser.Id) && !this._permission.IsAdmin(this.Context))
+                if (this.IsActualUser(userId))
                 {
                     IUser user = await this.Context.Guild.GetUserAsync(userId);
                     message += await RemoveIgnore(user.Id, user.ToString()) + Environment.NewLine;
@@ -57,11 +51,16 @@ namespace XayahBot.Command.Ignore
                 IChannel channel = await this.Context.Guild.GetChannelAsync(channelId);
                 message += await RemoveIgnore(channel.Id, channel.Name) + Environment.NewLine;
             }
-            if (!string.IsNullOrWhiteSpace(message))
+            await this.SendReplies(message);
+        }
+
+        private bool IsActualUser(ulong user)
+        {
+            if (!user.Equals(this.Context.Client.CurrentUser.Id) && !this._permission.IsOwner(this.Context))
             {
-                await ReplyAsync(message);
-                ReplyAsync(this._random.FromList(this._unignoredReactionList));
+                return true;
             }
+            return false;
         }
 
         private async Task<string> RemoveIgnore(ulong subjectId, string subjectName)
@@ -71,7 +70,6 @@ namespace XayahBot.Command.Ignore
             {
                 await this._ignoreService.RemoveAsync(this.Context.Guild.Id, subjectId);
                 message = string.Format(this._unignoreSuccess, subjectName);
-                Logger.Warning(string.Format(this._logUnignoreSuccess, subjectName));
             }
             catch (NotExistingException)
             {
@@ -82,6 +80,15 @@ namespace XayahBot.Command.Ignore
                 message = string.Format(this._unignoreFailed, subjectName);
             }
             return message;
+        }
+
+        private async Task SendReplies(string message)
+        {
+            if (!string.IsNullOrWhiteSpace(message))
+            {
+                await this.ReplyAsync(message);
+                await this.ReplyAsync(this._random.FromList(this._unignoredReactionList));
+            }
         }
     }
 }

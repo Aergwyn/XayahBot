@@ -12,7 +12,7 @@ namespace XayahBot.Command.System
             Permission permission = new Permission();
             string errorText = "You don't have the required permission for this command";
 
-            if (permission.IsAdminOrMod(context))
+            if (permission.IsOwnerOrMod(context))
             {
                 return PreconditionResult.FromSuccess();
             }

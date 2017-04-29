@@ -1,6 +1,4 @@
-﻿#pragma warning disable 4014
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,11 +12,8 @@ using XayahBot.Utility;
 
 namespace XayahBot.Command.Ignore
 {
-    public class CIgnore : ModuleBase
+    public class CIgnore : LoggedModuleBase
     {
-        private readonly string _logRequest = "\"{0}\" requested \"ignore\" command.";
-        private readonly string _logIgnoreSuccess = "Added \"{0}\" to the ignore list.";
-
         private readonly string _ignoreSuccess = "Added `{0}` to the ignore list.";
         private readonly string _ignoreFailed = "Failed to add `{0}` to the ignore list.";
         private readonly string _ignoreExisting = "`{0}` is already on the ignore list.";
@@ -44,33 +39,37 @@ namespace XayahBot.Command.Ignore
         public async Task Ignore([Remainder] string text)
         {
             string message = string.Empty;
-            Logger.Info(string.Format(this._logRequest, this.Context.User));
             foreach (ulong userId in this.Context.Message.MentionedUserIds.Distinct())
             {
-                if (!userId.Equals(this.Context.Client.CurrentUser.Id) && !this._permission.IsAdmin(this.Context))
+                if (this.IsActualUser(userId))
                 {
                     IUser user = await this.Context.Guild.GetUserAsync(userId);
-                    message += await AddIgnore(user.Id, user.ToString()) + Environment.NewLine;
+                    message += await this.AddToIgnore(user.Id, user.ToString()) + Environment.NewLine;
                 }
             }
             foreach (ulong channelId in this.Context.Message.MentionedChannelIds.Distinct())
             {
                 IChannel channel = await this.Context.Guild.GetChannelAsync(channelId);
-                message += await AddIgnore(channel.Id, channel.Name, true) + Environment.NewLine;
+                message += await this.AddToIgnore(channel.Id, channel.Name, true) + Environment.NewLine;
             }
-            if (!string.IsNullOrWhiteSpace(message))
-            {
-                await ReplyAsync(message);
-                ReplyAsync(this._random.FromList(this._ignoredReactionList));
-            }
+            await this.SendReplies(message);
         }
 
-        private async Task<string> AddIgnore(ulong subjectId, string subjectName)
+        private bool IsActualUser(ulong user)
         {
-            return await AddIgnore(subjectId, subjectName, false);
+            if (!user.Equals(this.Context.Client.CurrentUser.Id) && !this._permission.IsOwner(this.Context))
+            {
+                return true;
+            }
+            return false;
         }
 
-        private async Task<string> AddIgnore(ulong subjectId, string subjectName, bool isChannel)
+        private async Task<string> AddToIgnore(ulong subjectId, string subjectName)
+        {
+            return await this.AddToIgnore(subjectId, subjectName, false);
+        }
+
+        private async Task<string> AddToIgnore(ulong subjectId, string subjectName, bool isChannel)
         {
             string message = string.Empty;
             try
@@ -83,7 +82,6 @@ namespace XayahBot.Command.Ignore
                     SubjectName = subjectName
                 });
                 message = string.Format(this._ignoreSuccess, subjectName);
-                Logger.Warning(string.Format(this._logIgnoreSuccess, subjectName));
             }
             catch (AlreadyExistingException)
             {
@@ -94,6 +92,15 @@ namespace XayahBot.Command.Ignore
                 message = string.Format(this._ignoreFailed, subjectName);
             }
             return message;
+        }
+
+        private async Task SendReplies(string message)
+        {
+            if (!string.IsNullOrWhiteSpace(message))
+            {
+                await this.ReplyAsync(message);
+                await this.ReplyAsync(this._random.FromList(this._ignoredReactionList));
+            }
         }
     }
 }

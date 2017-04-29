@@ -19,7 +19,7 @@ namespace XayahBot.Command
         [RequireOwner]
         [RequireContext(ContextType.DM)]
         [Summary("Displays all properties.")]
-        public Task Get()
+        public async Task Get()
         {
             string message = $"__List of properties__{Environment.NewLine}```";
             foreach(Property property in Property.UpdatableValues)
@@ -27,15 +27,14 @@ namespace XayahBot.Command
                 message += $"{Environment.NewLine}{(property.Name + ":").PadRight(this.GetMaxWidth())}\"{property.Value}\"";
             }
             message += "```";
-            ReplyAsync(message);
-            return Task.CompletedTask;
+            await this.ReplyAsync(message);
         }
 
         [Command("set")]
         [RequireOwner]
         [RequireContext(ContextType.DM)]
         [Summary("Updates a specific property.")]
-        public Task Set(string name, [Remainder]string value = "")
+        public async Task Set(string name, [Remainder]string value = "")
         {
             string message = string.Empty;
             Property property = Property.GetUpdatableByName(name);
@@ -49,8 +48,7 @@ namespace XayahBot.Command
             {
                 message = string.Format(this._notFound, name);
             }
-            ReplyAsync(message);
-            return Task.CompletedTask;
+            await this.ReplyAsync(message);
         }
 
         private int GetMaxWidth()

@@ -22,28 +22,27 @@ namespace XayahBot.Command.Ignore
         [RequireMod]
         [RequireContext(ContextType.Guild)]
         [Summary("Displays the ignore list.")]
-        public Task Ignore()
+        public async Task Ignore()
         {
             string message = string.Empty;
             List<TIgnoreEntry> ignoreList = this._ignoreService.GetIgnoreList(this.Context.Guild.Id);
             message = $"__Ignored user__{Environment.NewLine}```";
-            message += this.ListIgnore(ignoreList.Where(x => !x.IsChannel).ToList());
+            message += this.BuildListString(ignoreList.Where(x => !x.IsChannel));
             message += $"```{Environment.NewLine}__Ignored channel__{Environment.NewLine}```";
-            message += this.ListIgnore(ignoreList.Where(x => x.IsChannel).ToList());
+            message += this.BuildListString(ignoreList.Where(x => x.IsChannel));
             message += "```";
-            ReplyAsync(message);
-            return Task.CompletedTask;
+            await this.ReplyAsync(message);
         }
 
-        private string ListIgnore(List<TIgnoreEntry> list)
+        private string BuildListString(IEnumerable<TIgnoreEntry> list)
         {
             string text = string.Empty;
             IOrderedEnumerable<TIgnoreEntry> orderedList = list.OrderBy(x => x.SubjectName);
             if (orderedList.Count() > 0)
             {
-                for (int i = 0; i < orderedList.Count(); i++)
+                foreach(TIgnoreEntry entry in orderedList)
                 {
-                    text += Environment.NewLine + orderedList.ElementAt(i).SubjectName;
+                    text += Environment.NewLine + entry.SubjectName;
                 }
             }
             else

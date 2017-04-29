@@ -6,7 +6,7 @@ namespace XayahBot.Command.System
 {
     public class Permission
     {
-        public bool IsAdmin(ICommandContext context)
+        public bool IsOwner(ICommandContext context)
         {
             return Property.Author.Equals(context.User.ToString());
         }
@@ -22,9 +22,9 @@ namespace XayahBot.Command.System
             return false;
         }
 
-        public bool IsAdminOrMod(ICommandContext context)
+        public bool IsOwnerOrMod(ICommandContext context)
         {
-            if (this.IsAdmin(context) || this.IsMod(context))
+            if (this.IsOwner(context) || this.IsMod(context))
             {
                 return true;
             }

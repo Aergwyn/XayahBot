@@ -55,7 +55,7 @@ namespace XayahBot.Command
         [CheckIgnoredUser]
         [CheckIgnoredChannel]
         [Summary("Triggers an 8ball-esque response.")]
-        public Task Are([Remainder] string text = "")
+        public async Task Are([Remainder] string text = "")
         {
             string response = string.Empty;
             text = text.Trim();
@@ -71,8 +71,7 @@ namespace XayahBot.Command
             {
                 response = this._random.FromList(this._noSentenceList);
             }
-            ReplyAsync(response);
-            return Task.CompletedTask;
+            await this.ReplyAsync(response);
         }
 
         private bool IsQuestion(string text)
