@@ -1,9 +1,9 @@
-﻿using Discord.Commands;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using XayahBot.Command.Attribute;
+using Discord.Commands;
+using XayahBot.Command.System;
 using XayahBot.Database.Model;
 using XayahBot.Database.Service;
 

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord.Commands;
+using XayahBot.Command.System;
 using XayahBot.Utility;
-using XayahBot.Command.Attribute;
 
 namespace XayahBot.Command
 {

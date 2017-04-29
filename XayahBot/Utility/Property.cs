@@ -24,17 +24,10 @@ namespace XayahBot.Utility
         public static readonly Property QuizMaxTries = new Property("quiz_maxtries", "10");
         public static readonly Property QuizTimeout = new Property("quiz_timeout", "10"); // Minutes
 
-        public static IEnumerable<Property> Values
+        public static IEnumerable<Property> UpdatableValues
         {
             get
             {
-                yield return Author;
-                yield return CmdPrefix;
-                yield return DbName;
-                yield return FilePath;
-                yield return FileRiotApiKey;
-                yield return FileToken;
-                //
                 yield return DataLongevity;
                 yield return GameActive;
                 yield return GameShutdown;
@@ -51,7 +44,7 @@ namespace XayahBot.Utility
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
-                return Values.Where(x => x.Updatable).FirstOrDefault(x => x.Name.ToLower().Equals(name.ToLower()));
+                return UpdatableValues.Where(x => x.Updatable).FirstOrDefault(x => x.Name.ToLower().Equals(name.ToLower()));
             }
             return null;
         }

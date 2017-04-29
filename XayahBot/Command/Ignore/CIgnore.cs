@@ -1,16 +1,16 @@
 ﻿#pragma warning disable 4014
 
-using Discord;
-using Discord.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using XayahBot.Command.Attribute;
-using XayahBot.Database.Service;
-using XayahBot.Utility;
+using Discord;
+using Discord.Commands;
+using XayahBot.Command.System;
 using XayahBot.Database.Model;
+using XayahBot.Database.Service;
 using XayahBot.Error;
+using XayahBot.Utility;
 
 namespace XayahBot.Command.Ignore
 {
@@ -34,19 +34,20 @@ namespace XayahBot.Command.Ignore
         //
 
         private readonly RNG _random = new RNG();
+        private readonly Permission _permission = new Permission();
         private readonly IgnoreService _ignoreService = new IgnoreService();
 
         [Command("ignore")]
         [RequireMod]
         [RequireContext(ContextType.Guild)]
         [Summary("Adds all mentioned user and channel to the ignore list.")]
-        public async Task Channel([Remainder] string text)
+        public async Task Ignore([Remainder] string text)
         {
             string message = string.Empty;
             Logger.Info(string.Format(this._logRequest, this.Context.User));
             foreach (ulong userId in this.Context.Message.MentionedUserIds.Distinct())
             {
-                if (!userId.Equals(this.Context.Client.CurrentUser.Id) && !Permission.IsAdmin(this.Context))
+                if (!userId.Equals(this.Context.Client.CurrentUser.Id) && !this._permission.IsAdmin(this.Context))
                 {
                     IUser user = await this.Context.Guild.GetUserAsync(userId);
                     message += await AddIgnore(user.Id, user.ToString()) + Environment.NewLine;

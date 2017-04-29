@@ -80,8 +80,6 @@ namespace XayahBot
             this._client.LeftGuild += this.HandleLeftGuild;
             this._client.MessageReceived += this.HandleMessageReceived;
 
-            this._dependencyMap.Add(this._client);
-
             await this._commandService.AddModulesAsync(Assembly.GetEntryAssembly());
         }
 

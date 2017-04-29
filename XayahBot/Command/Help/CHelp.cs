@@ -1,14 +1,13 @@
 ﻿#pragma warning disable 4014
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using XayahBot.Command.System;
 using XayahBot.Utility;
-using System.Collections.Generic;
-using System.Linq;
-using XayahBot.Command.Attribute;
-using XayahBot.Service;
 
 namespace XayahBot.Command.Help
 {
@@ -23,6 +22,7 @@ namespace XayahBot.Command.Help
         //
 
         private readonly CommandService _commandService;
+        private readonly Permission _permission = new Permission();
 
         public CHelp(CommandService commandService)
         {
@@ -73,12 +73,12 @@ namespace XayahBot.Command.Help
             }
             message = "__**Command List**__```";
             message += this.GetCommandBlockString(normalCmdList);
-            if (Permission.IsAdminOrMod(this.Context) && modCmdList.Count > 0)
+            if (this._permission.IsAdminOrMod(this.Context) && modCmdList.Count > 0)
             {
                 message += $"```{Environment.NewLine}__Mod-Commands__```";
                 message += this.GetCommandBlockString(modCmdList);
             }
-            if (Permission.IsAdmin(this.Context) && ownerCmdList.Count > 0)
+            if (this._permission.IsAdmin(this.Context) && ownerCmdList.Count > 0)
             {
                 message += $"```{Environment.NewLine}__Owner-Commands__```";
                 message += this.GetCommandBlockString(ownerCmdList);

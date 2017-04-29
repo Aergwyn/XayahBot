@@ -1,17 +1,17 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using XayahBot.Utility;
-using Discord;
 
-namespace XayahBot.Command
+namespace XayahBot.Command.System
 {
-    public static class Permission
+    public class Permission
     {
-        public static bool IsAdmin(ICommandContext context)
+        public bool IsAdmin(ICommandContext context)
         {
             return Property.Author.Equals(context.User.ToString());
         }
 
-        public static bool IsMod(ICommandContext context)
+        public bool IsMod(ICommandContext context)
         {
             if (context.User is IGuildUser guildUser &&
                 (guildUser.GuildPermissions.Has(GuildPermission.Administrator) || guildUser.GuildPermissions.Has(GuildPermission.ManageGuild) ||
@@ -22,9 +22,9 @@ namespace XayahBot.Command
             return false;
         }
 
-        public static bool IsAdminOrMod(ICommandContext context)
+        public bool IsAdminOrMod(ICommandContext context)
         {
-            if (IsAdmin(context) || IsMod(context))
+            if (this.IsAdmin(context) || this.IsMod(context))
             {
                 return true;
             }

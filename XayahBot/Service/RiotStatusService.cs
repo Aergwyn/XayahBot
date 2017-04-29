@@ -1,7 +1,7 @@
-﻿using Discord.WebSocket;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord.WebSocket;
 using XayahBot.API;
 using XayahBot.API.Riot.Model;
 

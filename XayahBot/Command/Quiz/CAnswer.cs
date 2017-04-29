@@ -1,9 +1,8 @@
 ﻿#pragma warning disable 4014
 
-using Discord.Commands;
 using System.Threading.Tasks;
-using XayahBot.Command.Attribute;
-using XayahBot.Service;
+using Discord.Commands;
+using XayahBot.Command.System;
 
 namespace XayahBot.Command.Quiz
 {

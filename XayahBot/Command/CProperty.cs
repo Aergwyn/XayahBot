@@ -1,21 +1,17 @@
-﻿using Discord;
-using Discord.Commands;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord.Commands;
+using XayahBot.Command.System;
 using XayahBot.Utility;
 
 namespace XayahBot.Command
 {
     [Group("prop")]
-    public class CProperty : ModuleBase
+    public class CProperty : LoggedModuleBase
     {
-        private readonly string _logRequest = "\"{0}\" requested \"property set\".";
-        private readonly string _logChanged = "\"{0}\" changed to \"{1}\".";
-
         private readonly string _notFound = "Could not find property with name `{0}`!";
-        private readonly string _changed = $"Property changed...{Environment.NewLine}```{Environment.NewLine}Old: {{0}}:\"{{1}}\"{Environment.NewLine}New: {{0}}:\"{{2}}\"```";
+        private readonly string _changed = $"Property `{{0}}` changed!{Environment.NewLine}```{Environment.NewLine}Old:{{1}}{Environment.NewLine}New:{{2}}```";
 
         //
 
@@ -25,14 +21,10 @@ namespace XayahBot.Command
         [Summary("Displays all properties.")]
         public Task Get()
         {
-            List<Property> displayList = Utility.Property.Values.Where(x => x.Updatable).ToList();
             string message = $"__List of properties__{Environment.NewLine}```";
-            for (int i = 0; i < displayList.Count; i++)
+            foreach(Property property in Property.UpdatableValues)
             {
-                Property property = displayList.ElementAt(i);
-                message += $"{Environment.NewLine}" +
-                    $"{(property.Name + ":").PadRight(Utility.Property.Values.Where(x => x.Updatable).OrderByDescending(x => x.Name.Length).First().Name.Length + 1, ' ')}" +
-                    $"\"{property.Value}\"";
+                message += $"{Environment.NewLine}{(property.Name + ":").PadRight(this.GetMaxWidth())}\"{property.Value}\"";
             }
             message += "```";
             ReplyAsync(message);
@@ -43,17 +35,15 @@ namespace XayahBot.Command
         [RequireOwner]
         [RequireContext(ContextType.DM)]
         [Summary("Updates a specific property.")]
-        public Task Property(string name, [Remainder]string value = "")
+        public Task Set(string name, [Remainder]string value = "")
         {
             string message = string.Empty;
-            Logger.Warning(string.Format(this._logRequest, this.Context.User));
-            Property property = Utility.Property.GetUpdatableByName(name);
+            Property property = Property.GetUpdatableByName(name);
             if (property != null)
             {
                 string oldValue = property.Value;
                 property.Value = value.Trim();
                 message = string.Format(this._changed, property.Name, oldValue, property.Value);
-                Logger.Warning(string.Format(this._logChanged, property.Name, property.Value));
             }
             else
             {
@@ -61,6 +51,11 @@ namespace XayahBot.Command
             }
             ReplyAsync(message);
             return Task.CompletedTask;
+        }
+
+        private int GetMaxWidth()
+        {
+            return Property.UpdatableValues.OrderByDescending(x => x.Name.Length).First().Name.Length + 1;
         }
     }
 }

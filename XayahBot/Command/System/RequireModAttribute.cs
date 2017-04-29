@@ -2,21 +2,23 @@
 
 using System.Threading.Tasks;
 using Discord.Commands;
-using XayahBot.Service;
 
-namespace XayahBot.Command.Attribute
+namespace XayahBot.Command.System
 {
     public class RequireModAttribute : PreconditionAttribute
     {
         public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IDependencyMap map)
         {
-            if (Permission.IsAdminOrMod(context))
+            Permission permission = new Permission();
+            string errorText = "You don't have the required permission for this command";
+
+            if (permission.IsAdminOrMod(context))
             {
                 return PreconditionResult.FromSuccess();
             }
             else
             {
-                return PreconditionResult.FromError("You don't have the required permission for this command");
+                return PreconditionResult.FromError(errorText);
             }
         }
     }
