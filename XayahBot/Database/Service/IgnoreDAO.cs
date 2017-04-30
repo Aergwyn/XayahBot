@@ -6,31 +6,34 @@ using XayahBot.Error;
 
 namespace XayahBot.Database.Service
 {
-    public class IgnoreService
+    public class IgnoreDAO
     {
-        public List<TIgnoreEntry> GetIgnoreList(ulong guild)
+        public List<TIgnoreEntry> GetIgnoreList(ulong guildId)
         {
             using (GeneralContext database = new GeneralContext())
             {
-                return database.IgnoreList.Where(x => x.Guild.Equals(guild)).ToList();
+                return database.IgnoreList.Where(x => x.GuildId.Equals(guildId)).ToList();
             }
         }
 
-        public async Task AddAsync(TIgnoreEntry ignoreEntry)
+        public async Task AddAsync(TIgnoreEntry entry)
         {
             using (GeneralContext database = new GeneralContext())
             {
-                TIgnoreEntry match = database.IgnoreList.FirstOrDefault(x => x.Guild.Equals(ignoreEntry.Guild) && x.SubjectId.Equals(ignoreEntry.SubjectId));
+                TIgnoreEntry match = database.IgnoreList.FirstOrDefault(x => x.GuildId.Equals(entry.GuildId) && x.SubjectId.Equals(entry.SubjectId));
                 if (match == null)
                 {
-                    database.IgnoreList.Add(ignoreEntry);
+                    database.IgnoreList.Add(entry);
                     if (await database.SaveChangesAsync() <= 0)
                     {
                         throw new NotSavedException();
                     }
                 }
+                else
+                {
+                    throw new AlreadyExistingException();
+                }
             }
-            throw new AlreadyExistingException();
         }
 
         public async Task UpdateAsync(ulong subjectId, string newSubjectName)
@@ -46,15 +49,18 @@ namespace XayahBot.Database.Service
                         throw new NotSavedException();
                     }
                 }
+                else
+                {
+                    throw new NotExistingException();
+                }
             }
-            throw new NotExistingException();
         }
 
-        public async Task RemoveAsync(ulong guild, ulong subjectId)
+        public async Task RemoveAsync(ulong guildId, ulong subjectId)
         {
             using (GeneralContext database = new GeneralContext())
             {
-                TIgnoreEntry match = database.IgnoreList.FirstOrDefault(x => x.Guild.Equals(guild) && x.SubjectId.Equals(subjectId));
+                TIgnoreEntry match = database.IgnoreList.FirstOrDefault(x => x.GuildId.Equals(guildId) && x.SubjectId.Equals(subjectId));
                 if (match != null)
                 {
                     database.Remove(match);
@@ -63,15 +69,18 @@ namespace XayahBot.Database.Service
                         throw new NotSavedException();
                     }
                 }
+                else
+                {
+                    throw new NotExistingException();
+                }
             }
-            throw new NotExistingException();
         }
 
-        public async Task RemoveByGuildAsync(ulong guild)
+        public async Task RemoveByGuildAsync(ulong guildId)
         {
             using (GeneralContext database = new GeneralContext())
             {
-                List<TIgnoreEntry> matches = database.IgnoreList.Where(x => x.Guild.Equals(guild)).ToList();
+                List<TIgnoreEntry> matches = database.IgnoreList.Where(x => x.GuildId.Equals(guildId)).ToList();
                 if (matches.Count > 0)
                 {
                     database.RemoveRange(matches);
@@ -80,8 +89,11 @@ namespace XayahBot.Database.Service
                         throw new NotSavedException();
                     }
                 }
+                else
+                {
+                    throw new NotExistingException();
+                }
             }
-            throw new NotExistingException();
         }
 
         public async Task RemoveBySubjectIdAsync(ulong subjectId)
@@ -97,17 +109,20 @@ namespace XayahBot.Database.Service
                         throw new NotSavedException();
                     }
                 }
+                else
+                {
+                    throw new NotExistingException();
+                }
             }
-            throw new NotExistingException();
         }
 
         //
 
-        public bool IsIgnored(ulong guild, ulong subjectId)
+        public bool IsIgnored(ulong guildId, ulong subjectId)
         {
             using (GeneralContext database = new GeneralContext())
             {
-                if (database.IgnoreList.FirstOrDefault(x => x.Guild.Equals(guild) && x.SubjectId.Equals(subjectId)) != null)
+                if (database.IgnoreList.FirstOrDefault(x => x.GuildId.Equals(guildId) && x.SubjectId.Equals(subjectId)) != null)
                 {
                     return true;
                 }

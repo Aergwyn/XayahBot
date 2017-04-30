@@ -12,7 +12,7 @@ namespace XayahBot.Command.System
 
         public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IDependencyMap map)
         {
-            if (map.Get<IgnoreService>().IsIgnored(context.Guild.Id, context.User.Id))
+            if (map.Get<IgnoreDAO>().IsIgnored(context.Guild.Id, context.User.Id))
             {
                 return PreconditionResult.FromError(this._errorText);
             }

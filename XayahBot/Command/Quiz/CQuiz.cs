@@ -33,7 +33,7 @@ namespace XayahBot.Command.Quiz
         private static DateTime _lastLeaderboardPost;
 
         private readonly RNG _random = new RNG();
-        private readonly LeaderboardService _leaderboardService = new LeaderboardService();
+        private readonly LeaderboardDAO _leaderboardDao = new LeaderboardDAO();
 
         [Command("ask")]
         [RequireContext(ContextType.Guild)]
@@ -54,7 +54,7 @@ namespace XayahBot.Command.Quiz
         public async Task Stats()
         {
             string message = string.Empty;
-            List<TLeaderboardEntry> leaderboard = (await this._leaderboardService.GetLeaderboard(this.Context.Guild.Id)).OrderByDescending(x => x.Answers).ToList();
+            List<TLeaderboardEntry> leaderboard = (await this._leaderboardDao.GetLeaderboardAsync(this.Context.Guild.Id)).OrderByDescending(x => x.Answers).ToList();
             if (leaderboard.Count > 0)
             {
                 if (_lastLeaderboardPost.AddMinutes(int.Parse(Property.QuizLeaderboardCd.Value)) < DateTime.UtcNow)

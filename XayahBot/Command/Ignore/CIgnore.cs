@@ -30,7 +30,7 @@ namespace XayahBot.Command.Ignore
 
         private readonly RNG _random = new RNG();
         private readonly Permission _permission = new Permission();
-        private readonly IgnoreService _ignoreService = new IgnoreService();
+        private readonly IgnoreDAO _ignoreDao = new IgnoreDAO();
 
         [Command("ignore")]
         [RequireMod]
@@ -74,9 +74,9 @@ namespace XayahBot.Command.Ignore
             string message = string.Empty;
             try
             {
-                await this._ignoreService.AddAsync(new TIgnoreEntry
+                await this._ignoreDao.AddAsync(new TIgnoreEntry
                 {
-                    Guild = this.Context.Guild.Id,
+                    GuildId = this.Context.Guild.Id,
                     IsChannel = isChannel,
                     SubjectId = subjectId,
                     SubjectName = subjectName

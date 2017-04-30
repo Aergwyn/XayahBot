@@ -18,7 +18,7 @@ namespace XayahBot
         private readonly IDependencyMap _dependencyMap = new DependencyMap();
 
         private FileReader _fileReader = new FileReader();
-        private IgnoreService _ignoreService = new IgnoreService();
+        private IgnoreDAO _ignoreDao = new IgnoreDAO();
 
         //
 
@@ -95,19 +95,19 @@ namespace XayahBot
 
         private Task HandleChannelUpdated(SocketChannel preUpdateChannel, SocketChannel postUpdateChannel)
         {
-            this._ignoreService.UpdateAsync(preUpdateChannel.Id, ((IChannel)postUpdateChannel).Name);
+            this._ignoreDao.UpdateAsync(preUpdateChannel.Id, ((IChannel)postUpdateChannel).Name);
             return Task.CompletedTask;
         }
 
         private Task HandleChannelDestroyed(SocketChannel deletedChannel)
         {
-            this._ignoreService.RemoveBySubjectIdAsync(deletedChannel.Id);
+            this._ignoreDao.RemoveBySubjectIdAsync(deletedChannel.Id);
             return Task.CompletedTask;
         }
 
         private Task HandleLeftGuild(SocketGuild leftGuild)
         {
-            this._ignoreService.RemoveByGuildAsync(leftGuild.Id);
+            this._ignoreDao.RemoveByGuildAsync(leftGuild.Id);
             return Task.CompletedTask;
         }
 

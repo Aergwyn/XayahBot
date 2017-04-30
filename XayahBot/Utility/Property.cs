@@ -23,6 +23,8 @@ namespace XayahBot.Utility
         public static readonly Property QuizMatch = new Property("quiz_match", "70"); // Percentage
         public static readonly Property QuizMaxTries = new Property("quiz_maxtries", "10");
         public static readonly Property QuizTimeout = new Property("quiz_timeout", "10"); // Minutes
+        public static readonly Property RemindMaxDays = new Property("remind_maxhours", "30"); // Days
+        public static readonly Property RemindMaxHours = new Property("remind_maxhours", "168"); // Hours
 
         public static IEnumerable<Property> UpdatableValues
         {
@@ -37,6 +39,8 @@ namespace XayahBot.Utility
                 yield return QuizMatch;
                 yield return QuizMaxTries;
                 yield return QuizTimeout;
+                yield return RemindMaxDays;
+                yield return RemindMaxHours;
             }
         }
 
@@ -51,7 +55,7 @@ namespace XayahBot.Utility
 
         //
 
-        private PropertyService _propertyService = new PropertyService();
+        private PropertyDAO _propertyDao = new PropertyDAO();
 
         public string Name { get; private set; }
         private string _value { get; set; }
@@ -61,7 +65,7 @@ namespace XayahBot.Utility
             {
                 if (this.NeedInit())
                 {
-                    this._value = this._propertyService.GetValue(this) ?? this._value;
+                    this._value = this._propertyDao.GetValue(this) ?? this._value;
                     this.Loaded = true;
                 }
                 return this._value;
@@ -74,7 +78,7 @@ namespace XayahBot.Utility
                     this._value = realValue;
                     if (this.Updatable)
                     {
-                        this._propertyService.SetValueAsync(this);
+                        this._propertyDao.SetValueAsync(this);
                     }
                 }
             }

@@ -5,7 +5,7 @@ using XayahBot.Utility;
 
 namespace XayahBot.Database.Service
 {
-    public class PropertyService
+    public class PropertyDAO
     {
         public string GetValue(Property property)
         {

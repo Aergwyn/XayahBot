@@ -9,26 +9,26 @@ using XayahBot.Utility;
 
 namespace XayahBot.Database.Service
 {
-    public class LeaderboardService
+    public class LeaderboardDAO
     {
-        public async Task<List<TLeaderboardEntry>> GetLeaderboard(ulong guild)
+        public async Task<List<TLeaderboardEntry>> GetLeaderboardAsync(ulong guildId)
         {
             await this.CheckForResetAsync();
             using (GeneralContext database = new GeneralContext())
             {
-                return database.Leaderboard.Where(x => x.Guild.Equals(guild)).ToList();
+                return database.QuizLeaderboard.Where(x => x.GuildId.Equals(guildId)).ToList();
             }
         }
 
-        public async Task IncrementAnswerAsync(ulong guild, ulong userId, string userName)
+        public async Task IncrementAnswerAsync(ulong guildId, ulong userId, string userName)
         {
             await this.CheckForResetAsync();
             using (GeneralContext database = new GeneralContext())
             {
-                TLeaderboardEntry match = database.Leaderboard.FirstOrDefault(x => x.Guild.Equals(guild) && x.UserName.Equals(userName));
+                TLeaderboardEntry match = database.QuizLeaderboard.FirstOrDefault(x => x.GuildId.Equals(guildId) && x.UserName.Equals(userName));
                 if (match == null)
                 {
-                    database.Leaderboard.Add(new TLeaderboardEntry { Guild = guild, UserId = userId, UserName = userName, Answers = 1 });
+                    database.QuizLeaderboard.Add(new TLeaderboardEntry { GuildId = guildId, UserId = userId, UserName = userName, Answers = 1 });
                 }
                 else
                 {
@@ -42,7 +42,7 @@ namespace XayahBot.Database.Service
         {
             using (GeneralContext database = new GeneralContext())
             {
-                database.Leaderboard.RemoveRange(database.Leaderboard);
+                database.QuizLeaderboard.RemoveRange(database.QuizLeaderboard);
                 database.SaveChangesAsync();
             }
             return Task.CompletedTask;
