@@ -28,26 +28,25 @@ namespace XayahBot.Command.List
         [Summary("Displays the ignore list.")]
         public async Task Ignore()
         {
-            string message = string.Empty;
             List<TIgnoreEntry> ignoreList = this._ignoreDao.GetIgnoreList(this.Context.Guild.Id);
-            message = $"__Ignored user__{Environment.NewLine}```";
-            message += this.BuildIgnoreListString(ignoreList.Where(x => !x.IsChannel));
-            message += $"```{Environment.NewLine}__Ignored channel__{Environment.NewLine}```";
-            message += this.BuildIgnoreListString(ignoreList.Where(x => x.IsChannel));
-            message += "```";
-            await this.ReplyAsync(message);
+            DiscordFormatMessage message = new DiscordFormatMessage();
+            message.Append("Ignored user", AppendOption.UNDERSCORE);
+            message.AppendCodeBlock(this.BuildIgnoreListString(ignoreList.Where(x => !x.IsChannel)));
+            message.Append("Ignored channel", AppendOption.UNDERSCORE);
+            message.AppendCodeBlock(this.BuildIgnoreListString(ignoreList.Where(x => x.IsChannel)));
+            await this.ReplyAsync(message.ToString());
         }
 
         [Command("reminder")]
         [Summary("Displays a list of your reminders.")]
         public async Task Reminder()
         {
-            string message = string.Empty;
             IMessageChannel channel = await this._responseHelper.GetDMChannel(this.Context);
             List<TRemindEntry> reminders = this._remindDao.GetReminders(this.Context.User.Id);
-            message = $"__Active Reminder__{Environment.NewLine}";
-            message += this.BuildReminderListString(reminders);
-            await channel.SendMessageAsync(message);
+            DiscordFormatMessage message = new DiscordFormatMessage();
+            message.Append("Active Reminder", AppendOption.UNDERSCORE);
+            message = this.BuildReminderListString(reminders, message);
+            await channel.SendMessageAsync(message.ToString());
         }
 
         private string BuildIgnoreListString(IEnumerable<TIgnoreEntry> list)
@@ -56,9 +55,13 @@ namespace XayahBot.Command.List
             IOrderedEnumerable<TIgnoreEntry> orderedList = list.OrderBy(x => x.SubjectName);
             if (orderedList.Count() > 0)
             {
-                foreach(TIgnoreEntry entry in orderedList)
+                for(int i = 0; i < orderedList.Count(); i++)
                 {
-                    text += Environment.NewLine + entry.SubjectName;
+                    if (i > 0)
+                    {
+                        text += Environment.NewLine;
+                    }
+                    text += orderedList.ElementAt(i).SubjectName;
                 }
             }
             else
@@ -68,22 +71,22 @@ namespace XayahBot.Command.List
             return text;
         }
 
-        private string BuildReminderListString(IEnumerable<TRemindEntry> list)
+        private DiscordFormatMessage BuildReminderListString(IEnumerable<TRemindEntry> list, DiscordFormatMessage message)
         {
-            string text = string.Empty;
             IOrderedEnumerable<TRemindEntry> orderedList = list.OrderBy(x => x.Id);
             if (orderedList.Count() > 0)
             {
                 foreach (TRemindEntry entry in orderedList)
                 {
-                    text += $"```{Environment.NewLine}ID: {entry.Id} | Expires: {entry.ExpirationDate}{Environment.NewLine}Message: {entry.Message}```";
+                    message.AppendCodeBlock($"ID: {entry.Id} | Expires: {entry.ExpirationDate} UTC{Environment.NewLine}" +
+                        $"Message:{Environment.NewLine}{entry.Message}");
                 }
             }
             else
             {
-                text += $"```{Environment.NewLine}{this._emptyList}```";
+                message.AppendCodeBlock(this._emptyList);
             }
-            return text;
+            return message;
         }
     }
 }

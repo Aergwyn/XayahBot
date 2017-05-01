@@ -33,45 +33,71 @@ namespace XayahBot.Command.Help
         public async Task Help()
         {
             IMessageChannel channel = await this._responseHelper.GetDMChannel(this.Context);
-            string message = string.Empty;
-            List<HelpLine> normalCmdList = new List<HelpLine>();
-            List<HelpLine> modCmdList = new List<HelpLine>();
-            List<HelpLine> ownerCmdList = new List<HelpLine>();
-            foreach (CommandInfo command in this._commandService.Commands)
+            DiscordFormatMessage message = new DiscordFormatMessage();
+            message = this.BuildCommonerCommandList(message);
+            message = this.BuildModCommandList(message);
+            message = this.BuildOwnerCommandList(message);
+            message.Append(string.Format(this._finishHelp, Property.Author));
+            await channel.SendMessageAsync(message.ToString());
+        }
+
+        private DiscordFormatMessage BuildCommonerCommandList(DiscordFormatMessage message)
+        {
+            List<HelpLine> commandList = this.GetMatchingPreconditionList();
+            message.Append("Command List", AppendOption.BOLD, AppendOption.UNDERSCORE);
+            message.AppendCodeBlock(this.BuildListString(commandList));
+            return message;
+        }
+
+        private DiscordFormatMessage BuildModCommandList(DiscordFormatMessage message)
+        {
+            List<HelpLine> commandList = this.GetMatchingPreconditionList(new RequireModAttribute());
+            if (this._permission.IsOwnerOrMod(this.Context) && commandList.Count > 0)
             {
-                HelpLine helpLine = this.GetHelpLine(command);
-                if (command.Preconditions.Contains(new RequireOwnerAttribute()))
+                message.Append("Mod-Commands", AppendOption.UNDERSCORE);
+                message.AppendCodeBlock(this.BuildListString(commandList));
+            }
+            return message;
+        }
+
+        private DiscordFormatMessage BuildOwnerCommandList(DiscordFormatMessage message)
+        {
+            List<HelpLine> commandList = this.GetMatchingPreconditionList(new RequireOwnerAttribute());
+            if (this._permission.IsOwner(this.Context) && commandList.Count > 0)
+            {
+                message.Append("Owner-Commands", AppendOption.UNDERSCORE);
+                message.AppendCodeBlock(this.BuildListString(commandList));
+            }
+            return message;
+        }
+
+        private List<HelpLine> GetMatchingPreconditionList(PreconditionAttribute precondition = null)
+        {
+            List<HelpLine> matches = new List<HelpLine>();
+            if (precondition != null)
+            {
+                foreach (CommandInfo command in this._commandService.Commands.Where(x => x.Preconditions.Contains(precondition)))
                 {
-                    ownerCmdList.Add(helpLine);
-                }
-                else if (command.Preconditions.Contains(new RequireModAttribute()))
-                {
-                    modCmdList.Add(helpLine);
-                }
-                else
-                {
-                    normalCmdList.Add(helpLine);
+                    matches.Add(this.GetHelpLine(command));
                 }
             }
-            message = "__**Command List**__```";
-            message += this.BuildListString(normalCmdList);
-            if (this._permission.IsOwnerOrMod(this.Context) && modCmdList.Count > 0)
+            else
             {
-                message += $"```{Environment.NewLine}__Mod-Commands__```";
-                message += this.BuildListString(modCmdList);
+                foreach (CommandInfo command in this._commandService.Commands)
+                {
+                    // this is far from optimal but I don't know how to solve it in a more acceptable way right now
+                    if (!command.Preconditions.Contains(new RequireOwnerAttribute()) && !command.Preconditions.Contains(new RequireModAttribute()))
+                    {
+                        matches.Add(this.GetHelpLine(command));
+                    }
+                }
             }
-            if (this._permission.IsOwner(this.Context) && ownerCmdList.Count > 0)
-            {
-                message += $"```{Environment.NewLine}__Owner-Commands__```";
-                message += this.BuildListString(ownerCmdList);
-            }
-            message += $"```{Environment.NewLine}{string.Format(_finishHelp, Property.Author)}";
-            await channel.SendMessageAsync(message);
+            return matches;
         }
 
         private HelpLine GetHelpLine(CommandInfo commandInfo)
         {
-            string command = this.BuildAliasList(commandInfo.Aliases);
+            string command = this.BuildAliasString(commandInfo.Aliases);
             foreach (ParameterInfo param in commandInfo.Parameters)
             {
                 if (param.IsOptional)
@@ -90,7 +116,7 @@ namespace XayahBot.Command.Help
             };
         }
 
-        private string BuildAliasList(IReadOnlyList<string> aliases)
+        private string BuildAliasString(IReadOnlyList<string> aliases)
         {
             string result = Property.CmdPrefix.Value;
             Dictionary<int, HashSet<string>> builder = new Dictionary<int, HashSet<string>>();
@@ -119,16 +145,17 @@ namespace XayahBot.Command.Help
         private string BuildListString(List<HelpLine> helpList)
         {
             string text = string.Empty;
-            foreach (HelpLine helpLine in helpList)
+            int maxWidth = helpList.OrderByDescending(x => x.Command.Length).First().Command.Length;
+            for(int i = 0; i < helpList.Count; i++)
             {
-                text += $"{Environment.NewLine}{helpLine.Command.PadRight(this.GetMaxWidth(helpList))} - {helpLine.Summary}";
+                if (i > 0)
+                {
+                    text += Environment.NewLine;
+                }
+                HelpLine helpLine = helpList.ElementAt(i);
+                text += $"{helpLine.Command.PadRight(maxWidth)} - { helpLine.Summary}";
             }
             return text;
-        }
-
-        private int GetMaxWidth(List<HelpLine> helpList)
-        {
-            return helpList.OrderByDescending(x => x.Command.Length).First().Command.Length;
         }
     }
 }

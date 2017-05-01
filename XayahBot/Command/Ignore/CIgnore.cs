@@ -14,10 +14,6 @@ namespace XayahBot.Command.Ignore
 {
     public class CIgnore : LoggedModuleBase
     {
-        private readonly string _ignoreSuccess = "Added `{0}` to the ignore list.";
-        private readonly string _ignoreFailed = "Failed to add `{0}` to the ignore list.";
-        private readonly string _ignoreExisting = "`{0}` is already on the ignore list.";
-
         private readonly List<string> _ignoredReactionList = new List<string>
         {
             "I warned you. Oh wait... did I? Crap. My fault.",
@@ -81,15 +77,15 @@ namespace XayahBot.Command.Ignore
                     SubjectId = subjectId,
                     SubjectName = subjectName
                 });
-                message = string.Format(this._ignoreSuccess, subjectName);
+                message = $"Added `{subjectName}` to the ignore list.";
             }
             catch (AlreadyExistingException)
             {
-                message = string.Format(this._ignoreExisting, subjectName);
+                message = $"`{subjectName}` is already on the ignore list.";
             }
             catch (NotSavedException)
             {
-                message = string.Format(this._ignoreFailed, subjectName);
+                message = $"Failed to add `{subjectName}` to the ignore list.";
             }
             return message;
         }

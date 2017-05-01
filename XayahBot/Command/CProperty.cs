@@ -10,24 +10,31 @@ namespace XayahBot.Command
     [Group("prop")]
     public class CProperty : LoggedModuleBase
     {
-        private readonly string _notFound = "Could not find property with name `{0}`!";
-        private readonly string _changed = $"Property `{{0}}` changed!{Environment.NewLine}```{Environment.NewLine}Old:{{1}}{Environment.NewLine}New:{{2}}```";
-
-        //
-
         [Command("get")]
         [RequireOwner]
         [RequireContext(ContextType.DM)]
         [Summary("Displays all properties.")]
         public async Task Get()
         {
-            string message = $"__List of properties__{Environment.NewLine}```";
-            foreach(Property property in Property.UpdatableValues)
+            DiscordFormatMessage message = new DiscordFormatMessage();
+            message.Append("List of properties", AppendOption.UNDERSCORE);
+            message.AppendCodeBlock(this.BuildPropertyListString());
+            await this.ReplyAsync(message.ToString());
+        }
+
+        private string BuildPropertyListString() {
+            string text = string.Empty;
+            int maxWidth = Property.UpdatableValues.OrderByDescending(x => x.Name.Length).First().Name.Length + 1;
+            for (int i = 0; i < Property.UpdatableValues.Count(); i++)
             {
-                message += $"{Environment.NewLine}{(property.Name + ":").PadRight(this.GetMaxWidth())}\"{property.Value}\"";
+                if (i > 0)
+                {
+                    text += Environment.NewLine;
+                }
+                Property property = Property.UpdatableValues.ElementAt(i);
+                text += (property.Name + ":").PadRight(maxWidth) + property.Value;
             }
-            message += "```";
-            await this.ReplyAsync(message);
+            return text;
         }
 
         [Command("set")]
@@ -36,24 +43,20 @@ namespace XayahBot.Command
         [Summary("Updates a specific property.")]
         public async Task Set(string name, [Remainder]string value = "")
         {
-            string message = string.Empty;
             Property property = Property.GetUpdatableByName(name);
+            DiscordFormatMessage message = new DiscordFormatMessage();
             if (property != null)
             {
                 string oldValue = property.Value;
-                property.Value = value.Trim();
-                message = string.Format(this._changed, property.Name, oldValue, property.Value);
+                property.Value = value = value.Trim();
+                message.Append($"Property `{property.Name}` changed!");
+                message.AppendCodeBlock($"Old:{oldValue}{Environment.NewLine}New:{value}");
             }
             else
             {
-                message = string.Format(this._notFound, name);
+                message.Append($"Could not find property with name `{name}`!");
             }
-            await this.ReplyAsync(message);
-        }
-
-        private int GetMaxWidth()
-        {
-            return Property.UpdatableValues.OrderByDescending(x => x.Name.Length).First().Name.Length + 1;
+            await this.ReplyAsync(message.ToString());
         }
     }
 }

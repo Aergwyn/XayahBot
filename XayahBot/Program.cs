@@ -66,6 +66,7 @@ namespace XayahBot
                 }
                 //
                 await this._client.SetGameAsync(Property.GameShutdown.Value);
+                await this.StopBackgroundThreadsAsync();
                 await this._client.StopAsync();
             }
             else
@@ -88,14 +89,18 @@ namespace XayahBot
             await this._commandService.AddModulesAsync(Assembly.GetEntryAssembly());
         }
 
+        private async Task StopBackgroundThreadsAsync()
+        {
+            await this._remindService.StopAsync();
+        }
+
         //
 
-        private Task HandleReady()
+        private async Task HandleReady()
         {
             string game = string.IsNullOrWhiteSpace(Property.GameActive.Value) ? null : Property.GameActive.Value;
-            this._client.SetGameAsync(game);
+            await this._client.SetGameAsync(game);
             this.StartBackgroundThreads();
-            return Task.CompletedTask;
         }
 
         private void StartBackgroundThreads()

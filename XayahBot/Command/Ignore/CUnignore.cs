@@ -13,10 +13,6 @@ namespace XayahBot.Command.Ignore
 {
     public class CUnignore : LoggedModuleBase
     {
-        private readonly string _unignoreSuccess = "Removed `{0}` from the ignore list.";
-        private readonly string _unignoreFailed = "Failed to remove `{0}` from the ignore list.";
-        private readonly string _unignoreNotExisting = "`{0}` was never on the ignore list.";
-
         private readonly List<string> _unignoredReactionList = new List<string>
         {
             "Maybe I over did it.",
@@ -69,15 +65,15 @@ namespace XayahBot.Command.Ignore
             try
             {
                 await this._ignoreDao.RemoveAsync(this.Context.Guild.Id, subjectId);
-                message = string.Format(this._unignoreSuccess, subjectName);
+                message = $"Removed `{subjectName}` from the ignore list.";
             }
             catch (NotExistingException)
             {
-                message = string.Format(this._unignoreNotExisting, subjectName);
+                message = $"`{subjectName}` was never on the ignore list.";
             }
             catch (NotSavedException)
             {
-                message = string.Format(this._unignoreFailed, subjectName);
+                message = $"Failed to remove `{subjectName}` from the ignore list.";
             }
             return message;
         }

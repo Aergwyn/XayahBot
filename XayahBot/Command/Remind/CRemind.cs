@@ -11,11 +11,8 @@ namespace XayahBot.Command.Remind
     [Group("remind me")]
     public class CRemind : ModuleBase
     {
-        private readonly string _reminderCreated = "I'm going to remind you in {0} {1}{2}. Maybe...";
+        private readonly string _reminderCreated = "I'm going to remind you in `{0}` {1}{2}. Maybe...";
         private readonly string _createRemindFailed = "Failed to create reminder.";
-        private readonly string _removedReminder = "Removed reminder with ID {0} from your list.";
-        private readonly string _remindNotExisting = "Reminder with ID {0} does not exist on your list.";
-        private readonly string _removeRemindFailed = "Failed to remove reminder with ID {0}.";
 
         //
 
@@ -28,21 +25,21 @@ namespace XayahBot.Command.Remind
 
         //
 
-        [Command("days"), Alias("d")]
-        [Summary("Adds a reminder with specified message to your list.")]
-        public async Task Days(int days, [Remainder] string text)
+        [Command("d")]
+        [Summary("Reminds you in X days with your specified message.")]
+        public async Task Days(int d, [Remainder] string text)
         {
             string message = string.Empty;
-            days = this.SetDayInRange(days);
+            d = this.SetDayInRange(d);
             try
             {
                 await this._remindService.AddNew(this.Context.Client as DiscordSocketClient, new TRemindEntry
                 {
-                    ExpirationDate = DateTime.UtcNow.AddDays(days),
+                    ExpirationDate = DateTime.UtcNow.AddDays(d),
                     Message = text.Trim(),
                     UserId = this.Context.User.Id
                 });
-                message = string.Format(this._reminderCreated, days, "day", this.AddSForMultiple(days));
+                message = string.Format(this._reminderCreated, d, "day", this.AddSForMultiple(d));
             }
             catch (NotSavedException)
             {
@@ -51,21 +48,44 @@ namespace XayahBot.Command.Remind
             await this.ReplyAsync(message);
         }
 
-        [Command("hours"), Alias("h")]
-        [Summary("Adds a reminder with specified message to your list.")]
-        public async Task Hours(int hours, [Remainder] string text)
+        [Command("h")]
+        [Summary("Reminds you in X hours with your specified message.")]
+        public async Task Hours(int h, [Remainder] string text)
         {
             string message = string.Empty;
-            hours = this.SetHourInRange(hours);
+            h = this.SetOtherInRange(h, 1, 23);
             try
             {
                 await this._remindService.AddNew(this.Context.Client as DiscordSocketClient, new TRemindEntry
                 {
-                    ExpirationDate = DateTime.UtcNow.AddHours(hours),
+                    ExpirationDate = DateTime.UtcNow.AddHours(h),
                     Message = text.Trim(),
                     UserId = this.Context.User.Id
                 });
-                message = string.Format(this._reminderCreated, hours, "hour", this.AddSForMultiple(hours));
+                message = string.Format(this._reminderCreated, h, "hour", this.AddSForMultiple(h));
+            }
+            catch (NotSavedException)
+            {
+                message = this._createRemindFailed;
+            }
+            await this.ReplyAsync(message);
+        }
+
+        [Command("m")]
+        [Summary("Reminds you in X minutes with your specified message.")]
+        public async Task Mins(int m, [Remainder] string text)
+        {
+            string message = string.Empty;
+            m = this.SetOtherInRange(m, 5, 59);
+            try
+            {
+                await this._remindService.AddNew(this.Context.Client as DiscordSocketClient, new TRemindEntry
+                {
+                    ExpirationDate = DateTime.UtcNow.AddMinutes(m),
+                    Message = text.Trim(),
+                    UserId = this.Context.User.Id
+                });
+                message = string.Format(this._reminderCreated, m, "minute", this.AddSForMultiple(m));
             }
             catch (NotSavedException)
             {
@@ -75,23 +95,22 @@ namespace XayahBot.Command.Remind
         }
 
         [Command("not")]
-        [RequireOwner]
-        [Summary("Removes a specific reminder from your list.")]
+        [Summary("Removes a reminder (by ID!) from your list.")]
         public async Task Not(int id)
         {
             string message = string.Empty;
             try
             {
                 await this._remindService.Remove(id, this.Context.User.Id);
-                message = string.Format(this._removedReminder, id);
+                message = $"Removed reminder with ID `{id}` from your list.";
             }
             catch (NotExistingException)
             {
-                message = string.Format(this._remindNotExisting, id);
+                message = $"Reminder with ID `{id}` does not exist on your list.";
             }
             catch (NotSavedException)
             {
-                message = string.Format(this._removeRemindFailed, id);
+                message = $"Failed to remove reminder with ID `{id}`.";
             }
             await this.ReplyAsync(message);
         }
@@ -111,19 +130,17 @@ namespace XayahBot.Command.Remind
             return days;
         }
 
-        private int SetHourInRange(int hours)
+        private int SetOtherInRange(int value, int min, int max)
         {
-            int min = 1;
-            int max = int.Parse(Property.RemindMaxHours.Value);
-            if (hours < min)
+            if (value < min)
             {
-                hours = min;
+                value = min;
             }
-            else if (hours > max)
+            else if (value > max)
             {
-                hours = max;
+                value = max;
             }
-            return hours;
+            return value;
         }
 
         private string AddSForMultiple(int value)
