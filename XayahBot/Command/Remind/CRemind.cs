@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Discord.Commands;
+using Discord.WebSocket;
+using XayahBot.Database.Model;
 using XayahBot.Error;
 using XayahBot.Utility;
 
@@ -17,7 +19,14 @@ namespace XayahBot.Command.Remind
 
         //
 
-        private readonly RemindService _remindService = new RemindService();
+        private RemindService _remindService { get; set; }
+
+        public CRemind(RemindService remindService)
+        {
+            this._remindService = remindService;
+        }
+
+        //
 
         [Command("days"), Alias("d")]
         [Summary("Adds a reminder with specified message to your list.")]
@@ -27,7 +36,7 @@ namespace XayahBot.Command.Remind
             days = this.SetDayInRange(days);
             try
             {
-                await this._remindService.AddNew(new Database.Model.TRemindEntry
+                await this._remindService.AddNew(this.Context.Client as DiscordSocketClient, new TRemindEntry
                 {
                     ExpirationDate = DateTime.UtcNow.AddDays(days),
                     Message = text.Trim(),
@@ -50,7 +59,7 @@ namespace XayahBot.Command.Remind
             hours = this.SetHourInRange(hours);
             try
             {
-                await this._remindService.AddNew(new Database.Model.TRemindEntry
+                await this._remindService.AddNew(this.Context.Client as DiscordSocketClient, new TRemindEntry
                 {
                     ExpirationDate = DateTime.UtcNow.AddHours(hours),
                     Message = text.Trim(),

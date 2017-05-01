@@ -18,8 +18,8 @@ namespace XayahBot.Service
             if (_instance == null)
             {
                 _instance = new RiotStatusService(client);
+                Task.Run(() => _instance.Start());
             }
-            Task.Run(() => _instance.Start());
             return Task.CompletedTask;
         }
 

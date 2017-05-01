@@ -8,6 +8,14 @@ namespace XayahBot.Database.Service
 {
     public class RemindDAO
     {
+        public List<TRemindEntry> GetReminders()
+        {
+            using (GeneralContext database = new GeneralContext())
+            {
+                return database.Reminders.ToList();
+            }
+        }
+
         public List<TRemindEntry> GetReminders(ulong userId)
         {
             using (GeneralContext database = new GeneralContext())

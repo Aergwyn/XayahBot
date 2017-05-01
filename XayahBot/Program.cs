@@ -8,6 +8,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using XayahBot.Utility;
 using XayahBot.Database.Service;
+using XayahBot.Command.Remind;
 
 namespace XayahBot
 {
@@ -15,6 +16,7 @@ namespace XayahBot
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commandService;
+        private readonly RemindService _remindService;
         private readonly IDependencyMap _dependencyMap = new DependencyMap();
 
         private FileReader _fileReader = new FileReader();
@@ -31,14 +33,15 @@ namespace XayahBot
 
         private Program()
         {
-            this._commandService = new CommandService(new CommandServiceConfig
-            {
-                DefaultRunMode = RunMode.Async
-            });
             this._client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 LogLevel = LogSeverity.Info
             });
+            this._commandService = new CommandService(new CommandServiceConfig
+            {
+                DefaultRunMode = RunMode.Async
+            });
+            this._remindService = RemindService.GetInstance(this._client);
         }
 
         private async Task StartAsync()
@@ -80,6 +83,8 @@ namespace XayahBot
             this._client.LeftGuild += this.HandleLeftGuild;
             this._client.MessageReceived += this.HandleMessageReceived;
 
+            this._dependencyMap.Add(this._remindService);
+
             await this._commandService.AddModulesAsync(Assembly.GetEntryAssembly());
         }
 
@@ -89,8 +94,14 @@ namespace XayahBot
         {
             string game = string.IsNullOrWhiteSpace(Property.GameActive.Value) ? null : Property.GameActive.Value;
             this._client.SetGameAsync(game);
-            //RiotStatusService.StartAsync(this._client); WiP
+            this.StartBackgroundThreads();
             return Task.CompletedTask;
+        }
+
+        private void StartBackgroundThreads()
+        {
+            this._remindService.Start();
+            //RiotStatusService.StartAsync(this._client); WiP
         }
 
         private Task HandleChannelUpdated(SocketChannel preUpdateChannel, SocketChannel postUpdateChannel)

@@ -1,75 +1,151 @@
 ﻿#pragma warning disable 4014
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Discord;
+using Discord.WebSocket;
 using XayahBot.Database.Model;
 using XayahBot.Database.Service;
+using XayahBot.Utility;
 
 namespace XayahBot.Command.Remind
 {
     public class RemindService
     {
-        private static bool _isRunning = false;
-        private static SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
-        private static SemaphoreSlim _taskLock = new SemaphoreSlim(1, 1);
-        private static Dictionary<int, object> _currentTasks = new Dictionary<int, object>();
+        private static RemindService _instance;
 
-        private static async Task Start()
+        public static RemindService GetInstance(DiscordSocketClient client)
         {
-            await _lock.WaitAsync();
+            if (_instance == null)
+            {
+                _instance = new RemindService(client);
+            }
+            return _instance;
+        }
+
+        private RemindService(DiscordSocketClient client)
+        {
+            this._client = client;
+        }
+
+        //
+
+        private readonly DiscordSocketClient _client;
+        private readonly RemindDAO _remindDao = new RemindDAO();
+        private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
+        private readonly ResponseHelper _responseHelper = new ResponseHelper();
+        private bool _isRunning = false;
+        private Dictionary<int, Timer> _currentTimer = new Dictionary<int, Timer>();
+
+        public async Task Start()
+        {
+            await this._lock.WaitAsync();
             try
             {
-                if (!_isRunning)
+                if (!this._isRunning)
                 {
-                    _isRunning = true;
+                    this._isRunning = true;
                     Task.Run(() => Run());
                 }
             }
             finally
             {
-                _lock.Release();
+                this._lock.Release();
             }
         }
 
-        private static void Run()
+        public async Task StopAsync()
         {
-            while (_isRunning)
+            this._isRunning = false;
+            await StopTimers();
+        }
+
+        private async Task Run()
+        {
+            try
             {
-                // every x
-                // get list of reminders
-                // cycle through list that do not have a current task
-                // if expiration in latest x*2 add a task
-                // do something, i guess
+                bool processed = false;
+                while (this._isRunning)
+                {
+                    int interval = int.Parse(Property.RemindInterval.Value);
+                    if (!processed && DateTime.UtcNow.Minute % interval == 0)
+                    {
+                        processed = true;
+                        List<TRemindEntry> reminders = this._remindDao.GetReminders();
+                        await ProcessExpiringReminders(reminders.Where(x => !this._currentTimer.Keys.Contains(x.Id)), interval);
+                    }
+                    else
+                    {
+                        processed = false;
+                    }
+                    await Task.Delay(15000);
+                }
+            }
+            finally
+            {
+                await StopAsync();
+            }
+        }
+
+        private Task ProcessExpiringReminders(IEnumerable<TRemindEntry> list, int interval)
+        {
+            foreach (TRemindEntry reminder in list)
+            {
+                if (DateTime.UtcNow.AddMinutes(interval) > reminder.ExpirationDate)
+                {
+                    long remainingTicks = reminder.ExpirationDate.Ticks - DateTime.UtcNow.Ticks;
+                    if (remainingTicks < 0)
+                    {
+                        remainingTicks = 0;
+                    }
+                    this._currentTimer.Add(reminder.Id, new Timer(this.HandleExpiredReminder, reminder, new TimeSpan(remainingTicks), new TimeSpan(Timeout.Infinite)));
+                }
+            }
+            return Task.CompletedTask;
+        }
+
+        private async void HandleExpiredReminder(object state)
+        {
+            TRemindEntry reminder = (TRemindEntry)state;
+            StopTimer(reminder.Id);
+            IMessageChannel channel = await this._responseHelper.GetDMChannel(this._client, reminder.UserId);
+            await channel.SendMessageAsync(reminder.Message);
+        }
+
+        private Task StopTimers()
+        {
+            foreach (Timer timer in this._currentTimer.Values)
+            {
+                timer.Dispose();
+            }
+            this._currentTimer.Clear();
+            return Task.CompletedTask;
+        }
+
+        private void StopTimer(int id)
+        {
+            if (this._currentTimer.TryGetValue(id, out Timer timer))
+            {
+                timer.Dispose();
+                this._currentTimer.Remove(id);
             }
         }
 
         //
 
-        private readonly RemindDAO _remindDao = new RemindDAO();
-
-        public async Task AddNew(TRemindEntry entry)
+        public async Task AddNew(DiscordSocketClient client, TRemindEntry reminder)
         {
-            await this._remindDao.AddAsync(entry);
-            //await Start();
+            await this._remindDao.AddAsync(reminder);
+            await Start();
         }
 
         public async Task Remove(int id, ulong userId)
         {
             await this._remindDao.RemoveAsync(id, userId);
-            await _taskLock.WaitAsync();
-            try
-            {
-                if (_currentTasks.TryGetValue(id, out object task))
-                {
-                    // kill task
-                    _currentTasks.Remove(id);
-                }
-            }
-            finally
-            {
-                _taskLock.Release();
-            }
+            StopTimer(id);
         }
     }
 }
