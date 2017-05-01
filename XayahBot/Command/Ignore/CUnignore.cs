@@ -36,9 +36,9 @@ namespace XayahBot.Command.Ignore
             string message = string.Empty;
             foreach (ulong userId in this.Context.Message.MentionedUserIds.Distinct())
             {
-                if (this.IsActualUser(userId))
+                IUser user = await this.Context.Guild.GetUserAsync(userId);
+                if (this.IsActualUser(user))
                 {
-                    IUser user = await this.Context.Guild.GetUserAsync(userId);
                     message += await RemoveIgnore(user.Id, user.ToString()) + Environment.NewLine;
                 }
             }
@@ -50,9 +50,9 @@ namespace XayahBot.Command.Ignore
             await this.SendReplies(message);
         }
 
-        private bool IsActualUser(ulong user)
+        private bool IsActualUser(IUser user)
         {
-            if (!user.Equals(this.Context.Client.CurrentUser.Id) && !this._permission.IsOwner(this.Context))
+            if (!user.Id.Equals(this.Context.Client.CurrentUser.Id) && !this._permission.IsOwner(user))
             {
                 return true;
             }

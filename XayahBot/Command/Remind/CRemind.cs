@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using XayahBot.Database.Model;
+using XayahBot.Database.Service;
 using XayahBot.Error;
 using XayahBot.Utility;
 
@@ -17,6 +21,8 @@ namespace XayahBot.Command.Remind
         //
 
         private RemindService _remindService { get; set; }
+        private readonly RemindDAO _remindDao = new RemindDAO();
+        private readonly ResponseHelper _responseHelper = new ResponseHelper();
 
         public CRemind(RemindService remindService)
         {
@@ -25,12 +31,42 @@ namespace XayahBot.Command.Remind
 
         //
 
+        [Command("list")]
+        [Summary("Displays a list of your active reminder.")]
+        public async Task Reminder()
+        {
+            IMessageChannel channel = await this._responseHelper.GetDMChannel(this.Context);
+            List<TRemindEntry> reminders = this._remindDao.GetReminders(this.Context.User.Id);
+            DiscordFormatMessage message = new DiscordFormatMessage();
+            message = this.BuildReminderListString(reminders, message);
+            await channel.SendMessageAsync(message.ToString());
+        }
+
+        private DiscordFormatMessage BuildReminderListString(IEnumerable<TRemindEntry> list, DiscordFormatMessage message)
+        {
+            IOrderedEnumerable<TRemindEntry> orderedList = list.OrderBy(x => x.Id);
+            if (orderedList.Count() > 0)
+            {
+                message.Append("Active Reminder", AppendOption.UNDERSCORE);
+                foreach (TRemindEntry entry in orderedList)
+                {
+                    message.AppendCodeBlock($"ID: {entry.Id} | Expires: {entry.ExpirationDate} UTC{Environment.NewLine}" +
+                        $"Message:{Environment.NewLine}{entry.Message}");
+                }
+            }
+            else
+            {
+                message.Append("You have no active reminder right now.");
+            }
+            return message;
+        }
+
         [Command("d")]
-        [Summary("Reminds you in X days with your specified message.")]
+        [Summary("Reminds you in 1-30 days with your specified message.")]
         public async Task Days(int d, [Remainder] string text)
         {
             string message = string.Empty;
-            d = this.SetDayInRange(d);
+            d = this.SetValueInRange(d, 1, 30);
             try
             {
                 await this._remindService.AddNew(this.Context.Client as DiscordSocketClient, new TRemindEntry
@@ -49,11 +85,11 @@ namespace XayahBot.Command.Remind
         }
 
         [Command("h")]
-        [Summary("Reminds you in X hours with your specified message.")]
+        [Summary("Reminds you in 1-23 hours with your specified message.")]
         public async Task Hours(int h, [Remainder] string text)
         {
             string message = string.Empty;
-            h = this.SetOtherInRange(h, 1, 23);
+            h = this.SetValueInRange(h, 1, 23);
             try
             {
                 await this._remindService.AddNew(this.Context.Client as DiscordSocketClient, new TRemindEntry
@@ -72,11 +108,11 @@ namespace XayahBot.Command.Remind
         }
 
         [Command("m")]
-        [Summary("Reminds you in X minutes with your specified message.")]
+        [Summary("Reminds you in 15-59 minutes with your specified message.")]
         public async Task Mins(int m, [Remainder] string text)
         {
             string message = string.Empty;
-            m = this.SetOtherInRange(m, 5, 59);
+            m = this.SetValueInRange(m, 15, 59);
             try
             {
                 await this._remindService.AddNew(this.Context.Client as DiscordSocketClient, new TRemindEntry
@@ -115,22 +151,7 @@ namespace XayahBot.Command.Remind
             await this.ReplyAsync(message);
         }
 
-        private int SetDayInRange(int days)
-        {
-            int min = 1;
-            int max = int.Parse(Property.RemindMaxDays.Value);
-            if (days < min)
-            {
-                days = min;
-            }
-            else if (days > max)
-            {
-                days = max;
-            }
-            return days;
-        }
-
-        private int SetOtherInRange(int value, int min, int max)
+        private int SetValueInRange(int value, int min, int max)
         {
             if (value < min)
             {

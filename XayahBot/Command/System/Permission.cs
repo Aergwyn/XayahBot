@@ -11,6 +11,11 @@ namespace XayahBot.Command.System
             return Property.Author.Equals(context.User.ToString());
         }
 
+        public bool IsOwner(IUser user)
+        {
+            return Property.Author.Equals(user.ToString());
+        }
+
         public bool IsMod(ICommandContext context)
         {
             if (context.User is IGuildUser guildUser &&

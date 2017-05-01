@@ -31,15 +31,52 @@ namespace XayahBot.Command.Ignore
         [Command("ignore")]
         [RequireMod]
         [RequireContext(ContextType.Guild)]
+        [Summary("Displays the ignore list.")]
+        public async Task Ignore()
+        {
+            List<TIgnoreEntry> ignoreList = this._ignoreDao.GetIgnoreList(this.Context.Guild.Id);
+            DiscordFormatMessage message = new DiscordFormatMessage();
+            message.Append("Ignored user", AppendOption.UNDERSCORE);
+            message.AppendCodeBlock(this.BuildIgnoreListString(ignoreList.Where(x => !x.IsChannel)));
+            message.Append("Ignored channel", AppendOption.UNDERSCORE);
+            message.AppendCodeBlock(this.BuildIgnoreListString(ignoreList.Where(x => x.IsChannel)));
+            await this.ReplyAsync(message.ToString());
+        }
+
+        private string BuildIgnoreListString(IEnumerable<TIgnoreEntry> list)
+        {
+            string text = string.Empty;
+            IOrderedEnumerable<TIgnoreEntry> orderedList = list.OrderBy(x => x.SubjectName);
+            if (orderedList.Count() > 0)
+            {
+                for (int i = 0; i < orderedList.Count(); i++)
+                {
+                    if (i > 0)
+                    {
+                        text += Environment.NewLine;
+                    }
+                    text += orderedList.ElementAt(i).SubjectName;
+                }
+            }
+            else
+            {
+                text += "This list is empty right now.";
+            }
+            return text;
+        }
+
+        [Command("ignore")]
+        [RequireMod]
+        [RequireContext(ContextType.Guild)]
         [Summary("Adds all mentioned user and channel to the ignore list.")]
         public async Task Ignore([Remainder] string text)
         {
             string message = string.Empty;
             foreach (ulong userId in this.Context.Message.MentionedUserIds.Distinct())
             {
-                if (this.IsActualUser(userId))
+                IUser user = await this.Context.Guild.GetUserAsync(userId);
+                if (this.IsActualUser(user))
                 {
-                    IUser user = await this.Context.Guild.GetUserAsync(userId);
                     message += await this.AddToIgnore(user.Id, user.ToString()) + Environment.NewLine;
                 }
             }
@@ -51,9 +88,9 @@ namespace XayahBot.Command.Ignore
             await this.SendReplies(message);
         }
 
-        private bool IsActualUser(ulong user)
+        private bool IsActualUser(IUser user)
         {
-            if (!user.Equals(this.Context.Client.CurrentUser.Id) && !this._permission.IsOwner(this.Context))
+            if (!user.Id.Equals(this.Context.Client.CurrentUser.Id) && !this._permission.IsOwner(user))
             {
                 return true;
             }

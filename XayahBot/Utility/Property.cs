@@ -23,8 +23,6 @@ namespace XayahBot.Utility
         public static readonly Property QuizMatch = new Property("quiz_match", "70"); // Percentage
         public static readonly Property QuizMaxTries = new Property("quiz_maxtries", "10");
         public static readonly Property QuizTimeout = new Property("quiz_timeout", "10"); // Minutes
-        public static readonly Property RemindInterval = new Property("remind_interval", "5"); // Minutes
-        public static readonly Property RemindMaxDays = new Property("remind_maxhours", "30"); // Days
 
         public static IEnumerable<Property> UpdatableValues
         {
@@ -39,8 +37,6 @@ namespace XayahBot.Utility
                 yield return QuizMatch;
                 yield return QuizMaxTries;
                 yield return QuizTimeout;
-                yield return RemindInterval;
-                yield return RemindMaxDays;
             }
         }
 

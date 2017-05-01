@@ -66,7 +66,7 @@ namespace XayahBot.Command.Remind
                 bool processed = false;
                 while (this._isRunning)
                 {
-                    int interval = int.Parse(Property.RemindInterval.Value);
+                    int interval = 5;
                     if ((!processed && DateTime.UtcNow.Minute % interval == 0) || init)
                     {
                         init = false;
