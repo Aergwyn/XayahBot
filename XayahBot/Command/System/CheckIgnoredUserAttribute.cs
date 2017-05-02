@@ -2,7 +2,7 @@
 
 using System.Threading.Tasks;
 using Discord.Commands;
-using XayahBot.Database.Service;
+using XayahBot.Database.DAO;
 
 namespace XayahBot.Command.System
 {

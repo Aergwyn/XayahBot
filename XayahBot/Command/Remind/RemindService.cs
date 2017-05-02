@@ -7,8 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
-using XayahBot.Database.Service;
 using XayahBot.Utility;
 
 namespace XayahBot.Command.Remind

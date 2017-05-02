@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using XayahBot.Database.Model;
 using XayahBot.Utility;
 
-namespace XayahBot.Database.Service
+namespace XayahBot.Database.DAO
 {
     public class LeaderboardDAO
     {
@@ -47,8 +47,6 @@ namespace XayahBot.Database.Service
             }
             return Task.CompletedTask;
         }
-
-        //
 
         private async Task CheckForResetAsync()
         {

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using XayahBot.Utility;
-using XayahBot.Database.Service;
 using XayahBot.Command.Remind;
+using XayahBot.Database.DAO;
+using XayahBot.Utility;
 
 namespace XayahBot
 {

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using XayahBot.Database.Model;
 using XayahBot.Error;
 
-namespace XayahBot.Database.Service
+namespace XayahBot.Database.DAO
 {
     public class RemindDAO
     {

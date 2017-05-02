@@ -8,10 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Newtonsoft.Json.Linq;
-using XayahBot.API;
 using XayahBot.API.Riot;
 using XayahBot.API.Riot.Model;
-using XayahBot.Database.Service;
+using XayahBot.Database.DAO;
 using XayahBot.Utility;
 
 namespace XayahBot.Command.Quiz

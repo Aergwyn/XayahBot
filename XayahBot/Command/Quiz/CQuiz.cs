@@ -6,8 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
 using XayahBot.Command.System;
+using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
-using XayahBot.Database.Service;
 using XayahBot.Utility;
 
 namespace XayahBot.Command.Quiz

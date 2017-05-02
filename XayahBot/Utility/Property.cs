@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using XayahBot.Database.Service;
+using XayahBot.Database.DAO;
 
 namespace XayahBot.Utility
 {

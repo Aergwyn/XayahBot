@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using XayahBot.Command.System;
+using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
-using XayahBot.Database.Service;
 using XayahBot.Error;
 using XayahBot.Utility;
 
