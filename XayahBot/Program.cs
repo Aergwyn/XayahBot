@@ -19,7 +19,6 @@ namespace XayahBot
         private readonly RemindService _remindService;
         private readonly IDependencyMap _dependencyMap = new DependencyMap();
 
-        private FileReader _fileReader = new FileReader();
         private IgnoreDAO _ignoreDao = new IgnoreDAO();
 
         //
@@ -50,7 +49,7 @@ namespace XayahBot
 
             await this.InitializeAsync();
 
-            string token = this._fileReader.ReadFirstLine(Property.FilePath.Value + Property.FileToken.Value);
+            string token = FileReader.ReadFirstLine(Property.FilePath.Value + Property.FileToken.Value);
             if (!string.IsNullOrWhiteSpace(token))
             {
                 await this._client.LoginAsync(TokenType.Bot, token);

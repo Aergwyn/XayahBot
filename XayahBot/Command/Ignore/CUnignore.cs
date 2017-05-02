@@ -25,8 +25,6 @@ namespace XayahBot.Command.Ignore
 
         //
 
-        private readonly RNG _random = new RNG();
-        private readonly Permission _permission = new Permission();
         private readonly IgnoreDAO _ignoreDao = new IgnoreDAO();
         private bool _hasNewUnignoredUser = false;
         private List<string> _newUnignoredList = new List<string>();
@@ -57,7 +55,7 @@ namespace XayahBot.Command.Ignore
 
         private bool IsActualUser(IUser user)
         {
-            if (!user.Id.Equals(this.Context.Client.CurrentUser.Id) && !this._permission.IsOwner(user))
+            if (!user.Id.Equals(this.Context.Client.CurrentUser.Id) && !DiscordPermissions.IsOwner(user))
             {
                 return true;
             }
@@ -99,7 +97,7 @@ namespace XayahBot.Command.Ignore
             }
             if (this._hasNewUnignoredUser)
             {
-                await this.ReplyAsync(this._random.FromList(this._unignoredReactionList));
+                await this.ReplyAsync(RNG.FromList(this._unignoredReactionList));
             }
         }
 

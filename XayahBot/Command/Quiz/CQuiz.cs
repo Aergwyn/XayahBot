@@ -24,7 +24,6 @@ namespace XayahBot.Command.Quiz
 
         //
 
-        private readonly RNG _random = new RNG();
         private readonly LeaderboardDAO _leaderboardDao = new LeaderboardDAO();
 
         [Command("ask")]
@@ -64,7 +63,7 @@ namespace XayahBot.Command.Quiz
             }
             else
             {
-                message = this._random.FromList(this._emptyLeaderboard);
+                message = RNG.FromList(this._emptyLeaderboard);
             }
             ReplyAsync(message);
         }

@@ -4,19 +4,19 @@ using XayahBot.Utility;
 
 namespace XayahBot.Command.System
 {
-    public class Permission
+    public static class DiscordPermissions
     {
-        public bool IsOwner(ICommandContext context)
+        public static bool IsOwner(ICommandContext context)
         {
             return Property.Author.Equals(context.User.ToString());
         }
 
-        public bool IsOwner(IUser user)
+        public static bool IsOwner(IUser user)
         {
             return Property.Author.Equals(user.ToString());
         }
 
-        public bool IsMod(ICommandContext context)
+        public static bool IsMod(ICommandContext context)
         {
             if (context.User is IGuildUser guildUser &&
                 (guildUser.GuildPermissions.Has(GuildPermission.Administrator) || guildUser.GuildPermissions.Has(GuildPermission.ManageGuild) ||
@@ -27,9 +27,9 @@ namespace XayahBot.Command.System
             return false;
         }
 
-        public bool IsOwnerOrMod(ICommandContext context)
+        public static bool IsOwnerOrMod(ICommandContext context)
         {
-            if (this.IsOwner(context) || this.IsMod(context))
+            if (IsOwner(context) || IsMod(context))
             {
                 return true;
             }

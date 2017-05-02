@@ -66,7 +66,6 @@ namespace XayahBot.Command.Quiz
 
         private static SemaphoreSlim _syncLock = new SemaphoreSlim(1, 1);
         private static Dictionary<ulong, QuizEntry> _questionMap = new Dictionary<ulong, QuizEntry>();
-        private static RNG _random = new RNG();
         private static LeaderboardDAO _leaderboardDao = new LeaderboardDAO();
 
         public static async Task AskQuestionAsync(CommandContext context)
@@ -80,7 +79,7 @@ namespace XayahBot.Command.Quiz
                     if (entry.TimeAsked.AddMinutes(int.Parse(Property.QuizTimeout.Value)) < DateTime.UtcNow)
                     {
                         _questionMap.Remove(context.Guild.Id);
-                        question = string.Format(_random.FromList(_questionTimeoutList), entry.GetAllAnswers());
+                        question = string.Format(RNG.FromList(_questionTimeoutList), entry.GetAllAnswers());
                     }
                     else
                     {
@@ -128,7 +127,7 @@ namespace XayahBot.Command.Quiz
                         if (!string.IsNullOrWhiteSpace(correctAnswer))
                         {
                             success = true;
-                            response = string.Format(_random.FromList(_fullAnswerList), context.User.Mention);
+                            response = string.Format(RNG.FromList(_fullAnswerList), context.User.Mention);
                         }
                     }
                     else
@@ -141,12 +140,12 @@ namespace XayahBot.Command.Quiz
                             if (percentage >= 100)
                             {
                                 success = true;
-                                response = string.Format(_random.FromList(_fullAnswerList), context.User.Mention);
+                                response = string.Format(RNG.FromList(_fullAnswerList), context.User.Mention);
                             }
                             else if (percentage >= int.Parse(Property.QuizMatch.Value))
                             {
                                 success = true;
-                                response = string.Format(_random.FromList(_partialAnswerList), context.User.Mention, correctAnswer);
+                                response = string.Format(RNG.FromList(_partialAnswerList), context.User.Mention, correctAnswer);
                             }
                         }
                     }
@@ -161,12 +160,12 @@ namespace XayahBot.Command.Quiz
                         if (entry.TimesFailed >= int.Parse(Property.QuizMaxTries.Value))
                         {
                             _questionMap.Remove(context.Guild.Id);
-                            response = string.Format(_random.FromList(_questionMaxTriesList), entry.GetAllAnswers());
+                            response = string.Format(RNG.FromList(_questionMaxTriesList), entry.GetAllAnswers());
                         }
                         else if (entry.TimeAsked.AddMinutes(int.Parse(Property.QuizTimeout.Value)) < DateTime.UtcNow)
                         {
                             _questionMap.Remove(context.Guild.Id);
-                            response = string.Format(_random.FromList(_questionTimeoutList), entry.GetAllAnswers());
+                            response = string.Format(RNG.FromList(_questionTimeoutList), entry.GetAllAnswers());
                         }
                     }
                 }
@@ -191,11 +190,11 @@ namespace XayahBot.Command.Quiz
         {
             QuizEntry entry = null;
             ChampionListDto championList = await new RiotStaticDataApi(Region.EUW).GetChampionsAsync();
-            int id = championList.Data.ElementAt(_random.Next(championList.Data.Count) - 1).Value.Id; // Get random champion id from list
+            int id = championList.Data.ElementAt(RNG.Next(championList.Data.Count) - 1).Value.Id; // Get random champion id from list
             ChampionDto champion = await new RiotStaticDataApi(Region.EUW).GetChampionAsync(id); // Get/Update data of champion
             if (champion != null)
             {
-                switch (_random.Next(4))
+                switch (RNG.Next(4))
                 {
                     case 1:
                         entry = AskChampionBasic(champion);
@@ -217,7 +216,7 @@ namespace XayahBot.Command.Quiz
         private static QuizEntry AskChampionBasic(ChampionDto champion)
         {
             QuizEntry entry = null;
-            switch (_random.Next(4))
+            switch (RNG.Next(4))
             {
                 case 1:
                     entry = new QuizEntry(string.Format(_championBasicNameQ, champion.Title), int.Parse(Property.QuizMatch.Value), champion.Name);
@@ -238,7 +237,7 @@ namespace XayahBot.Command.Quiz
         private static QuizEntry AskChampionSkin(ChampionDto champion)
         {
             QuizEntry entry = null;
-            switch (_random.Next(3))
+            switch (RNG.Next(3))
             {
                 case 1:
                     List<string> answer = new List<string>();
@@ -252,7 +251,7 @@ namespace XayahBot.Command.Quiz
                     entry = new QuizEntry(string.Format(_championSkinCountQ, champion.Name), champion.Skins.Count.ToString());
                     break;
                 case 3:
-                    SkinDto randomSkin = champion.Skins.FirstOrDefault(x => x.Num.Equals(_random.Next(champion.Skins.Count - 1)));
+                    SkinDto randomSkin = champion.Skins.FirstOrDefault(x => x.Num.Equals(RNG.Next(champion.Skins.Count - 1)));
                     entry = new QuizEntry(string.Format(_championSkinOrderQ, randomSkin.Num, NumberSuffix(randomSkin.Num), champion.Name, Property.QuizMatch), int.Parse(Property.QuizMatch.Value), randomSkin.Name);
                     break;
             }
@@ -277,9 +276,9 @@ namespace XayahBot.Command.Quiz
         private static QuizEntry AskChampionSpell(ChampionDto champion)
         {
             QuizEntry entry = null;
-            ChampionSpellDto spell = champion.Spells.ElementAt(_random.Next(champion.Spells.Count) - 1); // Get random spell from list
-            int rank = _random.Next(spell.MaxRank); // Random spell rank
-            switch (_random.Next(5))
+            ChampionSpellDto spell = champion.Spells.ElementAt(RNG.Next(champion.Spells.Count) - 1); // Get random spell from list
+            int rank = RNG.Next(spell.MaxRank); // Random spell rank
+            switch (RNG.Next(5))
             {
                 case 1:
                     List<string> answer = new List<string>();
@@ -348,8 +347,8 @@ namespace XayahBot.Command.Quiz
         {
             QuizEntry entry = null;
             StatsDto stats = champion.Stats;
-            int level = _random.Next(18);
-            switch (_random.Next(6))
+            int level = RNG.Next(18);
+            switch (RNG.Next(6))
             {
                 case 1:
                     entry = new QuizEntry(string.Format(_championStatsArmorQ, champion.Name, level), GetCalculateDStat(stats.Armor, stats.ArmorPerLevel, level));

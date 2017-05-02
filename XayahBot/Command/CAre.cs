@@ -49,8 +49,6 @@ namespace XayahBot.Command
 
         //
 
-        private readonly RNG _random = new RNG();
-
         [Command("are"), Alias("is", "am")]
         [CheckIgnoredUser]
         [CheckIgnoredChannel]
@@ -61,15 +59,15 @@ namespace XayahBot.Command
             text = text.Trim();
             if (this.IsQuestion(text))
             {
-                response = this._random.FromList(this._responseList);
+                response = RNG.FromList(this._responseList);
             }
             else if (this.IsSentence(text))
             {
-                response = this._random.FromList(this._noQuestionList);
+                response = RNG.FromList(this._noQuestionList);
             }
             else
             {
-                response = this._random.FromList(this._noSentenceList);
+                response = RNG.FromList(this._noSentenceList);
             }
             await this.ReplyAsync(response);
         }

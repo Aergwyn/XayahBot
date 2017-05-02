@@ -36,7 +36,6 @@ namespace XayahBot.Command.Remind
         private readonly DiscordSocketClient _client;
         private readonly RemindDAO _remindDao = new RemindDAO();
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
-        private readonly ResponseHelper _responseHelper = new ResponseHelper();
         private bool _isRunning = false;
         private Dictionary<int, Timer> _currentTimerList = new Dictionary<int, Timer>();
 
@@ -109,7 +108,7 @@ namespace XayahBot.Command.Remind
             TRemindEntry reminder = (TRemindEntry)state;
             await this._remindDao.RemoveAsync(reminder.Id, reminder.UserId);
             StopTimer(reminder.Id);
-            IMessageChannel channel = await this._responseHelper.GetDMChannel(this._client, reminder.UserId);
+            IMessageChannel channel = await ResponseHelper.GetDMChannel(this._client, reminder.UserId);
             DiscordFormatMessage message = new DiscordFormatMessage("Back then you told me to remind you of this.");
             message.AppendCodeBlock(reminder.Message);
             await channel.SendMessageAsync(message.ToString());

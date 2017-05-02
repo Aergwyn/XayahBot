@@ -18,8 +18,6 @@ namespace XayahBot.Command.Help
         //
 
         private readonly CommandService _commandService;
-        private readonly Permission _permission = new Permission();
-        private readonly ResponseHelper _responseHelper = new ResponseHelper();
 
         public CHelp(CommandService commandService)
         {
@@ -32,7 +30,7 @@ namespace XayahBot.Command.Help
         [Summary("Displays the list of commands.")]
         public async Task Help()
         {
-            IMessageChannel channel = await this._responseHelper.GetDMChannel(this.Context);
+            IMessageChannel channel = await ResponseHelper.GetDMChannel(this.Context);
             DiscordFormatMessage message = new DiscordFormatMessage();
             message = this.BuildCommonerCommandList(message);
             message = this.BuildModCommandList(message);
@@ -52,7 +50,7 @@ namespace XayahBot.Command.Help
         private DiscordFormatMessage BuildModCommandList(DiscordFormatMessage message)
         {
             List<HelpLine> commandList = this.GetMatchingPreconditionList(new RequireModAttribute());
-            if (this._permission.IsOwnerOrMod(this.Context) && commandList.Count > 0)
+            if (DiscordPermissions.IsOwnerOrMod(this.Context) && commandList.Count > 0)
             {
                 message.Append("Mod-Commands", AppendOption.UNDERSCORE);
                 message.AppendCodeBlock(this.BuildListString(commandList));
@@ -63,7 +61,7 @@ namespace XayahBot.Command.Help
         private DiscordFormatMessage BuildOwnerCommandList(DiscordFormatMessage message)
         {
             List<HelpLine> commandList = this.GetMatchingPreconditionList(new RequireOwnerAttribute());
-            if (this._permission.IsOwner(this.Context) && commandList.Count > 0)
+            if (DiscordPermissions.IsOwner(this.Context) && commandList.Count > 0)
             {
                 message.Append("Owner-Commands", AppendOption.UNDERSCORE);
                 message.AppendCodeBlock(this.BuildListString(commandList));

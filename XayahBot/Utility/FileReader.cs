@@ -3,9 +3,9 @@ using System.Linq;
 
 namespace XayahBot.Utility
 {
-    public class FileReader
+    public static class FileReader
     {
-        public string ReadFirstLine(string path)
+        public static string ReadFirstLine(string path)
         {
             string result = string.Empty;
             if (!string.IsNullOrWhiteSpace(path))

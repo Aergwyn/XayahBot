@@ -9,10 +9,9 @@ namespace XayahBot.Command.System
     {
         public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IDependencyMap map)
         {
-            Permission permission = new Permission();
             string errorText = "You don't have the required permission for this command";
 
-            if (permission.IsOwnerOrMod(context))
+            if (DiscordPermissions.IsOwnerOrMod(context))
             {
                 return PreconditionResult.FromSuccess();
             }

@@ -22,7 +22,6 @@ namespace XayahBot.Command.Remind
 
         private RemindService _remindService { get; set; }
         private readonly RemindDAO _remindDao = new RemindDAO();
-        private readonly ResponseHelper _responseHelper = new ResponseHelper();
 
         public CRemind(RemindService remindService)
         {
@@ -35,7 +34,7 @@ namespace XayahBot.Command.Remind
         [Summary("Displays a list of your active reminder.")]
         public async Task Reminder()
         {
-            IMessageChannel channel = await this._responseHelper.GetDMChannel(this.Context);
+            IMessageChannel channel = await ResponseHelper.GetDMChannel(this.Context);
             List<TRemindEntry> reminders = this._remindDao.GetReminders(this.Context.User.Id);
             DiscordFormatMessage message = new DiscordFormatMessage();
             message = this.BuildReminderListString(reminders, message);
