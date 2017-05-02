@@ -24,7 +24,7 @@ namespace XayahBot.Command
 
         private string BuildPropertyListString() {
             string text = string.Empty;
-            int maxWidth = Property.UpdatableValues.OrderByDescending(x => x.Name.Length).First().Name.Length + 1;
+            int maxWidth = Property.UpdatableValues.OrderByDescending(x => x.Name.Length).First().Name.Length;
             for (int i = 0; i < Property.UpdatableValues.Count(); i++)
             {
                 if (i > 0)
@@ -32,7 +32,7 @@ namespace XayahBot.Command
                     text += Environment.NewLine;
                 }
                 Property property = Property.UpdatableValues.ElementAt(i);
-                text += (property.Name + ":").PadRight(maxWidth) + property.Value;
+                text += property.Name.PadRight(maxWidth) + ":" + property.Value;
             }
             return text;
         }

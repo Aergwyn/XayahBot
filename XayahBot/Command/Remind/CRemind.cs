@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
-using XayahBot.Database.Service;
 using XayahBot.Error;
 using XayahBot.Utility;
 
