@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable 4014
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,6 +28,9 @@ namespace XayahBot.Command.Ignore
         private readonly RNG _random = new RNG();
         private readonly Permission _permission = new Permission();
         private readonly IgnoreDAO _ignoreDao = new IgnoreDAO();
+        private bool _hasNewUnignoredUser = false;
+        private List<string> _newUnignoredList = new List<string>();
+        private List<string> _notExistingUnignoredList = new List<string>();
 
         [Command("unignore")]
         [RequireMod]
@@ -39,15 +44,15 @@ namespace XayahBot.Command.Ignore
                 IUser user = await this.Context.Guild.GetUserAsync(userId);
                 if (this.IsActualUser(user))
                 {
-                    message += await RemoveIgnore(user.Id, user.ToString()) + Environment.NewLine;
+                    await RemoveIgnore(user.Id, user.ToString());
                 }
             }
             foreach (ulong channelId in this.Context.Message.MentionedChannelIds.Distinct())
             {
                 IChannel channel = await this.Context.Guild.GetChannelAsync(channelId);
-                message += await RemoveIgnore(channel.Id, channel.Name) + Environment.NewLine;
+                await RemoveIgnore(channel.Id, channel.Name, true);
             }
-            await this.SendReplies(message);
+            await this.SendReplies();
         }
 
         private bool IsActualUser(IUser user)
@@ -59,32 +64,98 @@ namespace XayahBot.Command.Ignore
             return false;
         }
 
-        private async Task<string> RemoveIgnore(ulong subjectId, string subjectName)
+        private async Task RemoveIgnore(ulong subjectId, string subjectName)
         {
-            string message = string.Empty;
+            await this.RemoveIgnore(subjectId, subjectName, false);
+        }
+
+        private async Task RemoveIgnore(ulong subjectId, string subjectName, bool isChannel)
+        {
             try
             {
                 await this._ignoreDao.RemoveAsync(this.Context.Guild.Id, subjectId);
-                message = $"Removed `{subjectName}` from the ignore list.";
+                this._newUnignoredList.Add(subjectName);
+                if (!isChannel)
+                {
+                    this._hasNewUnignoredUser = true;
+                }
             }
             catch (NotExistingException)
             {
-                message = $"`{subjectName}` was never on the ignore list.";
+                this._notExistingUnignoredList.Add(subjectName);
             }
-            catch (NotSavedException)
+            catch (NotSavedException nsex)
             {
-                message = $"Failed to remove `{subjectName}` from the ignore list.";
+                Logger.Warning(nsex.Message, nsex);
             }
-            return message;
         }
 
-        private async Task SendReplies(string message)
+        private async Task SendReplies()
         {
+            string message = this.CreateMessage();
             if (!string.IsNullOrWhiteSpace(message))
             {
                 await this.ReplyAsync(message);
+            }
+            if (this._hasNewUnignoredUser)
+            {
                 await this.ReplyAsync(this._random.FromList(this._unignoredReactionList));
             }
+        }
+
+        private string CreateMessage()
+        {
+            string text = string.Empty;
+            if (this._newUnignoredList.Count > 0)
+            {
+                text += $"Removed {this.BuildEnumerationFromList(this._newUnignoredList)} from the ignore list.";
+            }
+            int notExistingCount = this._notExistingUnignoredList.Count;
+            if (notExistingCount > 0)
+            {
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    text += Environment.NewLine + Environment.NewLine;
+                }
+                text += $"{this.BuildEnumerationFromList(this._notExistingUnignoredList)} " +
+                    $"{this.GetSingularOrPlural(notExistingCount)} never on the ignore list.";
+            }
+            return text;
+        }
+
+        private string BuildEnumerationFromList(List<string> list)
+        {
+            string text = string.Empty;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (i > 0)
+                {
+                    if (i == list.Count() - 1)
+                    {
+                        text += " and ";
+                    }
+                    else
+                    {
+                        text += ", ";
+                    }
+                }
+                text += $"`{list.ElementAt(i)}`";
+            }
+            return text;
+        }
+
+        private string GetSingularOrPlural(int count)
+        {
+            string text = string.Empty;
+            if (count > 1)
+            {
+                text = "were";
+            }
+            else
+            {
+                text = "was";
+            }
+            return text;
         }
     }
 }

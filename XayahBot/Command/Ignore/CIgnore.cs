@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable 4014
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,6 +29,9 @@ namespace XayahBot.Command.Ignore
         private readonly RNG _random = new RNG();
         private readonly Permission _permission = new Permission();
         private readonly IgnoreDAO _ignoreDao = new IgnoreDAO();
+        private bool _hasNewIgnoredUser = false;
+        private List<string> _newIgnoredList = new List<string>();
+        private List<string> _existingIgnoredList = new List<string>();
 
         [Command("ignore")]
         [RequireMod]
@@ -71,21 +76,20 @@ namespace XayahBot.Command.Ignore
         [Summary("Adds all mentioned user and channel to the ignore list.")]
         public async Task Ignore([Remainder] string text)
         {
-            string message = string.Empty;
             foreach (ulong userId in this.Context.Message.MentionedUserIds.Distinct())
             {
                 IUser user = await this.Context.Guild.GetUserAsync(userId);
                 if (this.IsActualUser(user))
                 {
-                    message += await this.AddToIgnore(user.Id, user.ToString()) + Environment.NewLine;
+                    await this.AddToIgnore(user.Id, user.ToString());
                 }
             }
             foreach (ulong channelId in this.Context.Message.MentionedChannelIds.Distinct())
             {
                 IChannel channel = await this.Context.Guild.GetChannelAsync(channelId);
-                message += await this.AddToIgnore(channel.Id, channel.Name, true) + Environment.NewLine;
+                await this.AddToIgnore(channel.Id, channel.Name, true);
             }
-            await this.SendReplies(message);
+            await this.SendReplies();
         }
 
         private bool IsActualUser(IUser user)
@@ -97,14 +101,13 @@ namespace XayahBot.Command.Ignore
             return false;
         }
 
-        private async Task<string> AddToIgnore(ulong subjectId, string subjectName)
+        private async Task AddToIgnore(ulong subjectId, string subjectName)
         {
-            return await this.AddToIgnore(subjectId, subjectName, false);
+            await this.AddToIgnore(subjectId, subjectName, false);
         }
 
-        private async Task<string> AddToIgnore(ulong subjectId, string subjectName, bool isChannel)
+        private async Task AddToIgnore(ulong subjectId, string subjectName, bool isChannel)
         {
-            string message = string.Empty;
             try
             {
                 await this._ignoreDao.AddAsync(new TIgnoreEntry
@@ -114,26 +117,88 @@ namespace XayahBot.Command.Ignore
                     SubjectId = subjectId,
                     SubjectName = subjectName
                 });
-                message = $"Added `{subjectName}` to the ignore list.";
+                this._newIgnoredList.Add(subjectName);
+                if (!isChannel)
+                {
+                    this._hasNewIgnoredUser = true;
+                }
             }
             catch (AlreadyExistingException)
             {
-                message = $"`{subjectName}` is already on the ignore list.";
+                this._existingIgnoredList.Add(subjectName);
             }
-            catch (NotSavedException)
+            catch (NotSavedException nsex)
             {
-                message = $"Failed to add `{subjectName}` to the ignore list.";
+                Logger.Warning(nsex.Message, nsex);
             }
-            return message;
         }
 
-        private async Task SendReplies(string message)
+        private async Task SendReplies()
         {
+            string message = this.CreateMessage();
             if (!string.IsNullOrWhiteSpace(message))
             {
                 await this.ReplyAsync(message);
+            }
+            if (this._hasNewIgnoredUser)
+            {
                 await this.ReplyAsync(this._random.FromList(this._ignoredReactionList));
             }
+        }
+
+        private string CreateMessage()
+        {
+            string text = string.Empty;
+            if (this._newIgnoredList.Count > 0)
+            {
+                text += $"Added {this.BuildEnumerationFromList(this._newIgnoredList)} to the ignore list.";
+            }
+            int existingCount = this._existingIgnoredList.Count;
+            if (existingCount > 0)
+            {
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    text += Environment.NewLine + Environment.NewLine;
+                }
+                text += $"{this.BuildEnumerationFromList(this._existingIgnoredList)} " +
+                    $"{this.GetSingularOrPlural(existingCount)} already on the ignore list.";
+            }
+            return text;
+        }
+
+        private string BuildEnumerationFromList(List<string> list)
+        {
+            string text = string.Empty;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (i > 0)
+                {
+                    if (i == list.Count() - 1)
+                    {
+                        text += " and ";
+                    }
+                    else
+                    {
+                        text += ", ";
+                    }
+                }
+                text += $"`{list.ElementAt(i)}`";
+            }
+            return text;
+        }
+
+        private string GetSingularOrPlural(int count)
+        {
+            string text = string.Empty;
+            if (count > 1)
+            {
+                text = "are";
+            }
+            else
+            {
+                text = "is";
+            }
+            return text;
         }
     }
 }

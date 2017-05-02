@@ -14,7 +14,7 @@ namespace XayahBot.API
         private static SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
         private static Dictionary<string, CacheEntry> _cache = new Dictionary<string, CacheEntry>();
 
-        new protected async Task<T> GetAsync<T>(ApiRequest request)
+        protected new async Task<T> GetAsync<T>(ApiRequest request)
         {
             T result = default(T);
             await _lock.WaitAsync();
