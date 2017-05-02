@@ -15,12 +15,6 @@ namespace XayahBot.Command.Quiz
     [Group("quiz")]
     public class CQuiz : ModuleBase
     {
-        private readonly List<string> _recentlyPosted = new List<string>
-        {
-            "... I just posted it. Not even a few minutes ago. Go look for it!",
-            "I refuse to post it again!",
-            "Again? But I just did!"
-        };
         private readonly List<string> _emptyLeaderboard = new List<string>
         {
             "Unlucky. No one had any success so far.",
@@ -29,8 +23,6 @@ namespace XayahBot.Command.Quiz
         };
 
         //
-
-        private static DateTime _lastLeaderboardPost;
 
         private readonly RNG _random = new RNG();
         private readonly LeaderboardDAO _leaderboardDao = new LeaderboardDAO();
@@ -57,26 +49,18 @@ namespace XayahBot.Command.Quiz
             List<TLeaderboardEntry> leaderboard = (await this._leaderboardDao.GetLeaderboardAsync(this.Context.Guild.Id)).OrderByDescending(x => x.Answers).ToList();
             if (leaderboard.Count > 0)
             {
-                if (_lastLeaderboardPost.AddMinutes(int.Parse(Property.QuizLeaderboardCd.Value)) < DateTime.UtcNow)
+                int width = leaderboard.First().Answers.ToString().Length;
+                message = "Most correctly answered questions this month:```";
+                for (int i = 0; i < leaderboard.Count && i < int.Parse(Property.QuizLeaderboardMax.Value); i++)
                 {
-                    int width = leaderboard.First().Answers.ToString().Length;
-                    message = "Most correctly answered questions this month...```";
-                    for (int i = 0; i < leaderboard.Count && i < int.Parse(Property.QuizLeaderboardMax.Value); i++)
+                    if (i > 0)
                     {
-                        if (i > 0)
-                        {
-                            message += Environment.NewLine;
-                        }
-                        TLeaderboardEntry entry = leaderboard.ElementAt(i);
-                        message += $"{entry.Answers.ToString().PadLeft(width)} - {entry.UserName}";
+                        message += Environment.NewLine;
                     }
-                    message += "```";
-                    _lastLeaderboardPost = DateTime.UtcNow;
+                    TLeaderboardEntry entry = leaderboard.ElementAt(i);
+                    message += $"{entry.Answers.ToString().PadLeft(width)} - {entry.UserName}";
                 }
-                else
-                {
-                    message = this._random.FromList(this._recentlyPosted);
-                }
+                message += "```";
             }
             else
             {

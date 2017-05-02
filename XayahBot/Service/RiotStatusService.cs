@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.WebSocket;
-using XayahBot.API;
+using XayahBot.API.Riot;
 using XayahBot.API.Riot.Model;
 
 namespace XayahBot.Service

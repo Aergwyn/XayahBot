@@ -146,7 +146,7 @@ namespace XayahBot.Command.Help
         {
             string text = string.Empty;
             int maxWidth = helpList.OrderByDescending(x => x.Command.Length).First().Command.Length;
-            for(int i = 0; i < helpList.Count; i++)
+            for (int i = 0; i < helpList.Count; i++)
             {
                 if (i > 0)
                 {
