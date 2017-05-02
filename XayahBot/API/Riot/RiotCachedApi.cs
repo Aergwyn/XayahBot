@@ -2,7 +2,7 @@
 
 namespace XayahBot.API.Riot
 {
-    public abstract class RiotApi : Api
+    public abstract class RiotCachedApi : CachedApi
     {
         protected abstract string GetService();
 
@@ -15,7 +15,7 @@ namespace XayahBot.API.Riot
 
         private FileReader _fileReader = new FileReader();
 
-        protected RiotApi(Region region)
+        protected RiotCachedApi(Region region)
         {
             this._region = region ?? Region.EUW;
             this._apiKey = this._fileReader.ReadFirstLine(Property.FilePath.Value + Property.FileRiotApiKey.Value);

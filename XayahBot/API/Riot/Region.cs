@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace XayahBot.API
+namespace XayahBot.API.Riot
 {
     public class Region
     {
@@ -26,8 +26,6 @@ namespace XayahBot.API
             this.Name = name;
             this.Platform = platform;
         }
-
-        //
 
         public override bool Equals(object obj)
         {

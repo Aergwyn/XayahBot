@@ -14,7 +14,6 @@ namespace XayahBot.Utility
         public static readonly Property FileRiotApiKey = new Property("file_riotapikey", "riotapikey.txt", false);
         public static readonly Property FileToken = new Property("file_token", "token.txt", false);
 
-        public static readonly Property DataLongevity = new Property("data_longevity", "24"); // Hours
         public static readonly Property GameActive = new Property("game_active", "with Rakan");
         public static readonly Property GameShutdown = new Property("game_shutdown", "shutting down...");
         public static readonly Property QuizLastReset = new Property("quiz_lastreset", "1/2017");
@@ -28,7 +27,6 @@ namespace XayahBot.Utility
         {
             get
             {
-                yield return DataLongevity;
                 yield return GameActive;
                 yield return GameShutdown;
                 yield return QuizLastReset;

@@ -8,13 +8,11 @@ namespace XayahBot.API
         public object Data { get; private set; }
         private DateTime ExpirationTime { get; set; }
 
-        public CacheEntry(object data)
+        public CacheEntry(object data, DateTime expirationTime)
         {
             this.Data = data;
-            this.ExpirationTime = DateTime.UtcNow.AddHours(int.Parse(Property.DataLongevity.Value));
+            this.ExpirationTime = expirationTime;
         }
-
-        //
 
         public bool IsExpired()
         {

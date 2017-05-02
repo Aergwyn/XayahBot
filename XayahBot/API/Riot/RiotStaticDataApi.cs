@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using XayahBot.API.Riot.Model;
 
 namespace XayahBot.API.Riot
 {
-    public class RiotStaticDataApi : RiotApi
+    public class RiotStaticDataApi : RiotCachedApi
     {
         public RiotStaticDataApi(Region region = null) : base(region)
         {
@@ -19,7 +20,10 @@ namespace XayahBot.API.Riot
             return "v3";
         }
 
-        //
+        protected override DateTime GetDataExpirationTime()
+        {
+            return DateTime.UtcNow.AddHours(24);
+        }
 
         public async Task<ChampionListDto> GetChampionsAsync()
         {

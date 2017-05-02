@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using XayahBot.API.Riot.Model;
 
-namespace XayahBot.API
+namespace XayahBot.API.Riot
 {
     public class RiotStatusApi : RiotApi
     {
