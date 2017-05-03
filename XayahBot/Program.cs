@@ -81,6 +81,7 @@ namespace XayahBot
             this._client.LeftGuild += this.HandleLeftGuild;
             this._client.MessageReceived += this.HandleMessageReceived;
 
+            this._dependencyMap.Add(new IgnoreDAO());
             this._dependencyMap.Add(this._remindService);
 
             await this._commandService.AddModulesAsync(Assembly.GetEntryAssembly());
@@ -134,7 +135,8 @@ namespace XayahBot
         private async Task HandleMessageReceived(SocketMessage arg)
         {
             int pos = 0;
-            if (arg is SocketUserMessage message && (message.HasCharPrefix(char.Parse(Property.CmdPrefix.Value), ref pos) || message.HasMentionPrefix(message.Discord.CurrentUser, ref pos)))
+            if (arg is SocketUserMessage message && (message.HasCharPrefix(char.Parse(Property.CmdPrefix.Value), ref pos) ||
+                message.HasMentionPrefix(message.Discord.CurrentUser, ref pos)))
             {
                 CommandContext context = new CommandContext(message.Discord, message);
                 IResult result = await this._commandService.ExecuteAsync(context, pos, this._dependencyMap);
