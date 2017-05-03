@@ -16,32 +16,25 @@ namespace XayahBot.Command.Data
         public static async Task<DiscordFormatMessage> GetChampionDataText(string name)
         {
             DiscordFormatMessage message = new DiscordFormatMessage();
-            if (!string.IsNullOrWhiteSpace(name))
+            name = name.Trim();
+            RiotStaticDataApi staticDataApi = new RiotStaticDataApi();
+            ChampionListDto championList = await staticDataApi.GetChampionsAsync();
+            List<ChampionDto> matches = championList.Data.Values.Where(x => x.Name.ToLower().Contains(name.ToLower()) || FilterName(x.Name).ToLower().Contains(name.ToLower())).ToList();
+            matches.Sort((a, b) => a.Name.CompareTo(b.Name));
+            if (matches.Count > 1)
             {
-                name = name.Trim();
-                RiotStaticDataApi staticDataApi = new RiotStaticDataApi();
-                ChampionListDto championList = await staticDataApi.GetChampionsAsync();
-                List<ChampionDto> matches = championList.Data.Values.Where(x => x.Name.ToLower().Contains(name.ToLower()) || FilterName(x.Name).ToLower().Contains(name.ToLower())).ToList();
-                matches.Sort((a, b) => a.Name.CompareTo(b.Name));
-                if (matches.Count > 1)
-                {
-                    message.Append($"Found more than one champion (fully or partially) named `{name}`.");
-                    message = BuildMatchListString(matches, message);
-                }
-                else if (matches.Count > 0)
-                {
-                    ChampionDto champion = await staticDataApi.GetChampionAsync(matches.First().Id);
-                    message = BuildChampionDataString(champion, message);
-                    Logger.Debug($"Posting champion data. Message length: {message.ToString().Length}");
-                }
-                else
-                {
-                    message.Append($"Oops! Your bad. I could not find a champion (fully or partially) named `{name}`.");
-                }
+                message.Append($"Found more than one champion (fully or partially) named `{name}`.");
+                message = BuildMatchListString(matches, message);
+            }
+            else if (matches.Count > 0)
+            {
+                ChampionDto champion = await staticDataApi.GetChampionAsync(matches.First().Id);
+                message = BuildChampionDataString(champion, message);
+                Logger.Debug($"Posting champion data. Message length: {message.ToString().Length}");
             }
             else
             {
-                message.Append("You should give me something I can search with...");
+                message.Append($"Oops! Your bad. I could not find a champion (fully or partially) named `{name}`.");
             }
             return message;
         }
