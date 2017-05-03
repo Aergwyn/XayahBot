@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿#pragma warning disable 4014
+
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord.Commands;
 using XayahBot.Command.System;
@@ -53,10 +55,10 @@ namespace XayahBot.Command
         [CheckIgnoredUser]
         [CheckIgnoredChannel]
         [Summary("Triggers an 8ball-esque response.")]
-        public async Task Are([Remainder] string text = "")
+        public Task Are([Remainder] string text = "")
         {
-            string response = string.Empty;
             text = text.Trim();
+            string response = string.Empty;
             if (this.IsQuestion(text))
             {
                 response = RNG.FromList(this._responseList);
@@ -69,7 +71,8 @@ namespace XayahBot.Command
             {
                 response = RNG.FromList(this._noSentenceList);
             }
-            await this.ReplyAsync(response);
+            this.ReplyAsync(response);
+            return Task.CompletedTask;
         }
 
         private bool IsQuestion(string text)

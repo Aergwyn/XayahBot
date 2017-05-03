@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable 4014
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,7 +38,7 @@ namespace XayahBot.Command.Help
             message = this.BuildModCommandList(message);
             message = this.BuildOwnerCommandList(message);
             message.Append(string.Format(this._finishHelp, Property.Author));
-            await channel.SendMessageAsync(message.ToString());
+            channel.SendMessageAsync(message.ToString());
         }
 
         private DiscordFormatMessage BuildCommonerCommandList(DiscordFormatMessage message)

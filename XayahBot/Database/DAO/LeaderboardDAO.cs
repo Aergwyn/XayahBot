@@ -1,6 +1,4 @@
-﻿#pragma warning disable 4014
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,18 +32,17 @@ namespace XayahBot.Database.DAO
                 {
                     match.Answers++;
                 }
-                database.SaveChangesAsync();
+                await database.SaveChangesAsync();
             }
         }
 
-        public Task ResetAsync()
+        public async Task ResetAsync()
         {
             using (GeneralContext database = new GeneralContext())
             {
                 database.QuizLeaderboard.RemoveRange(database.QuizLeaderboard);
-                database.SaveChangesAsync();
+                await database.SaveChangesAsync();
             }
-            return Task.CompletedTask;
         }
 
         private async Task CheckForResetAsync()
@@ -56,7 +53,7 @@ namespace XayahBot.Database.DAO
                 string[] lastReset = Property.QuizLastReset.Value.Split('/');
                 if (new DateTime(int.Parse(lastReset.ElementAt(1)), int.Parse(lastReset.ElementAt(0)), 1, 0, 0, 0).AddMonths(1) < now)
                 {
-                    await ResetAsync();
+                    await this.ResetAsync();
                     Property.QuizLastReset.Value = $"{now.Month}/{now.Year}";
                 }
             }

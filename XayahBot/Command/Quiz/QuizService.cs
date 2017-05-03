@@ -96,7 +96,7 @@ namespace XayahBot.Command.Quiz
                 }
                 if (!string.IsNullOrWhiteSpace(question))
                 {
-                    context.Channel.SendMessageAsync(question);
+                    await context.Channel.SendMessageAsync(question);
                 }
                 else
                 {
@@ -151,7 +151,7 @@ namespace XayahBot.Command.Quiz
                     if (success)
                     {
                         _questionMap.Remove(context.Guild.Id);
-                        _leaderboardDao.IncrementAnswerAsync(context.Guild.Id, context.User.Id, context.User.ToString());
+                        await _leaderboardDao.IncrementAnswerAsync(context.Guild.Id, context.User.Id, context.User.ToString());
                     }
                     else
                     {
@@ -170,7 +170,7 @@ namespace XayahBot.Command.Quiz
                 }
                 if (!string.IsNullOrWhiteSpace(response))
                 {
-                    context.Channel.SendMessageAsync(response);
+                    await context.Channel.SendMessageAsync(response);
                 }
             }
             catch (Exception ex)

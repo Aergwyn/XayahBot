@@ -6,16 +6,14 @@ namespace XayahBot.Utility
 {
     public static class RNG
     {
-        private static Random _numberGen = new Random();
-
         public static int Next(int max = 100)
         {
-            return _numberGen.Next(1, max + 1);
+            return new Random().Next(1, max + 1);
         }
 
         public static int Next(int min, int max)
         {
-            return _numberGen.Next(min, max + 1);
+            return new Random().Next(min, max + 1);
         }
 
         public static T FromList<T>(List<T> list)

@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable 4014
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -38,7 +40,7 @@ namespace XayahBot.Command.Remind
             List<TRemindEntry> reminders = this._remindDao.GetReminders(this.Context.User.Id);
             DiscordFormatMessage message = new DiscordFormatMessage();
             message = this.BuildReminderListString(reminders, message);
-            await channel.SendMessageAsync(message.ToString());
+            channel.SendMessageAsync(message.ToString());
         }
 
         private DiscordFormatMessage BuildReminderListString(IEnumerable<TRemindEntry> list, DiscordFormatMessage message)
@@ -64,6 +66,7 @@ namespace XayahBot.Command.Remind
         [Summary("Reminds you in 1-30 days with your specified message.")]
         public async Task Days(int d, [Remainder] string text)
         {
+            text = text.Trim();
             string message = string.Empty;
             d = this.SetValueInRange(d, 1, 30);
             try
@@ -71,7 +74,7 @@ namespace XayahBot.Command.Remind
                 await this._remindService.AddNew(this.Context.Client as DiscordSocketClient, new TRemindEntry
                 {
                     ExpirationDate = DateTime.UtcNow.AddDays(d),
-                    Message = text.Trim(),
+                    Message = text,
                     UserId = this.Context.User.Id
                 });
                 message = string.Format(this._reminderCreated, d, "day", this.AddSForMultiple(d));
@@ -80,13 +83,14 @@ namespace XayahBot.Command.Remind
             {
                 message = this._createRemindFailed;
             }
-            await this.ReplyAsync(message);
+            this.ReplyAsync(message);
         }
 
         [Command("h")]
         [Summary("Reminds you in 1-23 hours with your specified message.")]
         public async Task Hours(int h, [Remainder] string text)
         {
+            text = text.Trim();
             string message = string.Empty;
             h = this.SetValueInRange(h, 1, 23);
             try
@@ -94,7 +98,7 @@ namespace XayahBot.Command.Remind
                 await this._remindService.AddNew(this.Context.Client as DiscordSocketClient, new TRemindEntry
                 {
                     ExpirationDate = DateTime.UtcNow.AddHours(h),
-                    Message = text.Trim(),
+                    Message = text,
                     UserId = this.Context.User.Id
                 });
                 message = string.Format(this._reminderCreated, h, "hour", this.AddSForMultiple(h));
@@ -103,13 +107,14 @@ namespace XayahBot.Command.Remind
             {
                 message = this._createRemindFailed;
             }
-            await this.ReplyAsync(message);
+            this.ReplyAsync(message);
         }
 
         [Command("m")]
         [Summary("Reminds you in 15-59 minutes with your specified message.")]
         public async Task Mins(int m, [Remainder] string text)
         {
+            text = text.Trim();
             string message = string.Empty;
             m = this.SetValueInRange(m, 15, 59);
             try
@@ -117,7 +122,7 @@ namespace XayahBot.Command.Remind
                 await this._remindService.AddNew(this.Context.Client as DiscordSocketClient, new TRemindEntry
                 {
                     ExpirationDate = DateTime.UtcNow.AddMinutes(m),
-                    Message = text.Trim(),
+                    Message = text,
                     UserId = this.Context.User.Id
                 });
                 message = string.Format(this._reminderCreated, m, "minute", this.AddSForMultiple(m));
@@ -126,7 +131,7 @@ namespace XayahBot.Command.Remind
             {
                 message = this._createRemindFailed;
             }
-            await this.ReplyAsync(message);
+            this.ReplyAsync(message);
         }
 
         [Command("not")]
@@ -147,7 +152,7 @@ namespace XayahBot.Command.Remind
             {
                 message = $"Failed to remove reminder with ID `{id}`.";
             }
-            await this.ReplyAsync(message);
+            this.ReplyAsync(message);
         }
 
         private int SetValueInRange(int value, int min, int max)

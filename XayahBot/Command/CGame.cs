@@ -12,12 +12,17 @@ namespace XayahBot.Command
         [RequireOwner]
         [RequireContext(ContextType.DM)]
         [Summary("Updates the current game.")]
-        public async Task Game([Remainder] string text = "")
+        public Task Game([Remainder] string text = "")
         {
             DiscordSocketClient client = this.Context.Client as DiscordSocketClient;
-            string game = string.IsNullOrWhiteSpace(text) ? null : text.Trim();
+            string game = null;
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                game = text.Trim();
+            }
             Property.GameActive.Value = game;
-            await client.SetGameAsync(game);
+            client.SetGameAsync(game);
+            return Task.CompletedTask;
         }
     }
 }

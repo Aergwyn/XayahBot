@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Discord;
-using XayahBot.API;
 using XayahBot.API.Riot;
 using XayahBot.API.Riot.Model;
 using XayahBot.Utility;
@@ -15,94 +13,77 @@ namespace XayahBot.Command.Data
 {
     public static class InfoService
     {
-        private static readonly string _multipleChampsFound = "Found more than one champion (fully or partially) named `{0}`.{1}";
-        private static readonly string _noChampionFound = "Oops! Your bad. I could not find a champion (fully or partially) named `{0}`.";
-        private static readonly string _noInputGiven = "You should give me something I can search with...";
-
-        //
-
-        public static async Task GetChampionData(IMessageChannel channel, string name)
+        public static async Task<DiscordFormatMessage> GetChampionDataText(string name)
         {
+            DiscordFormatMessage message = new DiscordFormatMessage();
             if (!string.IsNullOrWhiteSpace(name))
             {
                 name = name.Trim();
-                ChampionListDto championList = await new RiotStaticDataApi(Region.EUW).GetChampionsAsync();
+                RiotStaticDataApi staticDataApi = new RiotStaticDataApi();
+                ChampionListDto championList = await staticDataApi.GetChampionsAsync();
                 List<ChampionDto> matches = championList.Data.Values.Where(x => x.Name.ToLower().Contains(name.ToLower()) || FilterName(x.Name).ToLower().Contains(name.ToLower())).ToList();
                 matches.Sort((a, b) => a.Name.CompareTo(b.Name));
-                if (matches.Count > 0)
+                if (matches.Count > 1)
                 {
-                    if (matches.Count > 1)
-                    {
-                        string nameList = "```";
-                        foreach (ChampionDto champion in matches)
-                        {
-                            nameList += Environment.NewLine + champion.Name;
-                        }
-                        nameList += "```";
-                        channel.SendMessageAsync(string.Format(_multipleChampsFound, name, nameList));
-                    }
-                    else
-                    {
-                        ChampionDto champion = await new RiotStaticDataApi(Region.EUW).GetChampionAsync(matches.ElementAt(0).Id);
-                        champion.Tags.Sort();
-                        List<SkinDto> skins = champion.Skins.Where(x => x.Num > 0).ToList();
-                        skins.Sort((a, b) => a.Num.CompareTo(b.Num));
-
-                        string message = $"__**{champion.Name} {champion.Title}**__```" +
-                            $"Tags     - {string.Join(", ", champion.Tags)}{Environment.NewLine}" +
-                            $"Resource - {champion.ParType}{Environment.NewLine}" +
-                            $"Passive  - {champion.Passive.Name}" +
-                            $"```{Environment.NewLine}__Statistics__```" +
-                            GetStatisticBlock(champion.Stats) +
-                            $"```{Environment.NewLine}__Abilities__```";
-                        for (int i = 0; i < champion.Spells.Count; i++)
-                        {
-                            if (i > 0)
-                            {
-                                message += $"{Environment.NewLine}------------{Environment.NewLine}";
-                            }
-                            ChampionSpellDto spell = champion.Spells.ElementAt(i);
-                            message += $"Name     - {spell.Name}{Environment.NewLine}" +
-                                $"Cost     - {spell.GetCostString()}{Environment.NewLine}" +
-                                $"Range    - {spell.GetRangeString()}{Environment.NewLine}" +
-                                $"Cooldown - {spell.GetCooldownString()}{Environment.NewLine}" +
-                                $"Scaling  - {spell.GetVarsString()}";
-                        }
-                        message += $"```{Environment.NewLine}__Skins__```";
-                        for (int i = 0; i < skins.Count; i++)
-                        {
-                            if (i > 0)
-                            {
-                                message += Environment.NewLine;
-                            }
-                            SkinDto skin = skins.ElementAt(i);
-                            message += $"{skin.Num.ToString().PadLeft(2)} - {skin.Name}";
-                        }
-                        message += "```";
-
-                        channel.SendMessageAsync(message);
-                        Logger.Debug($"Posting champion data. Message length: {message.Length}");
-                    }
+                    message.Append($"Found more than one champion (fully or partially) named `{name}`.");
+                    message = BuildMatchListString(matches, message);
+                }
+                else if (matches.Count > 0)
+                {
+                    ChampionDto champion = await staticDataApi.GetChampionAsync(matches.First().Id);
+                    message = BuildChampionDataString(champion, message);
+                    Logger.Debug($"Posting champion data. Message length: {message.ToString().Length}");
                 }
                 else
                 {
-                    channel.SendMessageAsync(string.Format(_noChampionFound, name));
+                    message.Append($"Oops! Your bad. I could not find a champion (fully or partially) named `{name}`.");
                 }
             }
             else
             {
-                channel.SendMessageAsync(_noInputGiven);
+                message.Append("You should give me something I can search with...");
             }
+            return message;
         }
-
-        //
 
         private static string FilterName(string name)
         {
             return Regex.Replace(name, @"[^ a-zA-Z0-9]+", string.Empty);
         }
 
-        private static string GetStatisticBlock(StatsDto stats)
+        private static DiscordFormatMessage BuildMatchListString(List<ChampionDto> matches, DiscordFormatMessage message)
+        {
+            string nameList = string.Empty;
+            foreach (ChampionDto champion in matches)
+            {
+                nameList += Environment.NewLine + champion.Name;
+            }
+            message.AppendCodeBlock(nameList);
+            return message;
+        }
+
+        private static DiscordFormatMessage BuildChampionDataString(ChampionDto champion, DiscordFormatMessage message)
+        {
+            message.Append($"{champion.Name} {champion.Title}", AppendOption.BOLD, AppendOption.UNDERSCORE);
+            message.AppendCodeBlock(BuildGeneralString(champion));
+            message.Append("Statistics", AppendOption.UNDERSCORE);
+            message.AppendCodeBlock(BuildStatisticsString(champion.Stats));
+            message.Append($"Abilities", AppendOption.UNDERSCORE);
+            message.AppendCodeBlock(BuildAbilitiesString(champion.Spells));
+            message.Append("Skins", AppendOption.UNDERSCORE);
+            message.AppendCodeBlock(BuildSkinsWithoutDefaultString(champion.Skins));
+            return message;
+        }
+
+        private static string BuildGeneralString(ChampionDto champion)
+        {
+            champion.Tags.Sort();
+            return $"Tags     - {string.Join(", ", champion.Tags)}{Environment.NewLine}" +
+                $"Resource - {champion.ParType}{Environment.NewLine}" +
+                $"Passive  - {champion.Passive.Name}";
+        }
+
+        private static string BuildStatisticsString(StatsDto stats)
         {
             List<decimal> leftStats = new List<decimal>()
             {
@@ -151,6 +132,42 @@ namespace XayahBot.Command.Data
                 $"Magic Resist  - {rightStatAlign.Align(stats.Spellblock)} (+ {rightScalingAlign.Align(stats.SpellblockPerLevel)}){Environment.NewLine}" +
                 $"Range     - {leftStatAlign.Align(stats.AttackRange)} {"".PadLeft(leftScalingAlign.GetFieldLength() + 4)} | " +
                 $"Move. Speed   - {rightStatAlign.Align(stats.MoveSpeed)}";
+            return text;
+        }
+
+        private static string BuildAbilitiesString(List<ChampionSpellDto> abilities)
+        {
+            string text = string.Empty;
+            for (int i = 0; i < abilities.Count; i++)
+            {
+                if (i > 0)
+                {
+                    text += $"{Environment.NewLine}------------{Environment.NewLine}";
+                }
+                ChampionSpellDto spell = abilities.ElementAt(i);
+                text += $"Name     - {spell.Name}{Environment.NewLine}" +
+                    $"Cost     - {spell.GetCostString()}{Environment.NewLine}" +
+                    $"Range    - {spell.GetRangeString()}{Environment.NewLine}" +
+                    $"Cooldown - {spell.GetCooldownString()}{Environment.NewLine}" +
+                    $"Scaling  - {spell.GetVarsString()}";
+            }
+            return text;
+        }
+
+        private static string BuildSkinsWithoutDefaultString(List<SkinDto> skins)
+        {
+            List<SkinDto> skinWithoutDefault = skins.Where(x => x.Num > 0).ToList();
+            skins.Sort((a, b) => a.Num.CompareTo(b.Num));
+            string text = string.Empty;
+            for (int i = 0; i < skins.Count; i++)
+            {
+                if (i > 0)
+                {
+                    text += Environment.NewLine;
+                }
+                SkinDto skin = skins.ElementAt(i);
+                text += $"{skin.Num.ToString().PadLeft(2)} - {skin.Name}";
+            }
             return text;
         }
     }

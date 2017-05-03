@@ -39,7 +39,7 @@ namespace XayahBot.Command.Remind
         private bool _isRunning = false;
         private Dictionary<int, Timer> _currentTimerList = new Dictionary<int, Timer>();
 
-        public async Task Start()
+        public async Task StartAsync()
         {
             await this._lock.WaitAsync();
             try
@@ -111,13 +111,13 @@ namespace XayahBot.Command.Remind
             IMessageChannel channel = await ResponseHelper.GetDMChannel(this._client, reminder.UserId);
             DiscordFormatMessage message = new DiscordFormatMessage("Back then you told me to remind you of this.");
             message.AppendCodeBlock(reminder.Message);
-            await channel.SendMessageAsync(message.ToString());
+            channel.SendMessageAsync(message.ToString());
         }
 
         public async Task StopAsync()
         {
-            this._isRunning = false;
             await StopTimers();
+            this._isRunning = false;
             Logger.Info("ReminderService stopped.");
         }
 
@@ -134,7 +134,7 @@ namespace XayahBot.Command.Remind
         public async Task AddNew(DiscordSocketClient client, TRemindEntry reminder)
         {
             await this._remindDao.AddAsync(reminder);
-            await Start();
+            await StartAsync();
         }
 
         public async Task Remove(int id, ulong userId)

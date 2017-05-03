@@ -50,7 +50,7 @@ namespace XayahBot.Command.Ignore
                 IChannel channel = await this.Context.Guild.GetChannelAsync(channelId);
                 await RemoveIgnore(channel.Id, channel.Name, true);
             }
-            await this.SendReplies();
+            this.SendReplies();
         }
 
         private bool IsActualUser(IUser user)
@@ -97,7 +97,7 @@ namespace XayahBot.Command.Ignore
             }
             if (this._hasNewUnignoredUser)
             {
-                await this.ReplyAsync(RNG.FromList(this._unignoredReactionList));
+                this.ReplyAsync(RNG.FromList(this._unignoredReactionList));
             }
         }
 

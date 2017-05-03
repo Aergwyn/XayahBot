@@ -35,7 +35,7 @@ namespace XayahBot.Command.Ignore
         [RequireMod]
         [RequireContext(ContextType.Guild)]
         [Summary("Displays the ignore list.")]
-        public async Task Ignore()
+        public Task Ignore()
         {
             List<TIgnoreEntry> ignoreList = this._ignoreDao.GetIgnoreList(this.Context.Guild.Id);
             DiscordFormatMessage message = new DiscordFormatMessage();
@@ -43,7 +43,8 @@ namespace XayahBot.Command.Ignore
             message.AppendCodeBlock(this.BuildIgnoreListString(ignoreList.Where(x => !x.IsChannel)));
             message.Append("Ignored channel", AppendOption.UNDERSCORE);
             message.AppendCodeBlock(this.BuildIgnoreListString(ignoreList.Where(x => x.IsChannel)));
-            await this.ReplyAsync(message.ToString());
+            this.ReplyAsync(message.ToString());
+            return Task.CompletedTask;
         }
 
         private string BuildIgnoreListString(IEnumerable<TIgnoreEntry> list)
@@ -87,7 +88,7 @@ namespace XayahBot.Command.Ignore
                 IChannel channel = await this.Context.Guild.GetChannelAsync(channelId);
                 await this.AddToIgnore(channel.Id, channel.Name, true);
             }
-            await this.SendReplies();
+            this.SendReplies();
         }
 
         private bool IsActualUser(IUser user)
@@ -140,7 +141,7 @@ namespace XayahBot.Command.Ignore
             }
             if (this._hasNewIgnoredUser)
             {
-                await this.ReplyAsync(RNG.FromList(this._ignoredReactionList));
+                this.ReplyAsync(RNG.FromList(this._ignoredReactionList));
             }
         }
 

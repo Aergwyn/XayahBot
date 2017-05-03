@@ -15,12 +15,13 @@ namespace XayahBot.Command
         [RequireOwner]
         [RequireContext(ContextType.DM)]
         [Summary("Displays all properties.")]
-        public async Task Get()
+        public Task Get()
         {
             DiscordFormatMessage message = new DiscordFormatMessage();
             message.Append("List of properties", AppendOption.UNDERSCORE);
             message.AppendCodeBlock(this.BuildPropertyListString());
-            await this.ReplyAsync(message.ToString());
+            this.ReplyAsync(message.ToString());
+            return Task.CompletedTask;
         }
 
         private string BuildPropertyListString()
@@ -43,14 +44,15 @@ namespace XayahBot.Command
         [RequireOwner]
         [RequireContext(ContextType.DM)]
         [Summary("Updates a specific property.")]
-        public async Task Set(string name, [Remainder]string value = "")
+        public Task Set(string name, [Remainder]string value = "")
         {
+            value = value.Trim();
             DiscordFormatMessage message = new DiscordFormatMessage();
             try
             {
                 Property property = Property.GetUpdatableByName(name);
                 string oldValue = property.Value;
-                property.Value = value = value.Trim();
+                property.Value = value;
                 message.Append($"Property `{property.Name}` changed!");
                 message.AppendCodeBlock($"Old:{oldValue}{Environment.NewLine}New:{value}");
             }
@@ -58,7 +60,8 @@ namespace XayahBot.Command
             {
                 message.Append($"Could not find property with name `{name}`!");
             }
-            await this.ReplyAsync(message.ToString());
+            this.ReplyAsync(message.ToString());
+            return Task.CompletedTask;
         }
     }
 }

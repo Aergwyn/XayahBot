@@ -8,13 +8,11 @@ namespace XayahBot.Command.System
 {
     public class CheckIgnoredUserAttribute : PreconditionAttribute
     {
-        private readonly string _errorText = "You are on the ignore list for this bot and can't execute this command";
-
         public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IDependencyMap map)
         {
             if (map.Get<IgnoreDAO>().IsIgnored(context.Guild.Id, context.User.Id))
             {
-                return PreconditionResult.FromError(this._errorText);
+                return PreconditionResult.FromError("You are on the ignore list for this bot and can't execute this command");
             }
             else
             {

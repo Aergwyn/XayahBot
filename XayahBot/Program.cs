@@ -46,15 +46,13 @@ namespace XayahBot
         private async Task StartAsync()
         {
             this._client.Log += Logger.Log;
-
             await this.InitializeAsync();
-
             string token = FileReader.ReadFirstLine(Property.FilePath.Value + Property.FileToken.Value);
             if (!string.IsNullOrWhiteSpace(token))
             {
                 await this._client.LoginAsync(TokenType.Bot, token);
                 await this._client.StartAsync();
-                //
+
                 bool exit = false;
                 while (!exit)
                 {
@@ -63,14 +61,14 @@ namespace XayahBot
                         exit = true;
                     }
                 }
-                //
+
                 await this._client.SetGameAsync(Property.GameShutdown.Value);
                 await this.StopBackgroundThreadsAsync();
                 await this._client.StopAsync();
             }
             else
             {
-                Logger.Error("No token supplied.");
+                await Logger.Error("No token supplied.");
             }
             await Task.Delay(2500);
         }
@@ -95,17 +93,24 @@ namespace XayahBot
 
         //
 
-        private async Task HandleReady()
+        private Task HandleReady()
         {
-            string game = string.IsNullOrWhiteSpace(Property.GameActive.Value) ? null : Property.GameActive.Value;
-            await this._client.SetGameAsync(game);
+            this.SetGame();
             this.StartBackgroundThreads();
+            return Task.CompletedTask;
         }
 
-        private void StartBackgroundThreads()
+        private void SetGame()
         {
-            this._remindService.Start();
+            string game = string.IsNullOrWhiteSpace(Property.GameActive.Value) ? null : Property.GameActive.Value;
+            this._client.SetGameAsync(game);
+        }
+
+        private Task StartBackgroundThreads()
+        {
+            this._remindService.StartAsync();
             //RiotStatusService.StartAsync(this._client); WiP
+            return Task.CompletedTask;
         }
 
         private Task HandleChannelUpdated(SocketChannel preUpdateChannel, SocketChannel postUpdateChannel)
