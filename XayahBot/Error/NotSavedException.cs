@@ -4,7 +4,7 @@ namespace XayahBot.Error
 {
     public class NotSavedException : Exception
     {
-        public NotSavedException() : base("Change was not saved.")
+        public NotSavedException() : base("Object state was not saved.")
         {
         }
     }

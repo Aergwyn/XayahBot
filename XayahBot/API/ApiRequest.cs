@@ -5,9 +5,9 @@ namespace XayahBot.API
 {
     public class ApiRequest
     {
-        public IEnumerable<string> Arguments { get; private set; }
         public string CacheId { get; private set; }
         public string Resource { get; private set; }
+        public IEnumerable<string> Arguments { get; private set; }
 
         public ApiRequest(string resource, params string[] arguments)
         {

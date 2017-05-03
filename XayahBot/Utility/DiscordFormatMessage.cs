@@ -12,8 +12,6 @@ namespace XayahBot.Utility
             this.Text = text;
         }
 
-        //
-
         public DiscordFormatMessage Append(string text, params AppendOption[] options)
         {
             if (!string.IsNullOrWhiteSpace(text))

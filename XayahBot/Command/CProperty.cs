@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
 using XayahBot.Command.System;
+using XayahBot.Error;
 using XayahBot.Utility;
 
 namespace XayahBot.Command
@@ -22,7 +23,8 @@ namespace XayahBot.Command
             await this.ReplyAsync(message.ToString());
         }
 
-        private string BuildPropertyListString() {
+        private string BuildPropertyListString()
+        {
             string text = string.Empty;
             int maxWidth = Property.UpdatableValues.OrderByDescending(x => x.Name.Length).First().Name.Length;
             for (int i = 0; i < Property.UpdatableValues.Count(); i++)
@@ -43,16 +45,16 @@ namespace XayahBot.Command
         [Summary("Updates a specific property.")]
         public async Task Set(string name, [Remainder]string value = "")
         {
-            Property property = Property.GetUpdatableByName(name);
             DiscordFormatMessage message = new DiscordFormatMessage();
-            if (property != null)
+            try
             {
+                Property property = Property.GetUpdatableByName(name);
                 string oldValue = property.Value;
                 property.Value = value = value.Trim();
                 message.Append($"Property `{property.Name}` changed!");
                 message.AppendCodeBlock($"Old:{oldValue}{Environment.NewLine}New:{value}");
             }
-            else
+            catch (NotExistingException)
             {
                 message.Append($"Could not find property with name `{name}`!");
             }

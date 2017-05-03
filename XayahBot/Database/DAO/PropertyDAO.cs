@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using XayahBot.Database.Model;
+using XayahBot.Error;
 using XayahBot.Utility;
 
 namespace XayahBot.Database.DAO
@@ -17,7 +18,7 @@ namespace XayahBot.Database.DAO
                     return dbProperty.Value;
                 }
             }
-            return null;
+            throw new NotExistingException();
         }
 
         public Task SetValueAsync(Property property)

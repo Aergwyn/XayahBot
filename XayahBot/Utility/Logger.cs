@@ -60,8 +60,6 @@ namespace XayahBot.Utility
             return Task.CompletedTask;
         }
 
-        //
-
         private static string GetTimeString()
         {
             DateTime stamp = DateTime.Now;

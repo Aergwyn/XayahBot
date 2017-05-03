@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using XayahBot.Database.DAO;
+using XayahBot.Error;
 
 namespace XayahBot.Utility
 {
@@ -42,7 +43,7 @@ namespace XayahBot.Utility
             {
                 return UpdatableValues.Where(x => x.Updatable).FirstOrDefault(x => x.Name.ToLower().Equals(name.ToLower()));
             }
-            return null;
+            throw new NotExistingException();
         }
 
         //
@@ -57,7 +58,13 @@ namespace XayahBot.Utility
             {
                 if (this.NeedInit())
                 {
-                    this._value = this._propertyDao.GetValue(this) ?? this._value;
+                    try
+                    {
+                        this._value = this._propertyDao.GetValue(this);
+                    }
+                    catch (NotExistingException)
+                    {
+                    }
                     this.Loaded = true;
                 }
                 return this._value;
@@ -85,8 +92,6 @@ namespace XayahBot.Utility
             this.Updatable = updatable;
             this.Loaded = !updatable;
         }
-
-        //
 
         private bool NeedInit()
         {
