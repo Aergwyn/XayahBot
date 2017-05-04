@@ -17,10 +17,12 @@ namespace XayahBot.Command
         [Summary("Displays all properties.")]
         public Task Get()
         {
-            DiscordFormatMessage message = new DiscordFormatMessage();
-            message.Append("List of properties", AppendOption.UNDERSCORE);
-            message.AppendCodeBlock(this.BuildPropertyListString());
-            this.ReplyAsync(message.ToString());
+            DiscordFormatEmbed message = new DiscordFormatEmbed()
+                .AppendTitle(":gear: ")
+                .AppendTitle("Property", AppendOption.Underscore)
+                .AppendDescription("Here is a list of available properties.")
+                .AppendDescriptionCodeBlock(this.BuildPropertyListString());
+            this.ReplyAsync("", false, message.ToEmbed());
             return Task.CompletedTask;
         }
 
@@ -47,20 +49,22 @@ namespace XayahBot.Command
         public Task Set(string name, [Remainder]string value = "")
         {
             value = value.Trim();
-            DiscordFormatMessage message = new DiscordFormatMessage();
+            DiscordFormatEmbed message = new DiscordFormatEmbed()
+                .AppendTitle(":gear: ")
+                .AppendTitle("Property", AppendOption.Underscore);
             try
             {
                 Property property = Property.GetUpdatableByName(name);
                 string oldValue = property.Value;
                 property.Value = value;
-                message.Append($"Property `{property.Name}` changed!");
-                message.AppendCodeBlock($"Old:{oldValue}{Environment.NewLine}New:{value}");
+                message.AppendDescription($"Value of property named `{property.Name}` changed.")
+                    .AppendDescriptionCodeBlock($"Old:{oldValue}{Environment.NewLine}New:{value}");
             }
             catch (NotExistingException)
             {
-                message.Append($"Could not find property with name `{name}`!");
+                message.AppendDescription($"Could not find property named `{name}`!");
             }
-            this.ReplyAsync(message.ToString());
+            this.ReplyAsync("", false, message.ToEmbed());
             return Task.CompletedTask;
         }
     }

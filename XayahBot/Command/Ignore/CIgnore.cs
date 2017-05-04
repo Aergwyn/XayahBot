@@ -38,16 +38,20 @@ namespace XayahBot.Command.Ignore
         public Task Ignore()
         {
             List<TIgnoreEntry> ignoreList = this._ignoreDao.GetIgnoreList(this.Context.Guild.Id);
-            DiscordFormatMessage message = new DiscordFormatMessage();
-            message.Append("Ignored user", AppendOption.UNDERSCORE);
-            message.AppendCodeBlock(this.BuildIgnoreListString(ignoreList.Where(x => !x.IsChannel)));
-            message.Append("Ignored channel", AppendOption.UNDERSCORE);
-            message.AppendCodeBlock(this.BuildIgnoreListString(ignoreList.Where(x => x.IsChannel)));
-            this.ReplyAsync(message.ToString());
+
+            DiscordFormatEmbed message = new DiscordFormatEmbed(this.Context)
+                .AppendTitle(":no_entry_sign: ")
+                .AppendTitle("Ignore List", AppendOption.Underscore)
+                .AppendDescription("Here is the current ignore list for this server." + Environment.NewLine + Environment.NewLine)
+                .AppendDescription("Ignored User", AppendOption.Bold)
+                .AppendDescriptionCodeBlock(this.BuildListString(ignoreList.Where(x => !x.IsChannel)))
+                .AppendDescription("Ignored Channel", AppendOption.Bold)
+                .AppendDescriptionCodeBlock(this.BuildListString(ignoreList.Where(x => x.IsChannel)));
+            this.ReplyAsync("", false, message.ToEmbed());
             return Task.CompletedTask;
         }
 
-        private string BuildIgnoreListString(IEnumerable<TIgnoreEntry> list)
+        private string BuildListString(IEnumerable<TIgnoreEntry> list)
         {
             string text = string.Empty;
             IOrderedEnumerable<TIgnoreEntry> orderedList = list.OrderBy(x => x.SubjectName);
@@ -57,14 +61,14 @@ namespace XayahBot.Command.Ignore
                 {
                     if (i > 0)
                     {
-                        text += Environment.NewLine;
+                        text += ", ";
                     }
                     text += orderedList.ElementAt(i).SubjectName;
                 }
             }
             else
             {
-                text += "This list is empty right now.";
+                text = "This list is empty right now.";
             }
             return text;
         }
@@ -134,10 +138,14 @@ namespace XayahBot.Command.Ignore
 
         private async Task SendReplies()
         {
-            string message = this.CreateMessage();
-            if (!string.IsNullOrWhiteSpace(message))
+            string text = this.CreateMessage();
+            if (!string.IsNullOrWhiteSpace(text))
             {
-                await this.ReplyAsync(message);
+                DiscordFormatEmbed message = new DiscordFormatEmbed(this.Context)
+                    .AppendTitle(":no_entry_sign: ")
+                    .AppendTitle("Ignore List", AppendOption.Underscore)
+                    .AppendDescription(text);
+                await this.ReplyAsync("", false, message.ToEmbed());
             }
             if (this._hasNewIgnoredUser)
             {
@@ -157,7 +165,7 @@ namespace XayahBot.Command.Ignore
             {
                 if (!string.IsNullOrWhiteSpace(text))
                 {
-                    text += Environment.NewLine + Environment.NewLine;
+                    text += Environment.NewLine;
                 }
                 text += $"{this.BuildEnumerationFromList(this._existingIgnoredList)} " +
                     $"{this.GetSingularOrPlural(existingCount)} already on the ignore list.";

@@ -41,7 +41,11 @@ namespace XayahBot.Utility
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
-                return UpdatableValues.Where(x => x.Updatable).FirstOrDefault(x => x.Name.ToLower().Equals(name.ToLower()));
+                Property match = UpdatableValues.Where(x => x.Updatable).FirstOrDefault(x => x.Name.ToLower().Equals(name.ToLower()));
+                if (match != null)
+                {
+                    return match;
+                }
             }
             throw new NotExistingException();
         }
@@ -104,15 +108,7 @@ namespace XayahBot.Utility
 
         public override bool Equals(object obj)
         {
-            if (obj != null)
-            {
-                string comp = obj.ToString();
-                if (this.ToString().Equals(comp))
-                {
-                    return true;
-                }
-            }
-            return false;
+            return this.ToString().Equals(obj?.ToString());
         }
 
         public override int GetHashCode()

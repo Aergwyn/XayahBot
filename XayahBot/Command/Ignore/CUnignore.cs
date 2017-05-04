@@ -90,10 +90,14 @@ namespace XayahBot.Command.Ignore
 
         private async Task SendReplies()
         {
-            string message = this.CreateMessage();
-            if (!string.IsNullOrWhiteSpace(message))
+            string text = this.CreateMessage();
+            if (!string.IsNullOrWhiteSpace(text))
             {
-                await this.ReplyAsync(message);
+                DiscordFormatEmbed message = new DiscordFormatEmbed(this.Context)
+                .AppendTitle(":no_entry_sign: ")
+                .AppendTitle("Ignore List", AppendOption.Underscore)
+                .AppendDescription(this.CreateMessage());
+                await this.ReplyAsync("", false, message.ToEmbed());
             }
             if (this._hasNewUnignoredUser)
             {
@@ -113,7 +117,7 @@ namespace XayahBot.Command.Ignore
             {
                 if (!string.IsNullOrWhiteSpace(text))
                 {
-                    text += Environment.NewLine + Environment.NewLine;
+                    text += Environment.NewLine;
                 }
                 text += $"{this.BuildEnumerationFromList(this._notExistingUnignoredList)} " +
                     $"{this.GetSingularOrPlural(notExistingCount)} never on the ignore list.";

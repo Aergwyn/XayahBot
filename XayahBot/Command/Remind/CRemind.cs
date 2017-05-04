@@ -48,7 +48,7 @@ namespace XayahBot.Command.Remind
             IOrderedEnumerable<TRemindEntry> orderedList = list.OrderBy(x => x.Id);
             if (orderedList.Count() > 0)
             {
-                message.Append("Active Reminder", AppendOption.UNDERSCORE);
+                message.Append("Active Reminder", AppendOption.Underscore);
                 foreach (TRemindEntry entry in orderedList)
                 {
                     message.AppendCodeBlock($"ID: {entry.Id} | Expires: {entry.ExpirationDate} UTC{Environment.NewLine}" +

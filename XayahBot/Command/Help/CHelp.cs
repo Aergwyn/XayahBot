@@ -44,7 +44,7 @@ namespace XayahBot.Command.Help
         private DiscordFormatMessage BuildCommonerCommandList(DiscordFormatMessage message)
         {
             List<HelpLine> commandList = this.GetMatchingPreconditionList();
-            message.Append("Command List", AppendOption.BOLD, AppendOption.UNDERSCORE);
+            message.Append("Command List", AppendOption.Underscore);
             message.AppendCodeBlock(this.BuildListString(commandList));
             return message;
         }
@@ -54,7 +54,7 @@ namespace XayahBot.Command.Help
             List<HelpLine> commandList = this.GetMatchingPreconditionList(new RequireModAttribute());
             if (DiscordPermissions.IsOwnerOrMod(this.Context) && commandList.Count > 0)
             {
-                message.Append("Mod-Commands", AppendOption.UNDERSCORE);
+                message.Append("Mod-Commands", AppendOption.Underscore);
                 message.AppendCodeBlock(this.BuildListString(commandList));
             }
             return message;
@@ -65,7 +65,7 @@ namespace XayahBot.Command.Help
             List<HelpLine> commandList = this.GetMatchingPreconditionList(new RequireOwnerAttribute());
             if (DiscordPermissions.IsOwner(this.Context) && commandList.Count > 0)
             {
-                message.Append("Owner-Commands", AppendOption.UNDERSCORE);
+                message.Append("Owner-Commands", AppendOption.Underscore);
                 message.AppendCodeBlock(this.BuildListString(commandList));
             }
             return message;

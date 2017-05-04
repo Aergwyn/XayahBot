@@ -21,32 +21,5 @@ namespace XayahBot.API.Riot.Model
         public List<ChampionSpellDto> Spells { get; set; }
         public List<string> Tags { get; set; } // aka Mage, Marksman, ...
         public string Title { get; set; }
-
-        //
-
-        public ChampionDto()
-        {
-            // for JSON
-        }
-
-        public ChampionDto(ChampionDto champion)
-        {
-            this.Id = champion.Id;
-            this.Name = champion.Name;
-            this.ParType = champion.ParType;
-            this.Passive = champion.Passive;
-            this.Skins = new List<SkinDto>(champion.Skins);
-            this.Stats = champion.Stats;
-            this.Spells = new List<ChampionSpellDto>(champion.Spells);
-            this.Tags = champion.Tags;
-            this.Title = champion.Title;
-        }
-
-        //
-
-        public ChampionDto Copy()
-        {
-            return new ChampionDto(this);
-        }
     }
 }

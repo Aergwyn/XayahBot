@@ -57,13 +57,13 @@ namespace XayahBot.Command.Data
 
         private static DiscordFormatMessage BuildChampionDataString(ChampionDto champion, DiscordFormatMessage message)
         {
-            message.Append($"{champion.Name} {champion.Title}", AppendOption.BOLD, AppendOption.UNDERSCORE);
+            message.Append($"{champion.Name} {champion.Title}", AppendOption.Bold, AppendOption.Underscore);
             message.AppendCodeBlock(BuildGeneralString(champion));
-            message.Append("Statistics", AppendOption.UNDERSCORE);
+            message.Append("Statistics", AppendOption.Underscore);
             message.AppendCodeBlock(BuildStatisticsString(champion.Stats));
-            message.Append($"Abilities", AppendOption.UNDERSCORE);
+            message.Append($"Abilities", AppendOption.Underscore);
             message.AppendCodeBlock(BuildAbilitiesString(champion.Spells));
-            message.Append("Skins", AppendOption.UNDERSCORE);
+            message.Append("Skins", AppendOption.Underscore);
             message.AppendCodeBlock(BuildSkinsWithoutDefaultString(champion.Skins));
             return message;
         }

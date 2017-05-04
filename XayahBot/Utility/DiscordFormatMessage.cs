@@ -16,14 +16,7 @@ namespace XayahBot.Utility
         {
             if (!string.IsNullOrWhiteSpace(text))
             {
-                string openOptions = string.Empty;
-                string closeOptions = string.Empty;
-                foreach (AppendOption option in options)
-                {
-                    openOptions += GetOptionChars(option);
-                }
-                closeOptions = string.Join(string.Empty, openOptions.Reverse());
-                this.Text += openOptions + text + closeOptions;
+                this.Text += AppendOption.Start(options) + text + AppendOption.End(options);
             }
             return this;
         }
@@ -35,23 +28,6 @@ namespace XayahBot.Utility
                 this.Text += Environment.NewLine + "```" + Environment.NewLine + text + Environment.NewLine + "```" + Environment.NewLine;
             }
             return this;
-        }
-
-        private string GetOptionChars(AppendOption option)
-        {
-            switch (option)
-            {
-                case AppendOption.BOLD:
-                    return "**";
-                case AppendOption.ITALIC:
-                    return "*";
-                case AppendOption.STRIKETHROUGH:
-                    return "~~";
-                case AppendOption.UNDERSCORE:
-                    return "__";
-                default:
-                    return string.Empty;
-            }
         }
 
         public override string ToString()
