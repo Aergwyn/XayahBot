@@ -44,27 +44,20 @@ namespace XayahBot.Command.Ignore
                 .AppendTitle("Ignore List", AppendOption.Underscore)
                 .AppendDescription("Here is the current ignore list for this server." + Environment.NewLine + Environment.NewLine)
                 .AppendDescription("Ignored User", AppendOption.Bold)
-                .AppendDescriptionCodeBlock(this.BuildListString(ignoreList.Where(x => !x.IsChannel)))
+                .AppendDescriptionCodeBlock(this.BuildIgnoreListString(ignoreList.Where(x => !x.IsChannel)))
                 .AppendDescription("Ignored Channel", AppendOption.Bold)
-                .AppendDescriptionCodeBlock(this.BuildListString(ignoreList.Where(x => x.IsChannel)));
+                .AppendDescriptionCodeBlock(this.BuildIgnoreListString(ignoreList.Where(x => x.IsChannel)));
             this.ReplyAsync("", false, message.ToEmbed());
             return Task.CompletedTask;
         }
 
-        private string BuildListString(IEnumerable<TIgnoreEntry> list)
+        private string BuildIgnoreListString(IEnumerable<TIgnoreEntry> list)
         {
             string text = string.Empty;
             IOrderedEnumerable<TIgnoreEntry> orderedList = list.OrderBy(x => x.SubjectName);
             if (orderedList.Count() > 0)
             {
-                for (int i = 0; i < orderedList.Count(); i++)
-                {
-                    if (i > 0)
-                    {
-                        text += ", ";
-                    }
-                    text += orderedList.ElementAt(i).SubjectName;
-                }
+                text = ListUtil.BuildEnumeration(list);
             }
             else
             {
@@ -158,7 +151,7 @@ namespace XayahBot.Command.Ignore
             string text = string.Empty;
             if (this._newIgnoredList.Count > 0)
             {
-                text += $"Added {this.BuildEnumerationFromList(this._newIgnoredList)} to the ignore list.";
+                text += $"Added {ListUtil.BuildAndEnumeration(this._newIgnoredList)} to the ignore list.";
             }
             int existingCount = this._existingIgnoredList.Count;
             if (existingCount > 0)
@@ -167,29 +160,8 @@ namespace XayahBot.Command.Ignore
                 {
                     text += Environment.NewLine;
                 }
-                text += $"{this.BuildEnumerationFromList(this._existingIgnoredList)} " +
+                text += $"{ListUtil.BuildAndEnumeration(this._existingIgnoredList)} " +
                     $"{this.GetSingularOrPlural(existingCount)} already on the ignore list.";
-            }
-            return text;
-        }
-
-        private string BuildEnumerationFromList(List<string> list)
-        {
-            string text = string.Empty;
-            for (int i = 0; i < list.Count; i++)
-            {
-                if (i > 0)
-                {
-                    if (i == list.Count() - 1)
-                    {
-                        text += " and ";
-                    }
-                    else
-                    {
-                        text += ", ";
-                    }
-                }
-                text += $"`{list.ElementAt(i)}`";
             }
             return text;
         }

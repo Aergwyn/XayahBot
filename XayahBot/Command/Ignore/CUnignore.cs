@@ -110,7 +110,7 @@ namespace XayahBot.Command.Ignore
             string text = string.Empty;
             if (this._newUnignoredList.Count > 0)
             {
-                text += $"Removed {this.BuildEnumerationFromList(this._newUnignoredList)} from the ignore list.";
+                text += $"Removed {ListUtil.BuildAndEnumeration(this._newUnignoredList)} from the ignore list.";
             }
             int notExistingCount = this._notExistingUnignoredList.Count;
             if (notExistingCount > 0)
@@ -119,29 +119,8 @@ namespace XayahBot.Command.Ignore
                 {
                     text += Environment.NewLine;
                 }
-                text += $"{this.BuildEnumerationFromList(this._notExistingUnignoredList)} " +
+                text += $"{ListUtil.BuildAndEnumeration(this._notExistingUnignoredList)} " +
                     $"{this.GetSingularOrPlural(notExistingCount)} never on the ignore list.";
-            }
-            return text;
-        }
-
-        private string BuildEnumerationFromList(List<string> list)
-        {
-            string text = string.Empty;
-            for (int i = 0; i < list.Count; i++)
-            {
-                if (i > 0)
-                {
-                    if (i == list.Count() - 1)
-                    {
-                        text += " and ";
-                    }
-                    else
-                    {
-                        text += ", ";
-                    }
-                }
-                text += $"`{list.ElementAt(i)}`";
             }
             return text;
         }

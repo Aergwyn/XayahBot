@@ -17,7 +17,7 @@ namespace XayahBot.Command.Remind
     [Group("remind me")]
     public class CRemind : ModuleBase
     {
-        private readonly string _reminderCreated = "I'm going to remind you in `{0}` {1}{2}. Maybe...";
+        private readonly string _reminderCreated = "I'm going to remind you in `{0}` {1}{2}. I think...";
 
         //
 

@@ -7,5 +7,10 @@
         public ulong SubjectId { get; set; }
         public string SubjectName { get; set; }
         public bool IsChannel { get; set; }
+
+        public override string ToString()
+        {
+            return this.SubjectName;
+        }
     }
 }
