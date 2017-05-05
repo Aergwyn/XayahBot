@@ -90,9 +90,9 @@ namespace XayahBot.Command.Remind
         {
             foreach (TRemindEntry reminder in list)
             {
-                if (DateTime.UtcNow.AddMinutes(interval) > reminder.ExpirationDate)
+                if (DateTime.UtcNow.AddMinutes(interval) > reminder.ExpirationTime)
                 {
-                    long remainingTicks = reminder.ExpirationDate.Ticks - DateTime.UtcNow.Ticks;
+                    long remainingTicks = reminder.ExpirationTime.Ticks - DateTime.UtcNow.Ticks;
                     if (remainingTicks < 0)
                     {
                         remainingTicks = 0;

@@ -18,7 +18,6 @@ namespace XayahBot.Command.Remind
     public class CRemind : ModuleBase
     {
         private readonly string _reminderCreated = "I'm going to remind you in `{0}` {1}{2}. Maybe...";
-        private readonly string _createRemindFailed = "Failed to create reminder.";
 
         //
 
@@ -51,7 +50,7 @@ namespace XayahBot.Command.Remind
                 message.Append("Active Reminder", AppendOption.Underscore);
                 foreach (TRemindEntry entry in orderedList)
                 {
-                    message.AppendCodeBlock($"ID: {entry.Id} | Expires: {entry.ExpirationDate} UTC{Environment.NewLine}" +
+                    message.AppendCodeBlock($"ID: {entry.Id} | Expires: {entry.ExpirationTime} UTC{Environment.NewLine}" +
                         $"Message:{Environment.NewLine}{entry.Message}");
                 }
             }
@@ -67,23 +66,11 @@ namespace XayahBot.Command.Remind
         public async Task Days(int d, [Remainder] string text)
         {
             text = text.Trim();
-            string message = string.Empty;
             d = this.SetValueInRange(d, 1, 30);
-            try
+            if (await CreateReminder(text, DateTime.UtcNow.AddDays(d)))
             {
-                await this._remindService.AddNew(this.Context.Client as DiscordSocketClient, new TRemindEntry
-                {
-                    ExpirationDate = DateTime.UtcNow.AddDays(d),
-                    Message = text,
-                    UserId = this.Context.User.Id
-                });
-                message = string.Format(this._reminderCreated, d, "day", this.AddSForMultiple(d));
+                this.ReplyAsync(string.Format(this._reminderCreated, d, "day", this.AddSForMultiple(d)));
             }
-            catch (NotSavedException)
-            {
-                message = this._createRemindFailed;
-            }
-            this.ReplyAsync(message);
         }
 
         [Command("h")]
@@ -91,23 +78,11 @@ namespace XayahBot.Command.Remind
         public async Task Hours(int h, [Remainder] string text)
         {
             text = text.Trim();
-            string message = string.Empty;
             h = this.SetValueInRange(h, 1, 23);
-            try
+            if (await CreateReminder(text, DateTime.UtcNow.AddHours(h)))
             {
-                await this._remindService.AddNew(this.Context.Client as DiscordSocketClient, new TRemindEntry
-                {
-                    ExpirationDate = DateTime.UtcNow.AddHours(h),
-                    Message = text,
-                    UserId = this.Context.User.Id
-                });
-                message = string.Format(this._reminderCreated, h, "hour", this.AddSForMultiple(h));
+                this.ReplyAsync(string.Format(this._reminderCreated, h, "hour", this.AddSForMultiple(h)));
             }
-            catch (NotSavedException)
-            {
-                message = this._createRemindFailed;
-            }
-            this.ReplyAsync(message);
         }
 
         [Command("m")]
@@ -115,23 +90,54 @@ namespace XayahBot.Command.Remind
         public async Task Mins(int m, [Remainder] string text)
         {
             text = text.Trim();
-            string message = string.Empty;
             m = this.SetValueInRange(m, 15, 59);
+            if (await CreateReminder(text, DateTime.UtcNow.AddMinutes(m)))
+            {
+                this.ReplyAsync(string.Format(this._reminderCreated, m, "minute", this.AddSForMultiple(m)));
+            }
+        }
+
+        private int SetValueInRange(int value, int min, int max)
+        {
+            if (value < min)
+            {
+                value = min;
+            }
+            else if (value > max)
+            {
+                value = max;
+            }
+            return value;
+        }
+
+        private async Task<bool> CreateReminder(string text, DateTime expirationTime)
+        {
+            string message = string.Empty;
             try
             {
                 await this._remindService.AddNew(this.Context.Client as DiscordSocketClient, new TRemindEntry
                 {
-                    ExpirationDate = DateTime.UtcNow.AddMinutes(m),
+                    ExpirationTime = expirationTime,
                     Message = text,
                     UserId = this.Context.User.Id
                 });
-                message = string.Format(this._reminderCreated, m, "minute", this.AddSForMultiple(m));
+                return true;
             }
-            catch (NotSavedException)
+            catch (NotSavedException nsex)
             {
-                message = this._createRemindFailed;
+                Logger.Error($"Failed to create reminder for {this.Context.User.ToString()}.", nsex);
             }
-            this.ReplyAsync(message);
+            return false;
+        }
+
+        private string AddSForMultiple(int value)
+        {
+            string text = string.Empty;
+            if (value > 1)
+            {
+                text = "s";
+            }
+            return text;
         }
 
         [Command("not")]
@@ -148,34 +154,11 @@ namespace XayahBot.Command.Remind
             {
                 message = $"Reminder with ID `{id}` does not exist on your list.";
             }
-            catch (NotSavedException)
+            catch (NotSavedException nsex)
             {
-                message = $"Failed to remove reminder with ID `{id}`.";
+                Logger.Error($"Failed to remove reminder with ID {id} for {this.Context.User}.", nsex);
             }
             this.ReplyAsync(message);
-        }
-
-        private int SetValueInRange(int value, int min, int max)
-        {
-            if (value < min)
-            {
-                value = min;
-            }
-            else if (value > max)
-            {
-                value = max;
-            }
-            return value;
-        }
-
-        private string AddSForMultiple(int value)
-        {
-            string text = string.Empty;
-            if (value > 1)
-            {
-                text = "s";
-            }
-            return text;
         }
     }
 }

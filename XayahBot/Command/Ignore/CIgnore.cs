@@ -132,7 +132,7 @@ namespace XayahBot.Command.Ignore
             }
             catch (NotSavedException nsex)
             {
-                Logger.Warning(nsex.Message, nsex);
+                Logger.Error($"Failed to add {subjectId} to ignore for {this.Context.User.ToString()}.", nsex);
             }
         }
 

@@ -84,7 +84,7 @@ namespace XayahBot.Command.Ignore
             }
             catch (NotSavedException nsex)
             {
-                Logger.Warning(nsex.Message, nsex);
+                Logger.Error($"Failed to remove {subjectId} from ignore for {this.Context.User.ToString()}.", nsex);
             }
         }
 
