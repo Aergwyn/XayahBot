@@ -25,8 +25,6 @@ namespace XayahBot.API.Riot.Model
         public decimal Spellblock { get; set; }
         public decimal SpellblockPerLevel { get; set; }
 
-        //
-
         public decimal GetBaseAttackSpeed()
         {
             return Math.Round(0.625M / (1 + this.AttackSpeedOffset), 3, MidpointRounding.AwayFromZero);

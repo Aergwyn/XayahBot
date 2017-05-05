@@ -73,7 +73,7 @@ namespace XayahBot.Command.Data
         {
             champion.Tags.Sort();
             return $"Tags     - {string.Join(", ", champion.Tags)}{Environment.NewLine}" +
-                $"Resource - {champion.ParType}{Environment.NewLine}" +
+                $"Resource - {champion.Resource}{Environment.NewLine}" +
                 $"Passive  - {champion.Passive.Name}";
         }
 

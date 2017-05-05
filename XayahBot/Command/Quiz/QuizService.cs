@@ -224,7 +224,7 @@ namespace XayahBot.Command.Quiz
                     entry = new QuizEntry(string.Format(_championBasicTitleQ, champion.Name, Property.QuizMatch), champion.Title);
                     break;
                 case 3:
-                    entry = new QuizEntry(string.Format(_championBasicResourceQ, champion.Name), champion.ParType);
+                    entry = new QuizEntry(string.Format(_championBasicResourceQ, champion.Name), champion.Resource);
                     break;
                 case 4:
                     entry = new QuizEntry(string.Format(_championBasicTagQ, champion.Name), champion.Tags.ToArray());

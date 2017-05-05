@@ -21,9 +21,9 @@ namespace XayahBot.API.Riot
 
         //
 
-        public async Task<ShardStatus> GetStatusAsync()
+        public async Task<ShardStatusDto> GetStatusAsync()
         {
-            return await this.GetAsync<ShardStatus>(new ApiRequest("shard-data"));
+            return await this.GetAsync<ShardStatusDto>(new ApiRequest("shard-data"));
         }
     }
 }

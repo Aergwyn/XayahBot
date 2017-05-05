@@ -14,21 +14,19 @@ namespace XayahBot
 {
     public class Program
     {
+        public static void Main(string[] args)
+        {
+            new Program().StartAsync().GetAwaiter().GetResult();
+        }
+
+        // ---
+
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commandService;
         private readonly RemindService _remindService;
         private readonly IDependencyMap _dependencyMap = new DependencyMap();
 
         private IgnoreDAO _ignoreDao = new IgnoreDAO();
-
-        //
-
-        public static void Main(string[] args)
-        {
-            new Program().StartAsync().GetAwaiter().GetResult();
-        }
-
-        //
 
         private Program()
         {
@@ -92,8 +90,6 @@ namespace XayahBot
             await this._remindService.StopAsync();
         }
 
-        //
-
         private Task HandleReady()
         {
             this.SetGame();
@@ -110,7 +106,7 @@ namespace XayahBot
         private Task StartBackgroundThreads()
         {
             this._remindService.StartAsync();
-            //RiotStatusService.StartAsync(this._client); WiP
+            //RiotStatusService.StartAsync(this._client);
             return Task.CompletedTask;
         }
 

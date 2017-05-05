@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.WebSocket;
@@ -54,7 +55,7 @@ namespace XayahBot.Service
                 bool _checked = false;
 
                 RiotStatusApi statusEuw = new RiotStatusApi(Region.EUW);
-                RiotStatusApi statusNa = new RiotStatusApi(Region.NA);
+                //RiotStatusApi statusNa = new RiotStatusApi(Region.NA);
 
                 while (this._running)
                 {
@@ -63,13 +64,13 @@ namespace XayahBot.Service
                         if (!_checked)
                         {
                             AnalyzeData(await statusEuw.GetStatusAsync());
-                            AnalyzeData(await statusNa.GetStatusAsync());
+                            //AnalyzeData(await statusNa.GetStatusAsync());
                             _checked = true;
                         }
                     }
                     else
                     {
-                        _checked = false;
+                            _checked = false;
                     }
                     if (this._running)
                     {
@@ -79,37 +80,30 @@ namespace XayahBot.Service
             }
         }
 
-        private void AnalyzeData(ShardStatus status)
+        private void AnalyzeData(ShardStatusDto status)
         {
             if (status != null && status.Services.Count > 0)
             {
                 ISocketMessageChannel testChannel = this._client.GetChannel(301030133014200320) as ISocketMessageChannel;
                 string message = string.Empty;
                 message += $"__Status {status.Name}__{Environment.NewLine}";
-                bool post = false;
                 string subMsg = string.Empty;
-                foreach (API.Riot.Model.Service srvc in status.Services)
+                foreach (ServiceDto service in status.Services)
                 {
-                    message += $"----{srvc.Name} | {srvc.Status}{Environment.NewLine}";
-                    foreach (Incident inc in srvc.Incidents.Where(x => x.Updates.Count > 0))
+                    message += $"{service.Name} | {service.Status}{Environment.NewLine}";
+                    foreach (IncidentDto incident in service.Incidents.Where(x => x.Active && x.Updates.Count > 0))
                     {
-                        subMsg += $"------{inc.Id} - {inc.Active} - {inc.Created_At}{Environment.NewLine}";
-                        foreach (Message msg in inc.Updates.Where(x => x.Translations.Where(y => y.Locale.Equals("en_US")).ToList().Count > 0))
+                        for(int i = 0; i < incident.Updates.Count; i++)
                         {
-                            subMsg += $"--------{msg.Author} - {msg.Severity} - {msg.Created_At}{Environment.NewLine}";
-                            foreach (Translation trsl in msg.Translations.Where(x => x.Locale.Equals("en_US")))
+                            if (i > 0)
                             {
-                                subMsg += $"Locale: {trsl.Locale}; Updated: {trsl.Updated_At}{Environment.NewLine}";
-                                subMsg += $"Message: {trsl.Content}{Environment.NewLine}";
-                                post = true;
+                                message += Environment.NewLine;
                             }
+                            UpdateDto update = incident.Updates.ElementAt(i);
+                            DateTime.TryParse(update.UpdateTime, out DateTime updateTime);
+                            message += $"---- {update.Severity.ToUpper()} - {updateTime}{Environment.NewLine}";
+                            message += $"---- {update.Content}{Environment.NewLine}";
                         }
-                    }
-                    if (post)
-                    {
-                        post = false;
-                        message += subMsg;
-                        subMsg = string.Empty;
                     }
                 }
                 testChannel.SendMessageAsync(message);

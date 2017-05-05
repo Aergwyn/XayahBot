@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace XayahBot.API.Riot.Model
 {
@@ -13,7 +14,10 @@ namespace XayahBot.API.Riot.Model
         //public string Key { get; set; }
         //public string Lore { get; set; }
         public string Name { get; set; }
-        public string ParType { get; set; } // Resource
+
+        [JsonProperty("ParType")]
+        public string Resource { get; set; } // Resource
+
         public PassiveDto Passive { get; set; }
         //public List<RecommendedDto> Recommended { get; set; }
         public List<SkinDto> Skins { get; set; }

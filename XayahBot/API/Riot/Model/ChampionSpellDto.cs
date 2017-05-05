@@ -27,11 +27,7 @@ namespace XayahBot.API.Riot.Model
         //public string Tooltip { get; set; }
         public List<SpellVarsDto> Vars { get; set; }
 
-        //
-
         private string _na = "N/A";
-
-        //
 
         public string GetCostString()
         {
