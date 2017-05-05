@@ -1,4 +1,4 @@
-﻿namespace XayahBot.Utility
+﻿namespace XayahBot.Utility.Messages
 {
     public enum FieldFormatType
     {

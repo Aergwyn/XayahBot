@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Linq;
 
-namespace XayahBot.Utility
+namespace XayahBot.Utility.Messages
 {
     public class DiscordFormatMessage
     {

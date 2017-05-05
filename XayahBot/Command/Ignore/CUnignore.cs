@@ -10,6 +10,7 @@ using XayahBot.Command.System;
 using XayahBot.Database.DAO;
 using XayahBot.Error;
 using XayahBot.Utility;
+using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command.Ignore
 {

@@ -10,6 +10,7 @@ using Discord.WebSocket;
 using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
 using XayahBot.Utility;
+using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command.Remind
 {

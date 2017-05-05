@@ -5,6 +5,7 @@ using Discord.Commands;
 using XayahBot.Command.System;
 using XayahBot.Error;
 using XayahBot.Utility;
+using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command
 {

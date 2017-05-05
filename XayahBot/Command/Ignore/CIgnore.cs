@@ -11,6 +11,7 @@ using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
 using XayahBot.Error;
 using XayahBot.Utility;
+using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command.Ignore
 {

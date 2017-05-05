@@ -2,7 +2,7 @@
 using Discord;
 using Discord.Commands;
 
-namespace XayahBot.Utility
+namespace XayahBot.Utility.Messages
 {
     public class DiscordFormatEmbed
     {

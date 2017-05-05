@@ -4,7 +4,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using XayahBot.Error;
 
-namespace XayahBot.Utility
+namespace XayahBot.Utility.Messages
 {
     public static class ResponseHelper
     {

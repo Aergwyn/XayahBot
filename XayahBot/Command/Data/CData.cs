@@ -3,7 +3,7 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using XayahBot.Utility;
+using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command.Data
 {
