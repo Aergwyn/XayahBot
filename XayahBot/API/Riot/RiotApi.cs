@@ -8,7 +8,7 @@ namespace XayahBot.API.Riot
 
         protected abstract string GetVersion();
 
-        //
+        // ---
 
         private Region _region;
         private string _apiKey;

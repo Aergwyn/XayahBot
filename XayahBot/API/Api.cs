@@ -16,7 +16,7 @@ namespace XayahBot.API
 
         protected abstract string GetBaseUrl();
 
-        //
+        // ---
 
         protected async Task<T> GetAsync<T>(ApiRequest request)
         {

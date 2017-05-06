@@ -24,8 +24,6 @@ namespace XayahBot.Command.Ignore
             "But is it really okay?"
         };
 
-        //
-
         private readonly IgnoreDAO _ignoreDao = new IgnoreDAO();
         private bool _hasNewUnignoredUser = false;
         private List<string> _newUnignoredList = new List<string>();

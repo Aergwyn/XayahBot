@@ -14,10 +14,8 @@ namespace XayahBot.API.Riot.Model
         //public string Key { get; set; }
         //public string Lore { get; set; }
         public string Name { get; set; }
-
         [JsonProperty("ParType")]
-        public string Resource { get; set; } // Resource
-
+        public string Resource { get; set; }
         public PassiveDto Passive { get; set; }
         //public List<RecommendedDto> Recommended { get; set; }
         public List<SkinDto> Skins { get; set; }

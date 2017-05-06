@@ -24,7 +24,7 @@ namespace XayahBot.Utility.Messages
             return string.Join(string.Empty, Start(options).Reverse());
         }
 
-        //
+        // ---
 
         private string FormatChars { get; set; }
 

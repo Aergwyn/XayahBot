@@ -16,7 +16,7 @@ namespace XayahBot.API.Riot
             }
         }
 
-        //
+        // ---
 
         public string Name { get; private set; }
         public string Platform { get; private set; }

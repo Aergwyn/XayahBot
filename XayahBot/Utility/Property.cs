@@ -50,7 +50,7 @@ namespace XayahBot.Utility
             throw new NotExistingException();
         }
 
-        //
+        // ---
 
         private PropertyDAO _propertyDao = new PropertyDAO();
 

@@ -27,18 +27,18 @@ namespace XayahBot.Command.Remind
             return _instance;
         }
 
-        private RemindService(DiscordSocketClient client)
-        {
-            this._client = client;
-        }
-
-        //
+        // ---
 
         private readonly DiscordSocketClient _client;
         private readonly RemindDAO _remindDao = new RemindDAO();
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
         private bool _isRunning = false;
         private Dictionary<int, Timer> _currentTimerList = new Dictionary<int, Timer>();
+
+        private RemindService(DiscordSocketClient client)
+        {
+            this._client = client;
+        }
 
         public async Task StartAsync()
         {

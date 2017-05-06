@@ -25,8 +25,6 @@ namespace XayahBot.Command.Ignore
             "My last nerve is long gone."
         };
 
-        //
-
         private readonly IgnoreDAO _ignoreDao = new IgnoreDAO();
         private bool _hasNewIgnoredUser = false;
         private List<string> _newIgnoredList = new List<string>();

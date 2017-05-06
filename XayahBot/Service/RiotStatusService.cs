@@ -53,10 +53,8 @@ namespace XayahBot.Service
             {
                 this._running = true;
                 bool _checked = false;
-
                 RiotStatusApi statusEuw = new RiotStatusApi(Region.EUW);
                 //RiotStatusApi statusNa = new RiotStatusApi(Region.NA);
-
                 while (this._running)
                 {
                     if (DateTime.UtcNow.Minute % 5 == 0)
@@ -70,7 +68,7 @@ namespace XayahBot.Service
                     }
                     else
                     {
-                            _checked = false;
+                        _checked = false;
                     }
                     if (this._running)
                     {
@@ -93,7 +91,7 @@ namespace XayahBot.Service
                     message += $"{service.Name} | {service.Status}{Environment.NewLine}";
                     foreach (IncidentDto incident in service.Incidents.Where(x => x.Active && x.Updates.Count > 0))
                     {
-                        for(int i = 0; i < incident.Updates.Count; i++)
+                        for (int i = 0; i < incident.Updates.Count; i++)
                         {
                             if (i > 0)
                             {

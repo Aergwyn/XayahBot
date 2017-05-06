@@ -20,8 +20,6 @@ namespace XayahBot.Command.Remind
     {
         private readonly string _reminderCreated = "I'm going to remind you in `{0}` {1}{2}. I think...";
 
-        //
-
         private RemindService _remindService { get; set; }
         private readonly RemindDAO _remindDao = new RemindDAO();
 
@@ -29,8 +27,6 @@ namespace XayahBot.Command.Remind
         {
             this._remindService = remindService;
         }
-
-        //
 
         [Command("list")]
         [Summary("Displays a list of your active reminder.")]

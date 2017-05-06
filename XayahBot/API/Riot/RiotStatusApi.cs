@@ -19,8 +19,6 @@ namespace XayahBot.API.Riot
             return "v3";
         }
 
-        //
-
         public async Task<ShardStatusDto> GetStatusAsync()
         {
             return await this.GetAsync<ShardStatusDto>(new ApiRequest("shard-data"));

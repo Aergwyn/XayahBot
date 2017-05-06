@@ -8,8 +8,6 @@ namespace XayahBot.Command.Data
         public int IntDigits { get; set; }
         public int DecDigits { get; set; }
 
-        //
-
         public DecAlign(List<decimal> numbers)
         {
             int intDigits = 1;
@@ -31,8 +29,6 @@ namespace XayahBot.Command.Data
             this.IntDigits = intDigits;
             this.DecDigits = decDigits;
         }
-
-        //
 
         public int GetFieldLength()
         {

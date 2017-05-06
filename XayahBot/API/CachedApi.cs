@@ -9,7 +9,7 @@ namespace XayahBot.API
     {
         protected abstract DateTime GetDataExpirationTime();
 
-        //
+        // ---
 
         private static SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
         private static Dictionary<string, CacheEntry> _cache = new Dictionary<string, CacheEntry>();

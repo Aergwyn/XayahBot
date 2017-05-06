@@ -18,16 +18,12 @@ namespace XayahBot.Command.Help
             "Also always remember using a space between each argument!" + Environment.NewLine +
             "If you have problems, questions and/or suggestions do not hesitate to message {0}.";
 
-        //
-
         private readonly CommandService _commandService;
 
         public CHelp(CommandService commandService)
         {
             this._commandService = commandService;
         }
-
-        //
 
         [Command("help"), Alias("h")]
         [Summary("Displays the list of commands.")]

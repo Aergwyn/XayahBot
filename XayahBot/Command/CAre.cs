@@ -49,8 +49,6 @@ namespace XayahBot.Command
             "How am I supposed to work with... whatever this is?",
         };
 
-        //
-
         [Command("are"), Alias("is", "am")]
         [CheckIgnoredUser]
         [CheckIgnoredChannel]
