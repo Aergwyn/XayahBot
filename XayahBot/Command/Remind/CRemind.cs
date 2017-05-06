@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
 using XayahBot.Error;
@@ -18,8 +17,6 @@ namespace XayahBot.Command.Remind
     [Group("remind me")]
     public class CRemind : ModuleBase
     {
-        private readonly string _reminderCreated = "I'm going to remind you in `{0}` {1}{2}. I think...";
-
         private RemindService _remindService { get; set; }
         private readonly RemindDAO _remindDao = new RemindDAO();
 
@@ -28,34 +25,32 @@ namespace XayahBot.Command.Remind
             this._remindService = remindService;
         }
 
-        [Command("list")]
+        [Command]
         [Summary("Displays a list of your active reminder.")]
-        public async Task Reminder()
+        public async Task List()
         {
             IMessageChannel channel = await ResponseHelper.GetDMChannel(this.Context);
             List<TRemindEntry> reminders = this._remindDao.GetReminders(this.Context.User.Id);
-            DiscordFormatMessage message = new DiscordFormatMessage();
-            message = this.BuildReminderListString(reminders, message);
-            channel.SendMessageAsync(message.ToString());
+            DiscordFormatEmbed message = new DiscordFormatEmbed();
+            this.BuildReminderListResponse(reminders, message);
+            channel.SendMessageAsync("", false, message.ToEmbed());
         }
 
-        private DiscordFormatMessage BuildReminderListString(IEnumerable<TRemindEntry> list, DiscordFormatMessage message)
+        private void BuildReminderListResponse(IEnumerable<TRemindEntry> list, DiscordFormatEmbed message)
         {
-            IOrderedEnumerable<TRemindEntry> orderedList = list.OrderBy(x => x.Id);
+            IOrderedEnumerable<TRemindEntry> orderedList = list.OrderBy(x => x.ExpirationTime);
             if (orderedList.Count() > 0)
             {
-                message.Append("Active Reminder", AppendOption.Underscore);
+                message.AppendDescription("Here is a list of your active reminder.");
                 foreach (TRemindEntry entry in orderedList)
                 {
-                    message.AppendCodeBlock($"ID: {entry.Id} | Expires: {entry.ExpirationTime} UTC{Environment.NewLine}" +
-                        $"Message:{Environment.NewLine}{entry.Message}");
+                    message.AddField($"ID: {entry.UserEntryNumber} | Expires: {entry.ExpirationTime} UTC", entry.Message);
                 }
             }
             else
             {
-                message.Append("You have no active reminder right now.");
+                message.AppendDescription("You have no active reminder right now.");
             }
-            return message;
         }
 
         [Command("d")]
@@ -64,9 +59,9 @@ namespace XayahBot.Command.Remind
         {
             text = text.Trim();
             d = this.SetValueInRange(d, 1, 30);
-            if (await CreateReminder(text, DateTime.UtcNow.AddDays(d)))
+            if (this.IsValidReminder(text) && await CreateReminder(text, DateTime.UtcNow.AddDays(d)))
             {
-                this.ReplyAsync(string.Format(this._reminderCreated, d, "day", this.AddSForMultiple(d)));
+                this.SendSuccessResponse("day", d);
             }
         }
 
@@ -76,9 +71,9 @@ namespace XayahBot.Command.Remind
         {
             text = text.Trim();
             h = this.SetValueInRange(h, 1, 23);
-            if (await CreateReminder(text, DateTime.UtcNow.AddHours(h)))
+            if (this.IsValidReminder(text) && await CreateReminder(text, DateTime.UtcNow.AddHours(h)))
             {
-                this.ReplyAsync(string.Format(this._reminderCreated, h, "hour", this.AddSForMultiple(h)));
+                this.SendSuccessResponse("hour", h);
             }
         }
 
@@ -88,9 +83,9 @@ namespace XayahBot.Command.Remind
         {
             text = text.Trim();
             m = this.SetValueInRange(m, 15, 59);
-            if (await CreateReminder(text, DateTime.UtcNow.AddMinutes(m)))
+            if (this.IsValidReminder(text) && await CreateReminder(text, DateTime.UtcNow.AddMinutes(m)))
             {
-                this.ReplyAsync(string.Format(this._reminderCreated, m, "minute", this.AddSForMultiple(m)));
+                this.SendSuccessResponse("minute", m);
             }
         }
 
@@ -107,12 +102,40 @@ namespace XayahBot.Command.Remind
             return value;
         }
 
+        private bool IsValidReminder(string textToCheck)
+        {
+            int reminderCap = int.Parse(Property.ReminderCap.Value);
+            int reminderTextCap = int.Parse(Property.ReminderTextCap.Value);
+            if (this._remindDao.GetReminders(this.Context.User.Id).Count >= reminderCap)
+            {
+                this.SendResponse($"You already reached the maximum of {reminderCap} active reminder.");
+                return false;
+            }
+            if (textToCheck.Length > reminderTextCap)
+            {
+                this.SendResponse($"Your message contains more than {reminderTextCap} characters and is too long.");
+                return false;
+            }
+            return true;
+        }
+
+        private void SendResponse(string text)
+        {
+            DiscordFormatEmbed message = null;
+            message = new DiscordFormatEmbed();
+            if (!this.Context.IsPrivate)
+            {
+                message.CreateFooter(this.Context);
+            }
+            message.AppendDescription(text);
+            this.ReplyAsync("", false, message.ToEmbed());
+        }
+
         private async Task<bool> CreateReminder(string text, DateTime expirationTime)
         {
-            string message = string.Empty;
             try
             {
-                await this._remindService.AddNew(this.Context.Client as DiscordSocketClient, new TRemindEntry
+                await this._remindService.AddNew(new TRemindEntry
                 {
                     ExpirationTime = expirationTime,
                     Message = text,
@@ -137,25 +160,32 @@ namespace XayahBot.Command.Remind
             return text;
         }
 
+        private void SendSuccessResponse(string timeUnit, int timeValue)
+        {
+            string text = string.Format("I'm going to remind you in `{0}` {1}{2}. I think...", timeValue, timeUnit, this.AddSForMultiple(timeValue));
+            this.SendResponse(text);
+        }
+
         [Command("not")]
         [Summary("Removes a reminder (by ID!) from your list.")]
         public async Task Not(int id)
         {
-            string message = string.Empty;
+            IMessageChannel channel = await ResponseHelper.GetDMChannel(this.Context);
+            DiscordFormatEmbed message = new DiscordFormatEmbed();
             try
             {
-                await this._remindService.Remove(id, this.Context.User.Id);
-                message = $"Removed reminder with ID `{id}` from your list.";
+                await this._remindService.Remove(this.Context.User.Id, id);
+                message.AppendDescription($"Removed reminder with ID `{id}` from your list.");
             }
             catch (NotExistingException)
             {
-                message = $"Reminder with ID `{id}` does not exist on your list.";
+                message.AppendDescription($"Reminder with ID `{id}` does not exist on your list.");
             }
             catch (NotSavedException nsex)
             {
                 Logger.Error($"Failed to remove reminder with ID {id} for {this.Context.User}.", nsex);
             }
-            this.ReplyAsync(message);
+            channel.SendMessageAsync("", false, message.ToEmbed());
         }
     }
 }

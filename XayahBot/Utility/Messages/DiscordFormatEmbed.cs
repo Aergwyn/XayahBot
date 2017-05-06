@@ -18,13 +18,6 @@ namespace XayahBot.Utility.Messages
             this.SetColor(XayahColor.Purple);
         }
 
-        public DiscordFormatEmbed(CommandContext commandContext) : this()
-        {
-            this.SetFooterThumbnail(commandContext.User.GetAvatarUrl())
-                .AppendFooter(commandContext.User.ToString())
-                .SetFooterTimestamp();
-        }
-
         public DiscordFormatEmbed SetColor(Color color)
         {
             this._builder.Color = color;
@@ -81,6 +74,14 @@ namespace XayahBot.Utility.Messages
                     break;
             }
             this._builder.AddField(nameText, valueText);
+            return this;
+        }
+
+        public DiscordFormatEmbed CreateFooter(CommandContext commandContext)
+        {
+            this.SetFooterThumbnail(commandContext.User.GetAvatarUrl())
+                .AppendFooter(commandContext.User.ToString())
+                .SetFooterTimestamp();
             return this;
         }
 

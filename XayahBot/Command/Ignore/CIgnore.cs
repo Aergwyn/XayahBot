@@ -40,9 +40,8 @@ namespace XayahBot.Command.Ignore
             string userString = this.BuildIgnoreListString(ignoreList.Where(x => !x.IsChannel));
             string channelString = this.BuildIgnoreListString(ignoreList.Where(x => x.IsChannel));
 
-            DiscordFormatEmbed message = new DiscordFormatEmbed(this.Context)
-                .AppendTitle(":no_entry_sign: ")
-                .AppendTitle("Ignore List", AppendOption.Underscore)
+            DiscordFormatEmbed message = new DiscordFormatEmbed()
+                .CreateFooter(this.Context)
                 .AppendDescription($"Here is the current ignore list for this server.{Environment.NewLine}{Environment.NewLine}")
                 .AppendDescription("Ignored User", AppendOption.Bold)
                 .AppendDescription($"{Environment.NewLine}{userString}{Environment.NewLine}{Environment.NewLine}")
@@ -84,7 +83,7 @@ namespace XayahBot.Command.Ignore
                 IChannel channel = await this.Context.Guild.GetChannelAsync(channelId);
                 await this.AddToIgnore(channel.Id, channel.Name, true);
             }
-            this.SendReplies();
+            this.SendResponse();
         }
 
         private bool IsActualUser(IUser user)
@@ -128,14 +127,13 @@ namespace XayahBot.Command.Ignore
             }
         }
 
-        private async Task SendReplies()
+        private async Task SendResponse()
         {
             string text = this.CreateMessage();
             if (!string.IsNullOrWhiteSpace(text))
             {
-                DiscordFormatEmbed message = new DiscordFormatEmbed(this.Context)
-                    .AppendTitle(":no_entry_sign: ")
-                    .AppendTitle("Ignore List", AppendOption.Underscore)
+                DiscordFormatEmbed message = new DiscordFormatEmbed()
+                    .CreateFooter(this.Context)
                     .AppendDescription(text);
                 await this.ReplyAsync("", false, message.ToEmbed());
             }

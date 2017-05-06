@@ -28,7 +28,11 @@ namespace XayahBot.Database.DAO
                 TProperty dbProperty = database.Properties.FirstOrDefault(x => x.Name.Equals(property.Name));
                 if (dbProperty == null)
                 {
-                    database.Properties.Add(new TProperty { Name = property.Name, Value = property.Value });
+                    database.Properties.Add(new TProperty
+                    {
+                        Name = property.Name,
+                        Value = property.Value
+                    });
                 }
                 else
                 {

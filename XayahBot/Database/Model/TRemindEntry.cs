@@ -6,6 +6,7 @@ namespace XayahBot.Database.Model
     {
         public int Id { get; set; }
         public ulong UserId { get; set; }
+        public int UserEntryNumber { get; set; }
         public DateTime ExpirationTime { get; set; }
         public string Message { get; set; }
     }

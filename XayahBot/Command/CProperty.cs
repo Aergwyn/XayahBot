@@ -19,8 +19,6 @@ namespace XayahBot.Command
         public Task Get()
         {
             DiscordFormatEmbed message = new DiscordFormatEmbed()
-                .AppendTitle(":gear: ")
-                .AppendTitle("Property", AppendOption.Underscore)
                 .AppendDescription("Here is a list of available properties.")
                 .AppendDescriptionCodeBlock(this.BuildPropertyListString());
             this.ReplyAsync("", false, message.ToEmbed());
@@ -50,9 +48,7 @@ namespace XayahBot.Command
         public Task Set(string name, [Remainder]string value = "")
         {
             value = value.Trim();
-            DiscordFormatEmbed message = new DiscordFormatEmbed()
-                .AppendTitle(":gear: ")
-                .AppendTitle("Property", AppendOption.Underscore);
+            DiscordFormatEmbed message = new DiscordFormatEmbed();
             try
             {
                 Property property = Property.GetUpdatableByName(name);

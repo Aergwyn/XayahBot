@@ -22,6 +22,8 @@ namespace XayahBot.Utility
         public static readonly Property QuizMatch = new Property("quiz_match", "70"); // Percentage
         public static readonly Property QuizMaxTries = new Property("quiz_maxtries", "10");
         public static readonly Property QuizTimeout = new Property("quiz_timeout", "10"); // Minutes
+        public static readonly Property ReminderCap = new Property("reminder_cap", "6");
+        public static readonly Property ReminderTextCap = new Property("reminder_textcap", "60");
 
         public static IEnumerable<Property> UpdatableValues
         {
@@ -34,6 +36,8 @@ namespace XayahBot.Utility
                 yield return QuizMatch;
                 yield return QuizMaxTries;
                 yield return QuizTimeout;
+                yield return ReminderCap;
+                yield return ReminderTextCap;
             }
         }
 
@@ -62,14 +66,15 @@ namespace XayahBot.Utility
             {
                 if (this.NeedInit())
                 {
+                    this.Loaded = true;
                     try
                     {
                         this._value = this._propertyDao.GetValue(this);
                     }
                     catch (NotExistingException)
                     {
+                        this._propertyDao.SetValueAsync(this);
                     }
-                    this.Loaded = true;
                 }
                 return this._value;
             }

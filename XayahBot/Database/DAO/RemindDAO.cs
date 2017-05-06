@@ -28,6 +28,17 @@ namespace XayahBot.Database.DAO
         {
             using (GeneralContext database = new GeneralContext())
             {
+                List<TRemindEntry> existingReminder = this.GetReminders(entry.UserId);
+                int newUserEntryNumber = 1;
+                while(true)
+                {
+                    if (existingReminder.Where(x => x.UserEntryNumber.Equals(newUserEntryNumber)).Count() == 0)
+                    {
+                        break;
+                    }
+                        newUserEntryNumber++;
+                }
+                entry.UserEntryNumber = newUserEntryNumber;
                 database.Reminders.Add(entry);
                 if (await database.SaveChangesAsync() <= 0)
                 {
@@ -36,11 +47,11 @@ namespace XayahBot.Database.DAO
             }
         }
 
-        public async Task RemoveAsync(int id, ulong userId)
+        public async Task RemoveAsync(ulong userId, int userEntryNumber)
         {
             using (GeneralContext database = new GeneralContext())
             {
-                TRemindEntry match = database.Reminders.FirstOrDefault(x => x.Id.Equals(id) && x.UserId.Equals(userId));
+                TRemindEntry match = database.Reminders.FirstOrDefault(x => x.UserId.Equals(userId) && x.UserEntryNumber.Equals(userEntryNumber));
                 if (match != null)
                 {
                     database.Remove(match);
