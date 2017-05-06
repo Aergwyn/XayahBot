@@ -37,15 +37,18 @@ namespace XayahBot.Command.Ignore
         public Task Ignore()
         {
             List<TIgnoreEntry> ignoreList = this._ignoreDao.GetIgnoreList(this.Context.Guild.Id);
+            string userString = this.BuildIgnoreListString(ignoreList.Where(x => !x.IsChannel));
+            string channelString = this.BuildIgnoreListString(ignoreList.Where(x => x.IsChannel));
 
             DiscordFormatEmbed message = new DiscordFormatEmbed(this.Context)
                 .AppendTitle(":no_entry_sign: ")
                 .AppendTitle("Ignore List", AppendOption.Underscore)
-                .AppendDescription("Here is the current ignore list for this server." + Environment.NewLine + Environment.NewLine)
+                .AppendDescription($"Here is the current ignore list for this server.{Environment.NewLine}{Environment.NewLine}")
                 .AppendDescription("Ignored User", AppendOption.Bold)
-                .AppendDescriptionCodeBlock(this.BuildIgnoreListString(ignoreList.Where(x => !x.IsChannel)))
+                .AppendDescription($"{Environment.NewLine}{userString}{Environment.NewLine}{Environment.NewLine}")
                 .AppendDescription("Ignored Channel", AppendOption.Bold)
-                .AppendDescriptionCodeBlock(this.BuildIgnoreListString(ignoreList.Where(x => x.IsChannel)));
+                .AppendDescription($"{Environment.NewLine}{channelString}");
+
             this.ReplyAsync("", false, message.ToEmbed());
             return Task.CompletedTask;
         }
@@ -54,11 +57,8 @@ namespace XayahBot.Command.Ignore
         {
             string text = string.Empty;
             IOrderedEnumerable<TIgnoreEntry> orderedList = list.OrderBy(x => x.SubjectName);
-            if (orderedList.Count() > 0)
-            {
-                text = ListUtil.BuildEnumeration(list);
-            }
-            else
+            text = ListUtil.BuildEnumeration(list);
+            if (string.IsNullOrWhiteSpace(text))
             {
                 text = "This list is empty right now.";
             }

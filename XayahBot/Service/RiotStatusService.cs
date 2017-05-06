@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Globalization;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.WebSocket;
@@ -54,7 +54,7 @@ namespace XayahBot.Service
                 this._running = true;
                 bool _checked = false;
                 RiotStatusApi statusEuw = new RiotStatusApi(Region.EUW);
-                //RiotStatusApi statusNa = new RiotStatusApi(Region.NA);
+                RiotStatusApi statusNa = new RiotStatusApi(Region.NA);
                 while (this._running)
                 {
                     if (DateTime.UtcNow.Minute % 5 == 0)
@@ -62,7 +62,7 @@ namespace XayahBot.Service
                         if (!_checked)
                         {
                             AnalyzeData(await statusEuw.GetStatusAsync());
-                            //AnalyzeData(await statusNa.GetStatusAsync());
+                            AnalyzeData(await statusNa.GetStatusAsync());
                             _checked = true;
                         }
                     }
@@ -80,32 +80,46 @@ namespace XayahBot.Service
 
         private void AnalyzeData(ShardStatusDto status)
         {
-            if (status != null && status.Services.Count > 0)
+            ISocketMessageChannel testChannel = this._client.GetChannel(301030133014200320) as ISocketMessageChannel;
+            string message = string.Empty;
+            for (int servicePos = 0; servicePos < status.Services.Count; servicePos++)
             {
-                ISocketMessageChannel testChannel = this._client.GetChannel(301030133014200320) as ISocketMessageChannel;
-                string message = string.Empty;
-                message += $"__Status {status.Name}__{Environment.NewLine}";
-                string subMsg = string.Empty;
-                foreach (ServiceDto service in status.Services)
+                ServiceDto service = status.Services.ElementAt(servicePos);
+                List<UpdateDto> updates = this.GetActiveUpdates(service);
+                for (int updatePos = 0; updatePos < updates.Count(); updatePos++)
                 {
-                    message += $"{service.Name} | {service.Status}{Environment.NewLine}";
-                    foreach (IncidentDto incident in service.Incidents.Where(x => x.Active && x.Updates.Count > 0))
+                    if (string.IsNullOrWhiteSpace(message))
                     {
-                        for (int i = 0; i < incident.Updates.Count; i++)
-                        {
-                            if (i > 0)
-                            {
-                                message += Environment.NewLine;
-                            }
-                            UpdateDto update = incident.Updates.ElementAt(i);
-                            DateTime.TryParse(update.UpdateTime, out DateTime updateTime);
-                            message += $"---- {update.Severity.ToUpper()} - {updateTime}{Environment.NewLine}";
-                            message += $"---- {update.Content}{Environment.NewLine}";
-                        }
+                        message += $"__Status {status.Name}__{Environment.NewLine}";
                     }
+                    if (updatePos == 0)
+                    {
+                        message += $"{service.Name} | {service.Status}{Environment.NewLine}";
+                    }
+                    else
+                    {
+                        message += Environment.NewLine;
+                    }
+                    UpdateDto update = updates.ElementAt(updatePos);
+                    DateTime.TryParse(update.UpdateTime, out DateTime updateTime);
+                    message += $"--- {update.Id} - {update.Severity.ToUpper()} - {updateTime}{Environment.NewLine}";
+                    message += $"--- {update.Content}{Environment.NewLine}";
                 }
-                testChannel.SendMessageAsync(message);
             }
+            testChannel.SendMessageAsync(message);
+        }
+
+        private List<UpdateDto> GetActiveUpdates(ServiceDto service)
+        {
+            List<UpdateDto> updateList = new List<UpdateDto>();
+            foreach (IncidentDto incident in service.Incidents)
+            {
+                if (incident.Active && incident.Updates.Count > 0)
+                {
+                    updateList.AddRange(incident.Updates);
+                }
+            }
+            return updateList;
         }
     }
 }
