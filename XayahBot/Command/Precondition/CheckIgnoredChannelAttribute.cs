@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using XayahBot.Database.DAO;
 
-namespace XayahBot.Command.System
+namespace XayahBot.Command.Precondition
 {
     public class CheckIgnoredChannelAttribute : PreconditionAttribute
     {

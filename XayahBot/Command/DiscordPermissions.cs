@@ -2,7 +2,7 @@
 using Discord.Commands;
 using XayahBot.Utility;
 
-namespace XayahBot.Command.System
+namespace XayahBot.Command
 {
     public static class DiscordPermissions
     {

@@ -3,7 +3,7 @@
 using System.Threading.Tasks;
 using Discord.Commands;
 
-namespace XayahBot.Command.System
+namespace XayahBot.Command.Precondition
 {
     public class RequireModAttribute : PreconditionAttribute
     {

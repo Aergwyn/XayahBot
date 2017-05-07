@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
-using XayahBot.Command.System;
 using XayahBot.Utility;
 
 namespace XayahBot.Command.Owner

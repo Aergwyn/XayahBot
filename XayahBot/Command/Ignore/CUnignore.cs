@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using XayahBot.Command.System;
+using XayahBot.Command.Precondition;
 using XayahBot.Database.DAO;
 using XayahBot.Error;
 using XayahBot.Utility;

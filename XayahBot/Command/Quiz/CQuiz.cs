@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
-using XayahBot.Command.System;
+using XayahBot.Command.Precondition;
 using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
 using XayahBot.Utility;

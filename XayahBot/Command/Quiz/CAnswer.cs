@@ -2,7 +2,7 @@
 
 using System.Threading.Tasks;
 using Discord.Commands;
-using XayahBot.Command.System;
+using XayahBot.Command.Precondition;
 
 namespace XayahBot.Command.Quiz
 {
