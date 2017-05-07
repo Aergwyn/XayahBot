@@ -7,7 +7,7 @@ using XayahBot.Error;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
-namespace XayahBot.Command
+namespace XayahBot.Command.Owner
 {
     [Group("prop")]
     public class CProperty : LoggedModuleBase
