@@ -13,7 +13,11 @@ namespace XayahBot.Utility.Messages
 
         public DiscordFormatMessage Append(string text, params AppendOption[] options)
         {
-            if (!string.IsNullOrWhiteSpace(text))
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                this.Text += text;
+            }
+            else
             {
                 this.Text += AppendOption.Start(options) + text + AppendOption.End(options);
             }

@@ -6,6 +6,7 @@ using XayahBot.Command.Precondition;
 
 namespace XayahBot.Command.Quiz
 {
+    [Category(CategoryType.QUIZ)]
     public class CAnswer : ModuleBase
     {
         [Command("answer")]

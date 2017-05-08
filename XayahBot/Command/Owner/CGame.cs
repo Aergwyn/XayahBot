@@ -1,10 +1,12 @@
 ﻿using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
+using XayahBot.Command.Precondition;
 using XayahBot.Utility;
 
 namespace XayahBot.Command.Owner
 {
+    [Category(CategoryType.OWNER)]
     public class CGame : LoggedModuleBase
     {
         [Command("game")]

@@ -15,6 +15,7 @@ using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command.Ignore
 {
+    [Category(CategoryType.IGNORE)]
     public class CIgnore : LoggedModuleBase
     {
         private readonly List<string> _ignoredReactionList = new List<string>
@@ -42,12 +43,15 @@ namespace XayahBot.Command.Ignore
 
             DiscordFormatEmbed message = new DiscordFormatEmbed()
                 .CreateFooter(this.Context)
-                .AppendDescription($"Here is the current ignore list for this server.{Environment.NewLine}{Environment.NewLine}")
+                .AppendDescription($"Here is the current ignore list for this server.")
+                .AppendDescription(Environment.NewLine + Environment.NewLine)
                 .AppendDescription("Ignored User", AppendOption.Bold)
-                .AppendDescription($"{Environment.NewLine}{userString}{Environment.NewLine}{Environment.NewLine}")
+                .AppendDescription(Environment.NewLine)
+                .AppendDescription(userString)
+                .AppendDescription(Environment.NewLine + Environment.NewLine)
                 .AppendDescription("Ignored Channel", AppendOption.Bold)
-                .AppendDescription($"{Environment.NewLine}{channelString}");
-
+                .AppendDescription(Environment.NewLine)
+                .AppendDescription(channelString);
             this.ReplyAsync("", false, message.ToEmbed());
             return Task.CompletedTask;
         }

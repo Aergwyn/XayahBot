@@ -32,19 +32,13 @@ namespace XayahBot.Utility.Messages
 
         public DiscordFormatEmbed AppendTitle(string text, params AppendOption[] options)
         {
-            if (!string.IsNullOrWhiteSpace(text))
-            {
-                this._builder.Title += AppendOption.Start(options) + text + AppendOption.End(options);
-            }
+            this._builder.Title += this.ApplyOptions(text, options);
             return this;
         }
 
         public DiscordFormatEmbed AppendDescription(string text, params AppendOption[] options)
         {
-            if (!string.IsNullOrWhiteSpace(text))
-            {
-                this._builder.Description += AppendOption.Start(options) + text + AppendOption.End(options);
-            }
+            this._builder.Description += this.ApplyOptions(text, options);
             return this;
         }
 
@@ -63,14 +57,14 @@ namespace XayahBot.Utility.Messages
             string valueText = value;
             switch (formatType) {
                 case FieldFormatType.NAME:
-                    nameText = AppendOption.Start(options) + name + AppendOption.End(options);
+                    nameText = this.ApplyOptions(name, options);
                     break;
                 case FieldFormatType.VALUE:
-                    valueText = AppendOption.Start(options) + value + AppendOption.End(options);
+                    valueText = this.ApplyOptions(value, options);
                     break;
                 case FieldFormatType.BOTH:
-                    nameText = AppendOption.Start(options) + name + AppendOption.End(options);
-                    valueText = AppendOption.Start(options) + value + AppendOption.End(options);
+                    nameText = this.ApplyOptions(name, options);
+                    valueText = this.ApplyOptions(value, options);
                     break;
             }
             this._builder.AddField(nameText, valueText);
@@ -109,6 +103,18 @@ namespace XayahBot.Utility.Messages
         public Embed ToEmbed()
         {
             return this._builder.Build();
+        }
+
+        private string ApplyOptions(string text, params AppendOption[] options)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return text;
+            }
+            else
+            {
+                return AppendOption.Start(options) + text + AppendOption.End(options);
+            }
         }
     }
 }

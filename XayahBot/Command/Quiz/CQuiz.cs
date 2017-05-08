@@ -13,6 +13,7 @@ using XayahBot.Utility;
 namespace XayahBot.Command.Quiz
 {
     [Group("quiz")]
+    [Category(CategoryType.QUIZ)]
     public class CQuiz : ModuleBase
     {
         private readonly List<string> _emptyLeaderboard = new List<string>

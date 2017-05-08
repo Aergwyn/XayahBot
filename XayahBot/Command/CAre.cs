@@ -8,6 +8,7 @@ using XayahBot.Utility;
 
 namespace XayahBot.Command
 {
+    [Category(CategoryType.MISC)]
     public class CAre : ModuleBase
     {
         private readonly List<string> _responseList = new List<string>

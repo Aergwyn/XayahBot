@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using XayahBot.Command.Precondition;
 using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
 using XayahBot.Error;
@@ -15,6 +16,7 @@ using XayahBot.Utility.Messages;
 namespace XayahBot.Command.Remind
 {
     [Group("remind me")]
+    [Category(CategoryType.REMIND)]
     public class CRemind : ModuleBase
     {
         private RemindService _remindService { get; set; }
@@ -31,13 +33,12 @@ namespace XayahBot.Command.Remind
         {
             IMessageChannel channel = await ResponseHelper.GetDMChannel(this.Context);
             List<TRemindEntry> reminders = this._remindDao.GetReminders(this.Context.User.Id);
-            DiscordFormatEmbed message = new DiscordFormatEmbed();
-            this.BuildReminderListResponse(reminders, message);
-            channel.SendMessageAsync("", false, message.ToEmbed());
+            channel.SendMessageAsync("", false, this.BuildReminderResponse(reminders).ToEmbed());
         }
 
-        private void BuildReminderListResponse(IEnumerable<TRemindEntry> list, DiscordFormatEmbed message)
+        private DiscordFormatEmbed BuildReminderResponse(IEnumerable<TRemindEntry> list)
         {
+            DiscordFormatEmbed message = new DiscordFormatEmbed();
             IOrderedEnumerable<TRemindEntry> orderedList = list.OrderBy(x => x.ExpirationTime);
             if (orderedList.Count() > 0)
             {
@@ -51,6 +52,7 @@ namespace XayahBot.Command.Remind
             {
                 message.AppendDescription("You have no active reminder right now.");
             }
+            return message;
         }
 
         [Command("d")]

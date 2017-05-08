@@ -14,6 +14,7 @@ using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command.Ignore
 {
+    [Category(CategoryType.IGNORE)]
     public class CUnignore : LoggedModuleBase
     {
         private readonly List<string> _unignoredReactionList = new List<string>

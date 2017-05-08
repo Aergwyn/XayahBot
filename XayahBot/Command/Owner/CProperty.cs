@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
+using XayahBot.Command.Precondition;
 using XayahBot.Error;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
@@ -9,6 +10,7 @@ using XayahBot.Utility.Messages;
 namespace XayahBot.Command.Owner
 {
     [Group("prop")]
+    [Category(CategoryType.OWNER)]
     public class CProperty : LoggedModuleBase
     {
         [Command("get")]
