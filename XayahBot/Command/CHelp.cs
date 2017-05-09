@@ -32,6 +32,10 @@ namespace XayahBot.Command
         {
             IMessageChannel channel = await ResponseHelper.GetDMChannel(this.Context);
             Category requestedCategory = Category.GetByName(category);
+            if (!this.CategoryContainsAvailableCommands(requestedCategory))
+            {
+                requestedCategory = Category.Help;
+            }
             DiscordFormatEmbed message = new DiscordFormatEmbed()
                 .AppendDescription($"Here is a list of commands for the category `{requestedCategory}`.")
                 .AppendDescription(Environment.NewLine);
@@ -41,6 +45,25 @@ namespace XayahBot.Command
             message.AppendDescription(Environment.NewLine + Environment.NewLine)
                 .AppendDescription(string.Format(this._finishHelp, Property.Author));
             channel.SendMessageAsync("", false, message.ToEmbed());
+        }
+
+        private bool CategoryContainsAvailableCommands(Category category)
+        {
+            List<CommandInfo> commands = this.GetCommandsOfCategory(category);
+            List<CommandInfo> reducedList = new List<CommandInfo>(commands);
+            foreach (CommandInfo command in commands)
+            {
+                if ((CommandUtil.HasRequireRole<RequireOwnerAttribute>(command) && !DiscordPermissions.IsOwner(this.Context)) ||
+                    (CommandUtil.HasRequireRole<RequireModAttribute>(command) && !DiscordPermissions.IsOwnerOrMod(this.Context)))
+                {
+                    reducedList.Remove(command);
+                }
+            }
+            if (reducedList.Count > 0)
+            {
+                return true;
+            }
+            return false;
         }
 
         private void ListCommandsForCategory(Category category, DiscordFormatEmbed message)
@@ -119,8 +142,11 @@ namespace XayahBot.Command
             message.AppendDescription("Other categories", AppendOption.Bold);
             foreach (Category otherCategory in Category.Values.Where(x => !x.Equals(category)))
             {
-                message.AppendDescription(Environment.NewLine)
-                    .AppendDescription(otherCategory.ToString());
+                if (this.CategoryContainsAvailableCommands(otherCategory))
+                {
+                    message.AppendDescription(Environment.NewLine)
+                        .AppendDescription(otherCategory.ToString());
+                }
             }
         }
     }
