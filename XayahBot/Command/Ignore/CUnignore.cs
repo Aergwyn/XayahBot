@@ -25,7 +25,7 @@ namespace XayahBot.Command.Ignore
             "But is it really okay?"
         };
 
-        private readonly IgnoreDAO _ignoreDao = new IgnoreDAO();
+        private readonly IgnoreListDAO _ignoreListDao = new IgnoreListDAO();
         private bool _hasNewUnignoredUser = false;
         private List<string> _newUnignoredList = new List<string>();
         private List<string> _notExistingUnignoredList = new List<string>();
@@ -71,7 +71,7 @@ namespace XayahBot.Command.Ignore
         {
             try
             {
-                await this._ignoreDao.RemoveAsync(this.Context.Guild.Id, subjectId);
+                await this._ignoreListDao.RemoveAsync(this.Context.Guild.Id, subjectId);
                 this._newUnignoredList.Add(subjectName);
                 if (!isChannel)
                 {

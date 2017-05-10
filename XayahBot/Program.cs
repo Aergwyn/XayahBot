@@ -29,8 +29,8 @@ namespace XayahBot
         private readonly IncidentService _incidentService;
         private readonly IDependencyMap _dependencyMap = new DependencyMap();
 
-        private readonly IgnoreDAO _ignoreDao = new IgnoreDAO();
-        private readonly IncidentsDAO _incidentsDao = new IncidentsDAO();
+        private readonly IgnoreListDAO _ignoreListDao = new IgnoreListDAO();
+        private readonly IncidentSubscriberDAO _incidentSubscriberDao = new IncidentSubscriberDAO();
 
         private Program()
         {
@@ -84,7 +84,7 @@ namespace XayahBot
             this._client.LeftGuild += this.HandleLeftGuild;
             this._client.MessageReceived += this.HandleMessageReceived;
 
-            this._dependencyMap.Add(new IgnoreDAO());
+            this._dependencyMap.Add(new IgnoreListDAO());
             this._dependencyMap.Add(this._remindService);
             this._dependencyMap.Add(this._incidentService);
 
@@ -113,7 +113,7 @@ namespace XayahBot
         private Task StartBackgroundThreads()
         {
             this._remindService.StartAsync();
-            this._incidentService.StartAsync();
+            //this._incidentService.StartAsync();
             return Task.CompletedTask;
         }
 
@@ -121,14 +121,14 @@ namespace XayahBot
         {
             try
             {
-                this._ignoreDao.UpdateAsync(preUpdateChannel.Id, ((IChannel)postUpdateChannel).Name);
+                this._ignoreListDao.UpdateAsync(preUpdateChannel.Id, ((IChannel)postUpdateChannel).Name);
             }
             catch (NotExistingException)
             {
             }
             try
             {
-                this._incidentsDao.UpdateAsync(preUpdateChannel.Id, ((IChannel)postUpdateChannel).Name);
+                this._incidentSubscriberDao.UpdateAsync(preUpdateChannel.Id, ((IChannel)postUpdateChannel).Name);
             }
             catch (NotExistingException)
             {
@@ -138,14 +138,14 @@ namespace XayahBot
 
         private Task HandleChannelDestroyed(SocketChannel deletedChannel)
         {
-            this._ignoreDao.RemoveBySubjectIdAsync(deletedChannel.Id);
+            this._ignoreListDao.RemoveBySubjectIdAsync(deletedChannel.Id);
             return Task.CompletedTask;
         }
 
         private Task HandleLeftGuild(SocketGuild leftGuild)
         {
-            this._ignoreDao.RemoveByGuildAsync(leftGuild.Id);
-            this._incidentsDao.RemoveAsync(leftGuild.Id);
+            this._ignoreListDao.RemoveByGuildAsync(leftGuild.Id);
+            this._incidentSubscriberDao.RemoveAsync(leftGuild.Id);
             return Task.CompletedTask;
         }
 

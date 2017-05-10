@@ -6,7 +6,7 @@ using XayahBot.Error;
 
 namespace XayahBot.Database.DAO
 {
-    public class IgnoreDAO
+    public class IgnoreListDAO
     {
         public List<TIgnoreEntry> GetIgnoreList(ulong guildId)
         {

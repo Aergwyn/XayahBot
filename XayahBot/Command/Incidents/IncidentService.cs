@@ -32,7 +32,7 @@ namespace XayahBot.Command.Incidents
         // ---
 
         private DiscordSocketClient _client;
-        private readonly IncidentsDAO _incidentsDao = new IncidentsDAO();
+        private readonly IncidentSubscriberDAO _incidentSubscriberDao = new IncidentSubscriberDAO();
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
         private bool _isRunning = false;
 
@@ -46,7 +46,7 @@ namespace XayahBot.Command.Incidents
             await this._lock.WaitAsync();
             try
             {
-                if (!this._isRunning && this._incidentsDao.HasSubscriber())
+                if (!this._isRunning && this._incidentSubscriberDao.HasSubscriber())
                 {
                     this._isRunning = true;
                     Task.Run(() => Run());
@@ -81,7 +81,7 @@ namespace XayahBot.Command.Incidents
                     {
                         processed = false;
                     }
-                    if (!this._incidentsDao.HasSubscriber())
+                    if (!this._incidentSubscriberDao.HasSubscriber())
                     {
                         this._isRunning = false;
                     }
@@ -109,6 +109,7 @@ namespace XayahBot.Command.Incidents
                 foreach (IncidentDto incident in this.GetValidIncidents(service))
                 {
                     bool postMessage = false;
+                    bool newUpdate = false;
                     DiscordFormatEmbed message = new DiscordFormatEmbed();
                     for (int updatePos = 0; updatePos < incident.Updates.Count; updatePos++)
                     {
@@ -122,19 +123,21 @@ namespace XayahBot.Command.Incidents
                             .AppendDescription($"{update.Severity.ToUpper()} - {updateTime}")
                             .AppendDescription(Environment.NewLine)
                             .AppendDescription(update.Content);
+                        if (this.IsAlreadyPosted(incident.Id, update.Id))
+                        {
+                            newUpdate = true;
+                        }
                         postMessage = true;
                     }
                     if (postMessage)
                     {
-                        // checkif already posted
-                        if (false)
+                        if (newUpdate)
                         {
-                            // edit
+                            await this.EditDataPost(message);
                         }
                         else
                         {
                             await this.PostData(message);
-                            // save post and metadata
                         }
                     }
                 }
@@ -146,13 +149,25 @@ namespace XayahBot.Command.Incidents
             return service.Incidents.Where(x => x.Active && x.Updates.Count > 0).ToList();
         }
 
+        private bool IsAlreadyPosted(long incidentId, string updateId)
+        {
+
+            return false;
+        }
+
+        private async Task EditDataPost(DiscordFormatEmbed message)
+        {
+            // get post and edit?
+        }
+
         private async Task PostData(DiscordFormatEmbed message)
         {
-            List<TIncidentSubscriber> subscriberList = this._incidentsDao.GetSubscriber();
+            List<TIncidentSubscriber> subscriberList = this._incidentSubscriberDao.GetSubscriber();
             foreach (TIncidentSubscriber subscriber in subscriberList)
             {
                 IMessageChannel channel = ResponseHelper.GetChannel(this._client, subscriber.ChannelId);
                 await channel.SendMessageAsync("", false, message.ToEmbed());
+                // save post and metadata?
             }
         }
 

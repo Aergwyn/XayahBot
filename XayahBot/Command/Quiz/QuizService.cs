@@ -65,7 +65,7 @@ namespace XayahBot.Command.Quiz
 
         private static SemaphoreSlim _syncLock = new SemaphoreSlim(1, 1);
         private static Dictionary<ulong, QuizEntry> _questionMap = new Dictionary<ulong, QuizEntry>();
-        private static LeaderboardDAO _leaderboardDao = new LeaderboardDAO();
+        private static QuizLeaderboardDAO _quizLeaderboardDao = new QuizLeaderboardDAO();
 
         public static async Task AskQuestionAsync(CommandContext context)
         {
@@ -151,7 +151,7 @@ namespace XayahBot.Command.Quiz
                     if (success)
                     {
                         _questionMap.Remove(context.Guild.Id);
-                        await _leaderboardDao.IncrementAnswerAsync(context.Guild.Id, context.User.Id, context.User.ToString());
+                        await _quizLeaderboardDao.IncrementAnswerAsync(context.Guild.Id, context.User.Id, context.User.ToString());
                     }
                     else
                     {

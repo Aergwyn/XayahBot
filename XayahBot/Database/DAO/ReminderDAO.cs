@@ -6,9 +6,9 @@ using XayahBot.Error;
 
 namespace XayahBot.Database.DAO
 {
-    public class RemindDAO
+    public class ReminderDAO
     {
-        public List<TRemindEntry> GetReminders()
+        public List<TRemindEntry> GetReminder()
         {
             using (GeneralContext database = new GeneralContext())
             {
@@ -16,7 +16,7 @@ namespace XayahBot.Database.DAO
             }
         }
 
-        public List<TRemindEntry> GetReminders(ulong userId)
+        public List<TRemindEntry> GetReminder(ulong userId)
         {
             using (GeneralContext database = new GeneralContext())
             {
@@ -28,7 +28,7 @@ namespace XayahBot.Database.DAO
         {
             using (GeneralContext database = new GeneralContext())
             {
-                List<TRemindEntry> existingReminder = this.GetReminders(entry.UserId);
+                List<TRemindEntry> existingReminder = this.GetReminder(entry.UserId);
                 int newUserEntryNumber = 1;
                 while (true)
                 {
@@ -69,7 +69,7 @@ namespace XayahBot.Database.DAO
 
         public bool HasReminder()
         {
-            if (this.GetReminders().Count > 0)
+            if (this.GetReminder().Count > 0)
             {
                 return true;
             }

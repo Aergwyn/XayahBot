@@ -25,7 +25,7 @@ namespace XayahBot.Command.Quiz
 
         //
 
-        private readonly LeaderboardDAO _leaderboardDao = new LeaderboardDAO();
+        private readonly QuizLeaderboardDAO _quizLeaderboardDao = new QuizLeaderboardDAO();
 
         [Command("ask")]
         [RequireContext(ContextType.Guild)]
@@ -46,7 +46,7 @@ namespace XayahBot.Command.Quiz
         public async Task Stats()
         {
             string message = string.Empty;
-            List<TLeaderboardEntry> leaderboard = (await this._leaderboardDao.GetLeaderboardAsync(this.Context.Guild.Id)).OrderByDescending(x => x.Answers).ToList();
+            List<TLeaderboardEntry> leaderboard = (await this._quizLeaderboardDao.GetLeaderboardAsync(this.Context.Guild.Id)).OrderByDescending(x => x.Answers).ToList();
             if (leaderboard.Count > 0)
             {
                 int width = leaderboard.First().Answers.ToString().Length;

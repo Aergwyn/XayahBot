@@ -6,21 +6,24 @@ using XayahBot.Error;
 
 namespace XayahBot.Database.DAO
 {
-    public class IncidentsDAO
+    public class IncidentSubscriberDAO
     {
-        public TIncident GetIncident()
-        {
-            return null;
-        }
-
-        public async Task AddAsync(TIncident entry)
+        public List<TIncidentSubscriber> GetSubscriber()
         {
             using (GeneralContext database = new GeneralContext())
             {
-                TIncident match = database.Incidents.FirstOrDefault(x => x.IncidentId.Equals(entry.IncidentId) && x.UpdateId.Equals(entry.UpdateId));
+                return database.IncidentSubscriber.ToList();
+            }
+        }
+
+        public async Task AddAsync(TIncidentSubscriber entry)
+        {
+            using (GeneralContext database = new GeneralContext())
+            {
+                TIncidentSubscriber match = database.IncidentSubscriber.FirstOrDefault(x => x.GuildId.Equals(entry.GuildId));
                 if (match == null)
                 {
-                    database.Incidents.Add(entry);
+                    database.IncidentSubscriber.Add(entry);
                     if (await database.SaveChangesAsync() <= 0)
                     {
                         throw new NotSavedException();
@@ -33,14 +36,14 @@ namespace XayahBot.Database.DAO
             }
         }
 
-        public async Task UpdateAsync(long incidentId, string updateId)
+        public async Task UpdateAsync(ulong channelId, string newChannelName)
         {
             using (GeneralContext database = new GeneralContext())
             {
-                TIncident match = database.Incidents.FirstOrDefault(x => x.IncidentId.Equals(incidentId));
+                TIncidentSubscriber match = database.IncidentSubscriber.FirstOrDefault(x => x.ChannelId.Equals(channelId));
                 if (match != null)
                 {
-                    match.UpdateId = updateId;
+                    match.ChannelName = newChannelName;
                     if (await database.SaveChangesAsync() <= 0)
                     {
                         throw new NotSavedException();
@@ -53,14 +56,14 @@ namespace XayahBot.Database.DAO
             }
         }
 
-        public async Task RemoveAsync(long incidentId)
+        public async Task RemoveAsync(ulong guildId)
         {
             using (GeneralContext database = new GeneralContext())
             {
-                List<TIncident> matches = database.Incidents.Where(x => x.IncidentId.Equals(incidentId)).ToList();
-                if (matches.Count > 0)
+                TIncidentSubscriber match = database.IncidentSubscriber.FirstOrDefault(x => x.GuildId.Equals(guildId));
+                if (match != null)
                 {
-                    database.RemoveRange(matches);
+                    database.Remove(match);
                     if (await database.SaveChangesAsync() <= 0)
                     {
                         throw new NotSavedException();
@@ -71,6 +74,15 @@ namespace XayahBot.Database.DAO
                     throw new NotExistingException();
                 }
             }
+        }
+
+        public bool HasSubscriber()
+        {
+            if (this.GetSubscriber().Count > 0)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

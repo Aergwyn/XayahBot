@@ -17,7 +17,7 @@ namespace XayahBot.Command.Incidents
     [Category(CategoryType.INCIDENT)]
     public class CIncidents : ModuleBase
     {
-        private readonly IncidentsDAO _statusSettingDao = new IncidentsDAO();
+        private readonly IncidentSubscriberDAO _incidentSubscriberDao = new IncidentSubscriberDAO();
         private IncidentService _incidentService;
 
         public CIncidents(IncidentService incidentService)
@@ -43,7 +43,7 @@ namespace XayahBot.Command.Incidents
                 .CreateFooter(this.Context);
             try
             {
-                await this._statusSettingDao.AddAsync(new TIncidentSubscriber
+                await this._incidentSubscriberDao.AddAsync(new TIncidentSubscriber
                 {
                     ChannelId = channel.Id,
                     ChannelName = channel.Name,
@@ -71,7 +71,7 @@ namespace XayahBot.Command.Incidents
                 .CreateFooter(this.Context);
             try
             {
-                await this._statusSettingDao.RemoveAsync(this.Context.Guild.Id);
+                await this._incidentSubscriberDao.RemoveAsync(this.Context.Guild.Id);
                 message.AppendDescription("Disabled incident notifications.");
             }
             catch (NotExistingException)

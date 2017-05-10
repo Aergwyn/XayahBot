@@ -26,7 +26,7 @@ namespace XayahBot.Command.Ignore
             "My last nerve is long gone."
         };
 
-        private readonly IgnoreDAO _ignoreDao = new IgnoreDAO();
+        private readonly IgnoreListDAO _ignoreListDao = new IgnoreListDAO();
         private bool _hasNewIgnoredUser = false;
         private List<string> _newIgnoredList = new List<string>();
         private List<string> _existingIgnoredList = new List<string>();
@@ -37,7 +37,7 @@ namespace XayahBot.Command.Ignore
         [Summary("Displays the ignore list.")]
         public Task Ignore()
         {
-            List<TIgnoreEntry> ignoreList = this._ignoreDao.GetIgnoreList(this.Context.Guild.Id);
+            List<TIgnoreEntry> ignoreList = this._ignoreListDao.GetIgnoreList(this.Context.Guild.Id);
             string userString = this.BuildIgnoreListString(ignoreList.Where(x => !x.IsChannel));
             string channelString = this.BuildIgnoreListString(ignoreList.Where(x => x.IsChannel));
 
@@ -108,7 +108,7 @@ namespace XayahBot.Command.Ignore
         {
             try
             {
-                await this._ignoreDao.AddAsync(new TIgnoreEntry
+                await this._ignoreListDao.AddAsync(new TIgnoreEntry
                 {
                     GuildId = this.Context.Guild.Id,
                     IsChannel = isChannel,

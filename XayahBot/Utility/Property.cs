@@ -56,7 +56,7 @@ namespace XayahBot.Utility
 
         // ---
 
-        private PropertyDAO _propertyDao = new PropertyDAO();
+        private PropertiesDAO _propertiesDao = new PropertiesDAO();
 
         public string Name { get; private set; }
         private string _value { get; set; }
@@ -69,11 +69,11 @@ namespace XayahBot.Utility
                     this.Loaded = true;
                     try
                     {
-                        this._value = this._propertyDao.GetValue(this);
+                        this._value = this._propertiesDao.GetValue(this);
                     }
                     catch (NotExistingException)
                     {
-                        this._propertyDao.SetValueAsync(this);
+                        this._propertiesDao.SetValueAsync(this);
                     }
                 }
                 return this._value;
@@ -86,7 +86,7 @@ namespace XayahBot.Utility
                     this._value = realValue;
                     if (this.Updatable)
                     {
-                        this._propertyDao.SetValueAsync(this);
+                        this._propertiesDao.SetValueAsync(this);
                     }
                 }
             }

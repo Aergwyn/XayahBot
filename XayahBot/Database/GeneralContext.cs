@@ -11,7 +11,7 @@ namespace XayahBot.Database
         public DbSet<TIgnoreEntry> IgnoreList { get; set; }
         public DbSet<TRemindEntry> Reminder { get; set; }
         public DbSet<TIncidentSubscriber> IncidentSubscriber { get; set; }
-        public DbSet<TPostedIncident> PostedIncidents { get; set; }
+        public DbSet<TIncident> Incidents { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

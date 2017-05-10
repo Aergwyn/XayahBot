@@ -7,7 +7,7 @@ using XayahBot.Utility;
 
 namespace XayahBot.Database.DAO
 {
-    public class LeaderboardDAO
+    public class QuizLeaderboardDAO
     {
         public async Task<List<TLeaderboardEntry>> GetLeaderboardAsync(ulong guildId)
         {
