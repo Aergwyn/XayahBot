@@ -12,7 +12,7 @@ namespace XayahBot.Database.DAO
         {
             using (GeneralContext database = new GeneralContext())
             {
-                return database.Reminders.ToList();
+                return database.Reminder.ToList();
             }
         }
 
@@ -20,7 +20,7 @@ namespace XayahBot.Database.DAO
         {
             using (GeneralContext database = new GeneralContext())
             {
-                return database.Reminders.Where(x => x.UserId.Equals(userId)).ToList();
+                return database.Reminder.Where(x => x.UserId.Equals(userId)).ToList();
             }
         }
 
@@ -30,16 +30,16 @@ namespace XayahBot.Database.DAO
             {
                 List<TRemindEntry> existingReminder = this.GetReminders(entry.UserId);
                 int newUserEntryNumber = 1;
-                while(true)
+                while (true)
                 {
                     if (existingReminder.Where(x => x.UserEntryNumber.Equals(newUserEntryNumber)).Count() == 0)
                     {
                         break;
                     }
-                        newUserEntryNumber++;
+                    newUserEntryNumber++;
                 }
                 entry.UserEntryNumber = newUserEntryNumber;
-                database.Reminders.Add(entry);
+                database.Reminder.Add(entry);
                 if (await database.SaveChangesAsync() <= 0)
                 {
                     throw new NotSavedException();
@@ -51,7 +51,7 @@ namespace XayahBot.Database.DAO
         {
             using (GeneralContext database = new GeneralContext())
             {
-                TRemindEntry match = database.Reminders.FirstOrDefault(x => x.UserId.Equals(userId) && x.UserEntryNumber.Equals(userEntryNumber));
+                TRemindEntry match = database.Reminder.FirstOrDefault(x => x.UserId.Equals(userId) && x.UserEntryNumber.Equals(userEntryNumber));
                 if (match != null)
                 {
                     database.Remove(match);
@@ -65,6 +65,15 @@ namespace XayahBot.Database.DAO
                     throw new NotExistingException();
                 }
             }
+        }
+
+        public bool HasReminder()
+        {
+            if (this.GetReminders().Count > 0)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

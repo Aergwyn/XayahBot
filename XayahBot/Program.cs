@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using XayahBot.Command.Incidents;
 using XayahBot.Command.Remind;
 using XayahBot.Database.DAO;
+using XayahBot.Error;
 using XayahBot.Utility;
 
 namespace XayahBot
@@ -24,9 +26,11 @@ namespace XayahBot
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commandService;
         private readonly RemindService _remindService;
+        private readonly IncidentService _incidentService;
         private readonly IDependencyMap _dependencyMap = new DependencyMap();
 
-        private IgnoreDAO _ignoreDao = new IgnoreDAO();
+        private readonly IgnoreDAO _ignoreDao = new IgnoreDAO();
+        private readonly IncidentsDAO _incidentsDao = new IncidentsDAO();
 
         private Program()
         {
@@ -39,6 +43,7 @@ namespace XayahBot
                 DefaultRunMode = RunMode.Async
             });
             this._remindService = RemindService.GetInstance(this._client);
+            this._incidentService = IncidentService.GetInstance(this._client);
         }
 
         private async Task StartAsync()
@@ -81,12 +86,14 @@ namespace XayahBot
 
             this._dependencyMap.Add(new IgnoreDAO());
             this._dependencyMap.Add(this._remindService);
+            this._dependencyMap.Add(this._incidentService);
 
             await this._commandService.AddModulesAsync(Assembly.GetEntryAssembly());
         }
 
         private async Task StopBackgroundThreadsAsync()
         {
+            this._incidentService.Stop();
             await this._remindService.StopAsync();
         }
 
@@ -106,13 +113,26 @@ namespace XayahBot
         private Task StartBackgroundThreads()
         {
             this._remindService.StartAsync();
-            //RiotStatusService.StartAsync(this._client);
+            this._incidentService.StartAsync();
             return Task.CompletedTask;
         }
 
         private Task HandleChannelUpdated(SocketChannel preUpdateChannel, SocketChannel postUpdateChannel)
         {
-            this._ignoreDao.UpdateAsync(preUpdateChannel.Id, ((IChannel)postUpdateChannel).Name);
+            try
+            {
+                this._ignoreDao.UpdateAsync(preUpdateChannel.Id, ((IChannel)postUpdateChannel).Name);
+            }
+            catch (NotExistingException)
+            {
+            }
+            try
+            {
+                this._incidentsDao.UpdateAsync(preUpdateChannel.Id, ((IChannel)postUpdateChannel).Name);
+            }
+            catch (NotExistingException)
+            {
+            }
             return Task.CompletedTask;
         }
 
@@ -125,6 +145,7 @@ namespace XayahBot
         private Task HandleLeftGuild(SocketGuild leftGuild)
         {
             this._ignoreDao.RemoveByGuildAsync(leftGuild.Id);
+            this._incidentsDao.RemoveAsync(leftGuild.Id);
             return Task.CompletedTask;
         }
 

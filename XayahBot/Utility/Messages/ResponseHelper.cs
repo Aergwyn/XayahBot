@@ -8,6 +8,11 @@ namespace XayahBot.Utility.Messages
 {
     public static class ResponseHelper
     {
+        public static IMessageChannel GetChannel(DiscordSocketClient client, ulong channelId)
+        {
+            return client.GetChannel(channelId) as IMessageChannel ?? throw new NoResponseChannelException();
+        }
+
         public static async Task<IMessageChannel> GetDMChannel(CommandContext context)
         {
             IMessageChannel channel = null;

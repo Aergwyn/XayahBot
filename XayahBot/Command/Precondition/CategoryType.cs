@@ -2,7 +2,7 @@
 {
     public enum CategoryType
     {
-        DATA, HELP, IGNORE, MISC, QUIZ, REMIND,
+        DATA, HELP, IGNORE, INCIDENT, MISC, QUIZ, REMIND,
         OWNER
     }
 }

@@ -45,7 +45,7 @@ namespace XayahBot.Command.Remind
             await this._lock.WaitAsync();
             try
             {
-                if (!this._isRunning)
+                if (!this._isRunning && this._remindDao.HasReminder())
                 {
                     this._isRunning = true;
                     Task.Run(() => Run());
@@ -67,24 +67,31 @@ namespace XayahBot.Command.Remind
                 while (this._isRunning)
                 {
                     int interval = 5;
-                    if ((!processed && DateTime.UtcNow.Minute % interval == 0) || init)
+                    if (DateTime.UtcNow.Minute % interval == 0 || init)
                     {
-                        init = false;
-                        processed = true;
-                        List<TRemindEntry> reminder = this._remindDao.GetReminders();
-                        List<TRemindEntry> dueReminder = reminder.Where(x => !this._currentTimerList.Keys.Contains(this.BuildTimerKey(x.UserId, x.UserEntryNumber))).ToList();
-                        await ProcessExpiringReminders(dueReminder, interval);
+                        if (!processed)
+                        {
+                            init = false;
+                            processed = true;
+                            List<TRemindEntry> reminder = this._remindDao.GetReminders();
+                            List<TRemindEntry> dueReminder = reminder.Where(x => !this._currentTimerList.Keys.Contains(this.BuildTimerKey(x.UserId, x.UserEntryNumber))).ToList();
+                            await ProcessExpiringReminders(dueReminder, interval);
+                        }
                     }
                     else
                     {
                         processed = false;
                     }
-                    await Task.Delay(15000);
+                    if (!this._remindDao.HasReminder())
+                    {
+                        this._isRunning = false;
+                    }
+                    await Task.Delay(10000);
                 }
             }
             finally
             {
-                await StopAsync();
+                await this.StopAsync();
             }
         }
 
@@ -125,7 +132,7 @@ namespace XayahBot.Command.Remind
 
         public async Task StopAsync()
         {
-            await StopTimers();
+            await this.StopTimers();
             this._isRunning = false;
             Logger.Info("ReminderService stopped.");
         }

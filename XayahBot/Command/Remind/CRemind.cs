@@ -19,7 +19,7 @@ namespace XayahBot.Command.Remind
     [Category(CategoryType.REMIND)]
     public class CRemind : ModuleBase
     {
-        private RemindService _remindService { get; set; }
+        private readonly RemindService _remindService;
         private readonly RemindDAO _remindDao = new RemindDAO();
 
         public CRemind(RemindService remindService)
