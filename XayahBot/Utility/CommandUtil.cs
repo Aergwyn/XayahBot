@@ -46,6 +46,7 @@ namespace XayahBot.Utility
         public static string ToHelpString(CommandInfo command)
         {
             string commandText = BuildAliasString(command.Aliases);
+            string contextText = BuildAllowedContextString(command.Preconditions);
             string summaryText = command.Summary;
             foreach (ParameterInfo param in command.Parameters)
             {
@@ -60,6 +61,8 @@ namespace XayahBot.Utility
             }
             DiscordFormatMessage message = new DiscordFormatMessage()
                 .Append(commandText, AppendOption.Bold)
+                .Append(Environment.NewLine)
+                .Append(contextText, AppendOption.Italic)
                 .Append(Environment.NewLine)
                 .Append(summaryText);
             return message.ToString();
@@ -89,6 +92,17 @@ namespace XayahBot.Utility
                 result += $"{string.Join("|", partList)} ";
             }
             return result.Trim();
+        }
+
+        private static string BuildAllowedContextString(IReadOnlyList<PreconditionAttribute> preconditions)
+        {
+            string contexts = "All";
+            RequireContextAttribute match = GetPrecondition<RequireContextAttribute>(preconditions);
+            if (match != null)
+            {
+                contexts = match.Contexts.ToString();
+            }
+            return "Context: " + contexts;
         }
     }
 }

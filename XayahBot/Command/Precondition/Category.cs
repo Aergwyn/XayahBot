@@ -8,6 +8,7 @@ namespace XayahBot.Command.Precondition
 {
     public class Category
     {
+        public static Category Account = new Category(CategoryType.ACCOUNT, "account");
         public static Category Data = new Category(CategoryType.DATA, "data");
         public static Category Help = new Category(CategoryType.HELP, "help");
         public static Category Ignore = new Category(CategoryType.IGNORE, "ignore");
@@ -20,6 +21,7 @@ namespace XayahBot.Command.Precondition
         {
             get
             {
+                yield return Account;
                 yield return Data;
                 yield return Help;
                 yield return Ignore;
