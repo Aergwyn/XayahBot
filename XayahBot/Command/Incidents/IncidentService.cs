@@ -102,8 +102,10 @@ namespace XayahBot.Command.Incidents
             List<IncidentData> incidents = new List<IncidentData>();
             RiotStatusApi statusEuw = new RiotStatusApi(Region.EUW);
             RiotStatusApi statusNa = new RiotStatusApi(Region.NA);
+            RiotStatusApi statusEune = new RiotStatusApi(Region.EUNE);
             incidents.AddRange(this.AnalyzeData(await statusEuw.GetStatusAsync()));
             incidents.AddRange(this.AnalyzeData(await statusNa.GetStatusAsync()));
+            incidents.AddRange(this.AnalyzeData(await statusEune.GetStatusAsync()));
             await this.ProcessCurrentIncidentsAsync(incidents);
             await this.ProcessSolvedIncidentsAsync(incidents);
         }
