@@ -36,11 +36,31 @@ namespace XayahBot.Database.DAO
             }
         }
 
-        public async Task RemoveAsync(ulong guildId)
+        public async Task RemoveByGuildIdAsync(ulong guildId)
         {
             using (GeneralContext database = new GeneralContext())
             {
                 TIncidentSubscriber match = database.IncidentSubscriber.FirstOrDefault(x => x.GuildId.Equals(guildId));
+                if (match != null)
+                {
+                    database.Remove(match);
+                    if (await database.SaveChangesAsync() <= 0)
+                    {
+                        throw new NotSavedException();
+                    }
+                }
+                else
+                {
+                    throw new NotExistingException();
+                }
+            }
+        }
+
+        public async Task RemoveByChannelIdAsync(ulong channelId)
+        {
+            using (GeneralContext database = new GeneralContext())
+            {
+                TIncidentSubscriber match = database.IncidentSubscriber.FirstOrDefault(x => x.ChannelId.Equals(channelId));
                 if (match != null)
                 {
                     database.Remove(match);

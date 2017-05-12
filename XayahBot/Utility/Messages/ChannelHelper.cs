@@ -6,7 +6,7 @@ using XayahBot.Error;
 
 namespace XayahBot.Utility.Messages
 {
-    public static class ResponseHelper
+    public static class ChannelHelper
     {
         public static IMessageChannel GetChannel(DiscordSocketClient client, ulong channelId)
         {
@@ -30,7 +30,7 @@ namespace XayahBot.Utility.Messages
         public static async Task<IMessageChannel> GetDMChannel(DiscordSocketClient client, ulong userId)
         {
             IUser user = client.GetUser(userId);
-            return await user.CreateDMChannelAsync() ?? throw new NoResponseChannelException();
+            return await user?.CreateDMChannelAsync() ?? throw new NoResponseChannelException();
         }
     }
 }

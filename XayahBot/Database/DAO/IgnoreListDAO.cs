@@ -76,7 +76,7 @@ namespace XayahBot.Database.DAO
             }
         }
 
-        public async Task RemoveByGuildAsync(ulong guildId)
+        public async Task RemoveByGuildIdAsync(ulong guildId)
         {
             using (GeneralContext database = new GeneralContext())
             {

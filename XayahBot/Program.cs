@@ -131,14 +131,39 @@ namespace XayahBot
 
         private Task HandleChannelDestroyed(SocketChannel deletedChannel)
         {
-            this._ignoreListDao.RemoveBySubjectIdAsync(deletedChannel.Id);
+            try
+            {
+                this._ignoreListDao.RemoveBySubjectIdAsync(deletedChannel.Id);
+            }
+            catch (NotExistingException)
+            {
+            }
+            try
+            {
+                this._incidentSubscriberDao.RemoveByChannelIdAsync(deletedChannel.Id);
+            }
+            catch (NotExistingException)
+            {
+            }
             return Task.CompletedTask;
         }
 
         private Task HandleLeftGuild(SocketGuild leftGuild)
         {
-            this._ignoreListDao.RemoveByGuildAsync(leftGuild.Id);
-            this._incidentSubscriberDao.RemoveAsync(leftGuild.Id);
+            try
+            {
+                this._ignoreListDao.RemoveByGuildIdAsync(leftGuild.Id);
+            }
+            catch (NotExistingException)
+            {
+            }
+            try
+            {
+                this._incidentSubscriberDao.RemoveByGuildIdAsync(leftGuild.Id);
+            }
+            catch (NotExistingException)
+            {
+            }
             return Task.CompletedTask;
         }
 

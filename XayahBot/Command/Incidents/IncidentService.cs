@@ -180,7 +180,7 @@ namespace XayahBot.Command.Incidents
                 TIncident entry = this._incidentsDao.GetIncident(incidentId);
                 foreach (TMessage message in entry.Messages)
                 {
-                    IMessageChannel channel = this._client.GetChannel(message.ChannelId) as IMessageChannel;
+                    IMessageChannel channel = ChannelHelper.GetChannel(this._client, message.ChannelId) as IMessageChannel;
                     IMessage postedMessage = await channel.GetMessageAsync(message.MessageId);
                     await postedMessage?.DeleteAsync();
                 }
@@ -197,7 +197,7 @@ namespace XayahBot.Command.Incidents
             TIncident entry = this.RetrieveDbIncident(incident);
             foreach (TIncidentSubscriber subscriber in this.GetInterestedSubscriber(entry))
             {
-                IMessageChannel channel = ResponseHelper.GetChannel(this._client, subscriber.ChannelId);
+                IMessageChannel channel = ChannelHelper.GetChannel(this._client, subscriber.ChannelId);
                 IUserMessage postedMessage = await channel.SendMessageAsync("", false, message.ToEmbed());
                 await this.SaveMessageIdAsync(entry, postedMessage);
             }

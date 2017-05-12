@@ -71,7 +71,7 @@ namespace XayahBot.Command.Incidents
                 .CreateFooter(this.Context);
             try
             {
-                await this._incidentSubscriberDao.RemoveAsync(this.Context.Guild.Id);
+                await this._incidentSubscriberDao.RemoveByGuildIdAsync(this.Context.Guild.Id);
                 message.AppendDescription("Disabled incident notifications.");
             }
             catch (NotExistingException)
