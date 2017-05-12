@@ -48,7 +48,7 @@ namespace XayahBot.Command.Remind
                 if (!this._isRunning && this._reminderDao.HasReminder())
                 {
                     this._isRunning = true;
-                    Task.Run(() => Run());
+                    Task.Run(() => RunAsync());
                     Logger.Info("ReminderService started.");
                 }
             }
@@ -58,7 +58,7 @@ namespace XayahBot.Command.Remind
             }
         }
 
-        private async Task Run()
+        private async Task RunAsync()
         {
             try
             {
@@ -75,7 +75,7 @@ namespace XayahBot.Command.Remind
                             processed = true;
                             List<TRemindEntry> reminder = this._reminderDao.GetReminder();
                             List<TRemindEntry> dueReminder = reminder.Where(x => !this._currentTimerList.Keys.Contains(this.BuildTimerKey(x.UserId, x.UserEntryNumber))).ToList();
-                            await ProcessExpiringReminders(dueReminder, interval);
+                            await ProcessExpiringRemindersAsync(dueReminder, interval);
                         }
                     }
                     else
@@ -95,7 +95,7 @@ namespace XayahBot.Command.Remind
             }
         }
 
-        private Task ProcessExpiringReminders(List<TRemindEntry> list, int interval)
+        private Task ProcessExpiringRemindersAsync(List<TRemindEntry> list, int interval)
         {
             foreach (TRemindEntry reminder in list)
             {
@@ -132,12 +132,12 @@ namespace XayahBot.Command.Remind
 
         public async Task StopAsync()
         {
-            await this.StopTimers();
+            await this.StopTimersAsync();
             this._isRunning = false;
             Logger.Info("ReminderService stopped.");
         }
 
-        private Task StopTimers()
+        private Task StopTimersAsync()
         {
             foreach (Timer timer in this._currentTimerList.Values)
             {
@@ -147,13 +147,13 @@ namespace XayahBot.Command.Remind
             return Task.CompletedTask;
         }
 
-        public async Task AddNew(TRemindEntry reminder)
+        public async Task AddNewAsync(TRemindEntry reminder)
         {
             await this._reminderDao.AddAsync(reminder);
             await StartAsync();
         }
 
-        public async Task Remove(ulong userId, int userEntryNumber)
+        public async Task RemoveAsync(ulong userId, int userEntryNumber)
         {
             await this._reminderDao.RemoveAsync(userId, userEntryNumber);
             StopTimer(this.BuildTimerKey(userId, userEntryNumber));

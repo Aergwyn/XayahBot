@@ -12,6 +12,7 @@ namespace XayahBot.Database
         public DbSet<TRemindEntry> Reminder { get; set; }
         public DbSet<TIncidentSubscriber> IncidentSubscriber { get; set; }
         public DbSet<TIncident> Incidents { get; set; }
+        public DbSet<TMessage> Messages { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

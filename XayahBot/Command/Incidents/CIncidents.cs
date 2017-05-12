@@ -14,7 +14,7 @@ using XayahBot.Utility.Messages;
 namespace XayahBot.Command.Incidents
 {
     [Group("incidents")]
-    [Category(CategoryType.INCIDENT)]
+    [Category(CategoryType.INCIDENTS)]
     public class CIncidents : ModuleBase
     {
         private readonly IncidentSubscriberDAO _incidentSubscriberDao = new IncidentSubscriberDAO();
@@ -28,7 +28,7 @@ namespace XayahBot.Command.Incidents
         [Command("enable")]
         [RequireMod]
         [RequireContext(ContextType.Guild)]
-        [Summary("Enables incident notifications for Riot's server in the mentioned channel.")]
+        [Summary("Enables incident notifications from Riot in the mentioned channel.")]
         public async Task Enable(string channel)
         {
             ulong channelId = this.Context.Message.MentionedChannelIds.ElementAt(0);
@@ -46,7 +46,6 @@ namespace XayahBot.Command.Incidents
                 await this._incidentSubscriberDao.AddAsync(new TIncidentSubscriber
                 {
                     ChannelId = channel.Id,
-                    ChannelName = channel.Name,
                     GuildId = this.Context.Guild.Id
                 });
                 message.AppendDescription($"Enabled incident notifications for `{channel.Name}`.");
@@ -64,7 +63,7 @@ namespace XayahBot.Command.Incidents
         [Command("disable")]
         [RequireMod]
         [RequireContext(ContextType.Guild)]
-        [Summary("Disables incident notifications for Riot's server.")]
+        [Summary("Disables incident notifications from Riot.")]
         public async Task Disable()
         {
             DiscordFormatEmbed message = new DiscordFormatEmbed()

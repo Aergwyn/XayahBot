@@ -11,6 +11,7 @@ using XayahBot.API.Riot;
 using XayahBot.API.Riot.Model;
 using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
+using XayahBot.Error;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
@@ -31,7 +32,9 @@ namespace XayahBot.Command.Incidents
 
         // ---
 
-        private DiscordSocketClient _client;
+        private readonly DiscordSocketClient _client;
+        private readonly MessagesDAO _messagesDao = new MessagesDAO();
+        private readonly IncidentsDAO _incidentsDao = new IncidentsDAO();
         private readonly IncidentSubscriberDAO _incidentSubscriberDao = new IncidentSubscriberDAO();
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
         private bool _isRunning = false;
@@ -49,7 +52,7 @@ namespace XayahBot.Command.Incidents
                 if (!this._isRunning && this._incidentSubscriberDao.HasSubscriber())
                 {
                     this._isRunning = true;
-                    Task.Run(() => Run());
+                    Task.Run(() => RunAsync());
                     Logger.Info("IncidentService started.");
                 }
             }
@@ -59,7 +62,7 @@ namespace XayahBot.Command.Incidents
             }
         }
 
-        private async Task Run()
+        private async Task RunAsync()
         {
             try
             {
@@ -74,7 +77,7 @@ namespace XayahBot.Command.Incidents
                         {
                             init = false;
                             processed = true;
-                            await CheckStatusApi();
+                            await CheckStatusApiAsync();
                         }
                     }
                     else
@@ -94,80 +97,178 @@ namespace XayahBot.Command.Incidents
             }
         }
 
-        private async Task CheckStatusApi()
+        private async Task CheckStatusApiAsync()
         {
+            List<IncidentData> incidents = new List<IncidentData>();
             RiotStatusApi statusEuw = new RiotStatusApi(Region.EUW);
             RiotStatusApi statusNa = new RiotStatusApi(Region.NA);
-            await this.AnalyzeDataAsync(await statusEuw.GetStatusAsync());
-            await this.AnalyzeDataAsync(await statusNa.GetStatusAsync());
+            incidents.AddRange(this.AnalyzeData(await statusEuw.GetStatusAsync()));
+            incidents.AddRange(this.AnalyzeData(await statusNa.GetStatusAsync()));
+            await this.ProcessCurrentIncidentsAsync(incidents);
+            await this.ProcessSolvedIncidentsAsync(incidents);
         }
 
-        private async Task AnalyzeDataAsync(ShardStatusDto status)
+        private List<IncidentData> AnalyzeData(ShardStatusDto status)
         {
+            List<IncidentData> incidents = new List<IncidentData>();
             foreach (ServiceDto service in status.Services)
             {
-                foreach (IncidentDto incident in this.GetValidIncidents(service))
+                foreach (IncidentDto incident in service.Incidents.Where(x => x.Active && x.Updates.Count > 0).ToList())
                 {
-                    bool postMessage = false;
-                    bool newUpdate = false;
-                    DiscordFormatEmbed message = new DiscordFormatEmbed();
-                    for (int updatePos = 0; updatePos < incident.Updates.Count; updatePos++)
+                    IncidentData incidentData = new IncidentData
                     {
-                        UpdateDto update = incident.Updates.ElementAt(updatePos);
+                        Id = incident.Id,
+                        Region = status.Region,
+                        Service = service.Name,
+                        Status = service.Status
+                    };
+                    foreach (UpdateDto update in incident.Updates)
+                    {
                         DateTime.TryParse(update.UpdateTime, out DateTime updateTime);
-                        if (updatePos == 0)
+                        UpdateData updateData = new UpdateData
                         {
-                            message.AppendDescription($"{status.Name} | {service.Name} | {service.Status}", AppendOption.Bold);
-                        }
-                        message.AppendDescription(Environment.NewLine)
-                            .AppendDescription($"{update.Severity.ToUpper()} - {updateTime}")
-                            .AppendDescription(Environment.NewLine)
-                            .AppendDescription(update.Content);
-                        if (this.IsAlreadyPosted(incident.Id, update.Id))
+                            Severity = update.Severity.ToUpper(),
+                            Text = update.Content,
+                            UpdateTime = updateTime
+                        };
+                        if (incidentData.LastUpdate == null || updateTime.Ticks > incidentData.LastUpdate.Ticks)
                         {
-                            newUpdate = true;
+                            incidentData.LastUpdate = updateTime;
                         }
-                        postMessage = true;
+                        incidentData.Updates.Add(updateData);
                     }
-                    if (postMessage)
-                    {
-                        if (newUpdate)
-                        {
-                            await this.EditDataPost(message);
-                        }
-                        else
-                        {
-                            await this.PostData(message);
-                        }
-                    }
+                    incidents.Add(incidentData);
                 }
+            }
+            return incidents;
+        }
+
+        private async Task ProcessCurrentIncidentsAsync(List<IncidentData> incidents)
+        {
+            foreach (IncidentData incident in incidents)
+            {
+                if (this.IsNewUpdate(incident.Id, incident.LastUpdate))
+                {
+                    await this.DeletePostsAsync(incident.Id);
+                }
+                await this.PostIncidentAsync(incident);
             }
         }
 
-        private List<IncidentDto> GetValidIncidents(ServiceDto service)
+        private bool IsNewUpdate(long incidentId, DateTime lastUpdate)
         {
-            return service.Incidents.Where(x => x.Active && x.Updates.Count > 0).ToList();
-        }
-
-        private bool IsAlreadyPosted(long incidentId, string updateId)
-        {
-
+            try
+            {
+                TIncident entry = this._incidentsDao.GetIncident(incidentId);
+                if (lastUpdate.Ticks > entry.LastUpdate.Ticks)
+                {
+                    return true;
+                }
+            }
+            catch (NotExistingException)
+            {
+            }
             return false;
         }
 
-        private async Task EditDataPost(DiscordFormatEmbed message)
+        private async Task DeletePostsAsync(long incidentId)
         {
-            // get post and edit?
+            try
+            {
+                TIncident entry = this._incidentsDao.GetIncident(incidentId);
+                foreach (TMessage message in entry.Messages)
+                {
+                    IMessageChannel channel = this._client.GetChannel(message.ChannelId) as IMessageChannel;
+                    IMessage postedMessage = await channel.GetMessageAsync(message.MessageId);
+                    await postedMessage.DeleteAsync();
+                }
+                await this._messagesDao.RemoveByIncidentIdAsync(entry);
+            }
+            catch (NotExistingException)
+            {
+            }
         }
 
-        private async Task PostData(DiscordFormatEmbed message)
+        private async Task PostIncidentAsync(IncidentData incident)
         {
-            List<TIncidentSubscriber> subscriberList = this._incidentSubscriberDao.GetSubscriber();
-            foreach (TIncidentSubscriber subscriber in subscriberList)
+            DiscordFormatEmbed message = this.CreateEmbed(incident);
+            TIncident entry = this.RetrieveDbIncident(incident);
+            foreach (TIncidentSubscriber subscriber in this.GetInterestedSubscriber(entry))
             {
                 IMessageChannel channel = ResponseHelper.GetChannel(this._client, subscriber.ChannelId);
-                await channel.SendMessageAsync("", false, message.ToEmbed());
-                // save post and metadata?
+                IUserMessage postedMessage = await channel.SendMessageAsync("", false, message.ToEmbed());
+                await this.SaveMessageIdAsync(entry, postedMessage);
+            }
+        }
+
+        private DiscordFormatEmbed CreateEmbed(IncidentData incident)
+        {
+            DiscordFormatEmbed message = new DiscordFormatEmbed()
+                .AppendDescription($"{incident.Region} | {incident.Service} | {incident.Status}", AppendOption.Bold);
+            foreach (UpdateData update in incident.Updates)
+            {
+                message.AppendDescription(Environment.NewLine)
+                    .AppendDescription($"{update.Severity} - {update.UpdateTime}", AppendOption.Italic)
+                    .AppendDescription(Environment.NewLine)
+                    .AppendDescription(update.Text);
+            }
+            return message;
+        }
+
+        private TIncident RetrieveDbIncident(IncidentData incident)
+        {
+            TIncident entry = null;
+            try
+            {
+                entry = this._incidentsDao.GetIncident(incident.Id);
+            }
+            catch (NotExistingException)
+            {
+                entry = new TIncident
+                {
+                    IncidentId = incident.Id,
+                };
+            }
+            entry.LastUpdate = incident.LastUpdate;
+            return entry;
+        }
+
+        private List<TIncidentSubscriber> GetInterestedSubscriber(TIncident entry)
+        {
+            List<TIncidentSubscriber> subscriberList = this._incidentSubscriberDao.GetSubscriber();
+            List<TIncidentSubscriber> reducedList = new List<TIncidentSubscriber>(subscriberList);
+            foreach (TIncidentSubscriber subscriber in subscriberList)
+            {
+                if (entry.Messages.Where(x => x.ChannelId.Equals(subscriber.ChannelId)).Count() > 0)
+                {
+                    reducedList.Remove(subscriber);
+                }
+            }
+            return reducedList;
+        }
+
+        private async Task SaveMessageIdAsync(TIncident entry, IUserMessage postedMessage)
+        {
+            TMessage message = new TMessage
+            {
+                ChannelId = postedMessage.Channel.Id,
+                Incident = entry,
+                MessageId = postedMessage.Id
+            };
+            entry.Messages.Add(message);
+            await this._incidentsDao.SaveAsync(entry);
+        }
+
+        private async Task ProcessSolvedIncidentsAsync(List<IncidentData> incidents)
+        {
+            List<TIncident> dbIncidents = this._incidentsDao.GetIncidents();
+            foreach (TIncident dbIncident in dbIncidents)
+            {
+                if (incidents.Where(x => x.Id.Equals(dbIncident.IncidentId)).Count() == 0)
+                {
+                    await this.DeletePostsAsync(dbIncident.IncidentId);
+                    await this._incidentsDao.RemoveByIncidentIdAsync(dbIncident.IncidentId);
+                }
             }
         }
 

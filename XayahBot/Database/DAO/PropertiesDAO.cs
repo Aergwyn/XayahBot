@@ -12,10 +12,10 @@ namespace XayahBot.Database.DAO
         {
             using (GeneralContext database = new GeneralContext())
             {
-                TProperty dbProperty = database.Properties.FirstOrDefault(x => x.Name.Equals(property.Name));
-                if (dbProperty != null)
+                TProperty match = database.Properties.FirstOrDefault(x => x.Name.Equals(property.Name));
+                if (match != null)
                 {
-                    return dbProperty.Value;
+                    return match.Value;
                 }
             }
             throw new NotExistingException();

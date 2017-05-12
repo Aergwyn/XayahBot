@@ -36,26 +36,6 @@ namespace XayahBot.Database.DAO
             }
         }
 
-        public async Task UpdateAsync(ulong channelId, string newChannelName)
-        {
-            using (GeneralContext database = new GeneralContext())
-            {
-                TIncidentSubscriber match = database.IncidentSubscriber.FirstOrDefault(x => x.ChannelId.Equals(channelId));
-                if (match != null)
-                {
-                    match.ChannelName = newChannelName;
-                    if (await database.SaveChangesAsync() <= 0)
-                    {
-                        throw new NotSavedException();
-                    }
-                }
-                else
-                {
-                    throw new NotExistingException();
-                }
-            }
-        }
-
         public async Task RemoveAsync(ulong guildId)
         {
             using (GeneralContext database = new GeneralContext())

@@ -137,7 +137,7 @@ namespace XayahBot.Command.Remind
         {
             try
             {
-                await this._remindService.AddNew(new TRemindEntry
+                await this._remindService.AddNewAsync(new TRemindEntry
                 {
                     ExpirationTime = expirationTime,
                     Message = text,
@@ -176,7 +176,7 @@ namespace XayahBot.Command.Remind
             DiscordFormatEmbed message = new DiscordFormatEmbed();
             try
             {
-                await this._remindService.Remove(this.Context.User.Id, id);
+                await this._remindService.RemoveAsync(this.Context.User.Id, id);
                 message.AppendDescription($"Removed reminder with ID `{id}` from your list.");
             }
             catch (NotExistingException)

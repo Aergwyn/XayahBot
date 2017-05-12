@@ -113,7 +113,7 @@ namespace XayahBot
         private Task StartBackgroundThreads()
         {
             this._remindService.StartAsync();
-            //this._incidentService.StartAsync();
+            this._incidentService.StartAsync();
             return Task.CompletedTask;
         }
 
@@ -122,13 +122,6 @@ namespace XayahBot
             try
             {
                 this._ignoreListDao.UpdateAsync(preUpdateChannel.Id, ((IChannel)postUpdateChannel).Name);
-            }
-            catch (NotExistingException)
-            {
-            }
-            try
-            {
-                this._incidentSubscriberDao.UpdateAsync(preUpdateChannel.Id, ((IChannel)postUpdateChannel).Name);
             }
             catch (NotExistingException)
             {
