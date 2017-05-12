@@ -58,6 +58,7 @@ namespace XayahBot.Command.Incidents
             {
                 Logger.Error($"Failed to add status setting for {this.Context.Guild.Name} ({this.Context.Guild.Id}).", nsex);
             }
+            await this.ReplyAsync("", false, message.ToEmbed());
         }
 
         [Command("disable")]
