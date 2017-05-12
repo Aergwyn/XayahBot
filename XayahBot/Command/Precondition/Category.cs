@@ -12,7 +12,7 @@ namespace XayahBot.Command.Precondition
         public static Category Data = new Category(CategoryType.DATA, "data");
         public static Category Help = new Category(CategoryType.HELP, "help");
         public static Category Ignore = new Category(CategoryType.IGNORE, "ignore");
-        public static Category Incident = new Category(CategoryType.INCIDENTS, "incident");
+        public static Category Incidents = new Category(CategoryType.INCIDENTS, "incidents");
         public static Category Misc = new Category(CategoryType.MISC, "misc");
         public static Category Quiz = new Category(CategoryType.QUIZ, "quiz");
         public static Category Remind = new Category(CategoryType.REMIND, "remind me");
@@ -26,7 +26,7 @@ namespace XayahBot.Command.Precondition
                 yield return Data;
                 yield return Help;
                 yield return Ignore;
-                yield return Incident;
+                yield return Incidents;
                 yield return Misc;
                 yield return Quiz;
                 yield return Remind;
