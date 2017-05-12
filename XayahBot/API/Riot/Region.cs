@@ -6,6 +6,7 @@ namespace XayahBot.API.Riot
     {
         public static readonly Region EUW = new Region("EUW", "euw1");
         public static readonly Region NA = new Region("NA", "na1");
+        public static readonly Region EUNE = new Region("EUNE", "eun1");
 
         public static IEnumerable<Region> Values
         {
@@ -13,6 +14,7 @@ namespace XayahBot.API.Riot
             {
                 yield return EUW;
                 yield return NA;
+                yield return EUNE;
             }
         }
 
