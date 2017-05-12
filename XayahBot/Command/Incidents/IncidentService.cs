@@ -182,7 +182,7 @@ namespace XayahBot.Command.Incidents
                 {
                     IMessageChannel channel = this._client.GetChannel(message.ChannelId) as IMessageChannel;
                     IMessage postedMessage = await channel.GetMessageAsync(message.MessageId);
-                    await postedMessage.DeleteAsync();
+                    await postedMessage?.DeleteAsync();
                 }
                 await this._messagesDao.RemoveByIncidentIdAsync(entry);
             }
