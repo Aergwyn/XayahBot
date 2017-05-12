@@ -180,9 +180,16 @@ namespace XayahBot.Command.Incidents
                 TIncident entry = this._incidentsDao.GetIncident(incidentId);
                 foreach (TMessage message in entry.Messages)
                 {
-                    IMessageChannel channel = ChannelHelper.GetChannel(this._client, message.ChannelId) as IMessageChannel;
-                    IMessage postedMessage = await channel.GetMessageAsync(message.MessageId);
-                    await postedMessage?.DeleteAsync();
+                    IMessageChannel channel = ChannelHelper.GetChannel(this._client, message.ChannelId);
+                    try
+                    {
+                        IMessage postedMessage = await channel.GetMessageAsync(message.MessageId);
+                        await postedMessage?.DeleteAsync();
+                    }
+                    catch (NullReferenceException)
+                    {
+                        // If a message got deleted it throws nullreference if you try to access it. weird.
+                    }
                 }
                 await this._messagesDao.RemoveByIncidentIdAsync(entry);
             }
