@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Net;
 using Discord.WebSocket;
 using XayahBot.API.Riot;
 using XayahBot.API.Riot.Model;
@@ -180,15 +181,19 @@ namespace XayahBot.Command.Incidents
                 TIncident entry = this._incidentsDao.GetIncident(incidentId);
                 foreach (TMessage message in entry.Messages)
                 {
-                    IMessageChannel channel = ChannelHelper.GetChannel(this._client, message.ChannelId);
                     try
                     {
+                        IMessageChannel channel = ChannelHelper.GetChannel(this._client, message.ChannelId);
                         IMessage postedMessage = await channel.GetMessageAsync(message.MessageId);
                         await postedMessage?.DeleteAsync();
                     }
                     catch (NullReferenceException)
                     {
-                        // If a message got deleted it throws nullreference if you try to access it. weird.
+                        // If a message got deleted it throws NullReferenceException if you try to access it. weird.
+                    }
+                    catch (HttpException)
+                    {
+                        // If your permission got revoked you can't access that channel anymore and it throws HttpException
                     }
                 }
                 await this._messagesDao.RemoveByIncidentIdAsync(entry);
@@ -204,9 +209,16 @@ namespace XayahBot.Command.Incidents
             TIncident entry = this.RetrieveDbIncident(incident);
             foreach (TIncidentSubscriber subscriber in this.GetInterestedSubscriber(entry))
             {
-                IMessageChannel channel = ChannelHelper.GetChannel(this._client, subscriber.ChannelId);
-                IUserMessage postedMessage = await channel.SendMessageAsync("", false, message.ToEmbed());
-                await this.SaveMessageIdAsync(entry, postedMessage);
+                try
+                {
+                    IMessageChannel channel = ChannelHelper.GetChannel(this._client, subscriber.ChannelId);
+                    IUserMessage postedMessage = await channel.SendMessageAsync("", false, message.ToEmbed());
+                    await this.SaveMessageIdAsync(entry, postedMessage);
+                }
+                catch (HttpException)
+                {
+                    // If your permission got revoked you can't access that channel anymore and it throws HttpException
+                }
             }
         }
 
@@ -283,8 +295,11 @@ namespace XayahBot.Command.Incidents
 
         public void Stop()
         {
-            this._isRunning = false;
-            Logger.Info("IncidentService stopped.");
+            if (this._isRunning)
+            {
+                this._isRunning = false;
+                Logger.Info("IncidentService stopped.");
+            }
         }
     }
 }

@@ -132,9 +132,12 @@ namespace XayahBot.Command.Remind
 
         public async Task StopAsync()
         {
-            await this.StopTimersAsync();
-            this._isRunning = false;
-            Logger.Info("ReminderService stopped.");
+            if (this._isRunning)
+            {
+                this._isRunning = false;
+                await this.StopTimersAsync();
+                Logger.Info("ReminderService stopped.");
+            }
         }
 
         private Task StopTimersAsync()
