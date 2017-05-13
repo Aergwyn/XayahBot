@@ -109,37 +109,27 @@ namespace XayahBot.Command.Data
 
         private void AppendName()
         {
-            this._message.AppendDescription($"Here is the requested data for `{this._champion.Name}`.")
-                .AppendDescription(Environment.NewLine)
-                .AppendDescription(Environment.NewLine);
+            this._message.AppendDescription($"Here is the requested data for `{this._champion.Name}`.");
         }
 
         private void AppendMiscData()
         {
+            List<SkinDto> skins = this._champion.Skins.Where(x => x.Num > 0).ToList();
+            skins.Sort((a, b) => a.Num.CompareTo(b.Num));
             this._champion.Tags.Sort();
-            string generalText = 
+            string text =
                 $"Title    - {this._champion.Title}" +
                 Environment.NewLine +
                 $"Tags     - {string.Join(", ", this._champion.Tags)}" +
                 Environment.NewLine +
-                $"Resource - {this._champion.Resource}";
-            this._message.AppendDescription("General", AppendOption.Underscore)
-                .AppendDescriptionCodeBlock(generalText);
-
-            List<SkinDto> skins = this._champion.Skins.Where(x => x.Num > 0).ToList();
-            skins.Sort((a, b) => a.Num.CompareTo(b.Num));
-            string skinText = string.Empty;
-            for (int i = 0; i < skins.Count; i++)
+                $"Resource - {this._champion.Resource}" +
+                Environment.NewLine +
+                "Skins     -";
+            foreach (SkinDto skin in skins)
             {
-                if (i > 0)
-                {
-                    skinText += Environment.NewLine;
-                }
-                SkinDto skin = skins.ElementAt(i);
-                skinText += $"{skin.Num.ToString().PadLeft(2)} - {skin.Name}";
+                text += $"{Environment.NewLine}{skin.Num.ToString().PadLeft(2)} - {skin.Name}";
             }
-            this._message.AppendDescription("Skins", AppendOption.Underscore)
-                .AppendDescriptionCodeBlock(skinText);
+            this._message.AppendDescriptionCodeBlock(text);
         }
 
         private void AppendSpellData()

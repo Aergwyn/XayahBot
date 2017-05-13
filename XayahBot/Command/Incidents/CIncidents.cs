@@ -43,7 +43,7 @@ namespace XayahBot.Command.Incidents
                 .CreateFooter(this.Context);
             try
             {
-                await this._incidentSubscriberDao.AddAsync(new TIncidentSubscriber
+                await this._incidentSubscriberDao.SaveAsync(new TIncidentSubscriber
                 {
                     ChannelId = channel.Id,
                     GuildId = this.Context.Guild.Id

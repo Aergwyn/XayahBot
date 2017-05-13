@@ -21,12 +21,12 @@ namespace XayahBot.Command.Owner
         {
             DiscordFormatEmbed message = new DiscordFormatEmbed()
                 .AppendDescription("Here is a list of available properties.")
-                .AppendDescriptionCodeBlock(this.BuildPropertyListString());
+                .AppendDescriptionCodeBlock(this.BuildPropertyList());
             this.ReplyAsync("", false, message.ToEmbed());
             return Task.CompletedTask;
         }
 
-        private string BuildPropertyListString()
+        private string BuildPropertyList()
         {
             string text = string.Empty;
             int maxWidth = Property.UpdatableValues.OrderByDescending(x => x.Name.Length).First().Name.Length;

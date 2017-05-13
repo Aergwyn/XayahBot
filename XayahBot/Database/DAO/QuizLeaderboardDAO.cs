@@ -61,10 +61,13 @@ namespace XayahBot.Database.DAO
             {
                 using (GeneralContext database = new GeneralContext())
                 {
-                    database.QuizLeaderboard.RemoveRange(database.QuizLeaderboard);
-                    if (await database.SaveChangesAsync() <= 0)
+                    if (database.QuizLeaderboard.Count() > 0)
                     {
-                        throw new NotSavedException();
+                        database.QuizLeaderboard.RemoveRange(database.QuizLeaderboard);
+                        if (await database.SaveChangesAsync() <= 0)
+                        {
+                            throw new NotSavedException();
+                        }
                     }
                     DateTime now = DateTime.UtcNow;
                     Property.QuizLastReset.Value = $"{now.Month}/{now.Year}";

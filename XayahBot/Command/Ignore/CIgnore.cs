@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using XayahBot.Command.Precondition;
 using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
@@ -26,10 +27,16 @@ namespace XayahBot.Command.Ignore
             "My last nerve is long gone."
         };
 
+        private readonly DiscordSocketClient _client;
         private readonly IgnoreListDAO _ignoreListDao = new IgnoreListDAO();
         private bool _hasNewIgnoredUser = false;
         private List<string> _newIgnoredList = new List<string>();
         private List<string> _existingIgnoredList = new List<string>();
+
+        public CIgnore(DiscordSocketClient client)
+        {
+            this._client = client;
+        }
 
         [Command("ignore")]
         [RequireMod]
@@ -56,10 +63,24 @@ namespace XayahBot.Command.Ignore
             return Task.CompletedTask;
         }
 
-        private string BuildIgnoreListString(IEnumerable<TIgnoreEntry> list)
+        private string BuildIgnoreListString(IEnumerable<TIgnoreEntry> ignoreList)
         {
             string text = string.Empty;
-            text = ListUtil.BuildEnumeration(list);
+            List<string> names = new List<string>();
+            foreach (TIgnoreEntry ignoreEntry in ignoreList)
+            {
+                if (ignoreEntry.IsChannel)
+                {
+                    IChannel channel = this._client.GetChannel(ignoreEntry.SubjectId) as IChannel;
+                    names.Add(channel.Name);
+                }
+                else
+                {
+                    IUser user = this._client.GetUser(ignoreEntry.SubjectId) as IUser;
+                    names.Add(user.ToString());
+                }
+            }
+            text = ListUtil.BuildEnumeration(names);
             if (string.IsNullOrWhiteSpace(text))
             {
                 text = "This list is empty right now.";

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using XayahBot.Command.Precondition;
 using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
@@ -26,7 +27,13 @@ namespace XayahBot.Command.Quiz
 
         //
 
+        private readonly DiscordSocketClient _client;
         private readonly QuizLeaderboardDAO _quizLeaderboardDao = new QuizLeaderboardDAO();
+
+        public CQuiz(DiscordSocketClient client)
+        {
+            this._client = client;
+        }
 
         [Command("ask")]
         [RequireContext(ContextType.Guild)]
@@ -59,7 +66,7 @@ namespace XayahBot.Command.Quiz
                         message += Environment.NewLine;
                     }
                     TLeaderboardEntry entry = leaderboard.ElementAt(i);
-                    IUser user = await this.Context.Channel.GetUserAsync(entry.UserId);
+                    IUser user = this._client.GetUser(entry.UserId);
                     message += $"{entry.Answers.ToString().PadLeft(width)} - {user}";
                 }
                 message += "```";

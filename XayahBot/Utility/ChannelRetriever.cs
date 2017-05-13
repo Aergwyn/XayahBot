@@ -8,11 +8,6 @@ namespace XayahBot.Utility
 {
     public static class ChannelRetriever
     {
-        public static IMessageChannel GetChannel(DiscordSocketClient client, ulong channelId)
-        {
-            return client.GetChannel(channelId) as IMessageChannel ?? throw new NoChannelException();
-        }
-
         public static async Task<IMessageChannel> GetDMChannel(CommandContext context)
         {
             IMessageChannel channel = null;

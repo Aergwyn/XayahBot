@@ -27,7 +27,7 @@ namespace XayahBot.Database.DAO
 
         public async Task SaveAsync(TIncidentSubscriber entry)
         {
-            if (this.HasSubscriber(entry.ChannelId))
+            if (this.HasChannelSubscribed(entry.ChannelId))
             {
                 throw new AlreadyExistingException();
             }
@@ -37,7 +37,7 @@ namespace XayahBot.Database.DAO
             }
         }
 
-        public async Task AddAsync(TIncidentSubscriber entry)
+        private async Task AddAsync(TIncidentSubscriber entry)
         {
             using (GeneralContext database = new GeneralContext())
             {
@@ -75,14 +75,30 @@ namespace XayahBot.Database.DAO
                         throw new NotSavedException();
                     }
                 }
+                else
+                {
+                    throw new NotExistingException();
+                }
             }
         }
 
-        public bool HasSubscriber(ulong channelId)
+        public bool HasChannelSubscribed(ulong channelId)
         {
             using (GeneralContext database = new GeneralContext())
             {
                 if (database.IncidentSubscriber.Where(x => x.ChannelId.Equals(channelId)).Count() > 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool HasGuildSubscribed(ulong guildId)
+        {
+            using (GeneralContext database = new GeneralContext())
+            {
+                if (database.IncidentSubscriber.Where(x => x.GuildId.Equals(guildId)).Count() > 0)
                 {
                     return true;
                 }

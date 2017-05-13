@@ -50,7 +50,7 @@ namespace XayahBot.Utility
             {
                 await this._ignoreListDao.RemoveBySubjectIdAsync(deletedChannel.Id);
             }
-            if (this._incidentSubscriberDao.HasSubscriber(deletedChannel.Id))
+            if (this._incidentSubscriberDao.HasChannelSubscribed(deletedChannel.Id))
             {
                 await this._incidentSubscriberDao.RemoveByChannelIdAsync(deletedChannel.Id);
             }
@@ -59,7 +59,10 @@ namespace XayahBot.Utility
         public async Task HandleLeftGuild(SocketGuild leftGuild)
         {
             await this._ignoreListDao.RemoveByGuildIdAsync(leftGuild.Id);
-            await this._incidentSubscriberDao.RemoveByGuildIdAsync(leftGuild.Id);
+            if (this._incidentSubscriberDao.HasGuildSubscribed(leftGuild.Id))
+            {
+                await this._incidentSubscriberDao.RemoveByGuildIdAsync(leftGuild.Id);
+            }
         }
     }
 }
