@@ -39,6 +39,7 @@ namespace XayahBot.API
                 catch (ErrorResponseException erex)
                 {
                     Logger.Error(erex.Message);
+                    throw erex;
                 }
             }
             return result;
@@ -49,7 +50,7 @@ namespace XayahBot.API
             if (!response.IsSuccessStatusCode)
             {
                 ErrorResponse error = JsonConvert.DeserializeObject<ErrorResponse>(content);
-                throw new ErrorResponseException($"{error.Status.StatusCode} | {error.Status.Message}");
+                throw new ErrorResponseException($"{error.Status.StatusCode} {error.Status.Message}");
             }
         }
 

@@ -1,11 +1,8 @@
-﻿#pragma warning disable 4014
-
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using XayahBot.Command.Precondition;
 using XayahBot.Utility;
-using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command.Data
 {
@@ -13,13 +10,37 @@ namespace XayahBot.Command.Data
     [Category(CategoryType.DATA)]
     public class CData : ModuleBase
     {
-        [Command("champ"), Alias("c")]
-        [Summary("Displays data of a specific champion. Name does not have to be exact.")]
-        public async Task Champ([Remainder] string name)
+        [Group("champ"), Alias("c")]
+        public class CChamp : ModuleBase
         {
-            IMessageChannel channel = await ChannelRetriever.GetDMChannel(this.Context);
-            DiscordFormatMessage message = await InfoService.GetChampionDataText(name);
-            channel.SendMessageAsync(message.ToString());
+            [Command("misc")]
+            [Summary("Displays misc data of a champion.")]
+            public async Task Misc([Remainder] string name)
+            {
+                await this.BuildAndPost(ChampionDataType.MISC, name);
+            }
+
+            [Command("spells")]
+            [Summary("Displays spells of a champion.")]
+            public async Task Spell([Remainder] string name)
+            {
+                await this.BuildAndPost(ChampionDataType.SPELLS, name);
+            }
+
+            [Command("stats")]
+            [Summary("Displays stats (with stat growth) of a champion.")]
+            public async Task Stats([Remainder] string name)
+            {
+                await this.BuildAndPost(ChampionDataType.STATS, name);
+            }
+
+            private async Task BuildAndPost(ChampionDataType type, string name)
+            {
+                IMessageChannel channel = await ChannelRetriever.GetDMChannel(this.Context);
+                ChampionDataBuilder builder = new ChampionDataBuilder(channel, name);
+                await builder.BuildAsync(type);
+                await builder.PostAsync();
+            }
         }
     }
 }

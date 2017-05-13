@@ -29,5 +29,37 @@ namespace XayahBot.API.Riot.Model
         {
             return Math.Round(0.625M / (1 + this.AttackSpeedOffset), 3, MidpointRounding.AwayFromZero);
         }
+
+        public decimal[] GetStats()
+        {
+            return new decimal[]{
+                this.Armor,
+                this.AttackDamage,
+                this.AttackRange,
+                this.AttackSpeedOffset,
+                this.Crit,
+                this.Hp,
+                this.HpRegen,
+                this.MoveSpeed,
+                this.Mp,
+                this.MpRegen,
+                this.Spellblock,
+            };
+        }
+
+        public decimal[] GetStatGrowthList()
+        {
+            return new decimal[]{
+                this.ArmorPerLevel,
+                this.AttackDamagePerLevel,
+                this.AttackSpeedPerLevel,
+                this.CritPerLevel,
+                this.HpPerLevel,
+                this.HpRegenPerLevel,
+                this.MpPerLevel,
+                this.MpRegenPerLevel,
+                this.SpellblockPerLevel
+            };
+        }
     }
 }
