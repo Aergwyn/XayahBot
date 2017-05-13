@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using XayahBot.Command.Precondition;
 using XayahBot.Database.DAO;
@@ -46,7 +47,7 @@ namespace XayahBot.Command.Quiz
         public async Task Stats()
         {
             string message = string.Empty;
-            List<TLeaderboardEntry> leaderboard = (await this._quizLeaderboardDao.GetLeaderboardAsync(this.Context.Guild.Id)).OrderByDescending(x => x.Answers).ToList();
+            List<TLeaderboardEntry> leaderboard = (await this._quizLeaderboardDao.GetAllAsync(this.Context.Guild.Id)).OrderByDescending(x => x.Answers).ToList();
             if (leaderboard.Count > 0)
             {
                 int width = leaderboard.First().Answers.ToString().Length;
@@ -58,7 +59,8 @@ namespace XayahBot.Command.Quiz
                         message += Environment.NewLine;
                     }
                     TLeaderboardEntry entry = leaderboard.ElementAt(i);
-                    message += $"{entry.Answers.ToString().PadLeft(width)} - {entry.UserName}";
+                    IUser user = await this.Context.Channel.GetUserAsync(entry.UserId);
+                    message += $"{entry.Answers.ToString().PadLeft(width)} - {user}";
                 }
                 message += "```";
             }

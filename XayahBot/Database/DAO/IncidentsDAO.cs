@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using XayahBot.Database.Model;
@@ -9,15 +8,7 @@ namespace XayahBot.Database.DAO
 {
     public class IncidentsDAO
     {
-        public List<TIncident> GetIncidents()
-        {
-            using (GeneralContext database = new GeneralContext())
-            {
-                return database.Incidents.ToList();
-            }
-        }
-
-        public TIncident GetIncident(long incidentId)
+        public TIncident GetSingle(long incidentId)
         {
             using (GeneralContext database = new GeneralContext())
             {
@@ -25,25 +16,28 @@ namespace XayahBot.Database.DAO
                 if (match != null)
                 {
                     database.Entry(match).Collection(x => x.Messages).Load();
-                    return match;
                 }
+                return match ?? throw new NotExistingException();
             }
-            throw new NotExistingException();
+        }
+
+        public List<TIncident> GetAll()
+        {
+            using (GeneralContext database = new GeneralContext())
+            {
+                return database.Incidents.ToList();
+            }
         }
 
         public async Task SaveAsync(TIncident entry)
         {
-            using (GeneralContext database = new GeneralContext())
+            if (this.HasIncident(entry.IncidentId))
             {
-                TIncident match = database.Incidents.FirstOrDefault(x => x.IncidentId.Equals(entry.IncidentId));
-                if (match == null)
-                {
-                    await this.AddAsync(entry);
-                }
-                else
-                {
-                    await this.UpdateAsync(entry);
-                }
+                await this.UpdateAsync(entry);
+            }
+            else
+            {
+                await this.AddAsync(entry);
             }
         }
 
@@ -51,18 +45,10 @@ namespace XayahBot.Database.DAO
         {
             using (GeneralContext database = new GeneralContext())
             {
-                TIncident match = database.Incidents.FirstOrDefault(x => x.IncidentId.Equals(entry.IncidentId));
-                if (match == null)
+                database.Incidents.Add(entry);
+                if (await database.SaveChangesAsync() <= 0)
                 {
-                    database.Incidents.Add(entry);
-                    if (await database.SaveChangesAsync() <= 0)
-                    {
-                        throw new NotSavedException();
-                    }
-                }
-                else
-                {
-                    throw new AlreadyExistingException();
+                    throw new NotSavedException();
                 }
             }
         }
@@ -99,7 +85,7 @@ namespace XayahBot.Database.DAO
         {
             try
             {
-                this.GetIncident(incidentId);
+                this.GetSingle(incidentId);
                 return true;
             }
             catch (NotExistingException)

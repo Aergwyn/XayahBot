@@ -73,7 +73,7 @@ namespace XayahBot.Command.Remind
                         {
                             init = false;
                             processed = true;
-                            List<TRemindEntry> reminder = this._reminderDao.GetReminder();
+                            List<TRemindEntry> reminder = this._reminderDao.GetAll();
                             List<TRemindEntry> dueReminder = reminder.Where(x => !this._currentTimerList.Keys.Contains(this.BuildTimerKey(x.UserId, x.UserEntryNumber))).ToList();
                             await ProcessExpiringRemindersAsync(dueReminder, interval);
                         }
@@ -152,7 +152,7 @@ namespace XayahBot.Command.Remind
 
         public async Task AddNewAsync(TRemindEntry reminder)
         {
-            await this._reminderDao.AddAsync(reminder);
+            await this._reminderDao.SaveAsync(reminder);
             await StartAsync();
         }
 

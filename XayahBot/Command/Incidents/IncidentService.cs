@@ -50,7 +50,7 @@ namespace XayahBot.Command.Incidents
             await this._lock.WaitAsync();
             try
             {
-                if (!this._isRunning && this._incidentSubscriberDao.HasSubscriber())
+                if (!this._isRunning && this._incidentSubscriberDao.HasAnySubscriber())
                 {
                     this._isRunning = true;
                     Task.Run(() => RunAsync());
@@ -85,7 +85,7 @@ namespace XayahBot.Command.Incidents
                     {
                         processed = false;
                     }
-                    if (!this._incidentSubscriberDao.HasSubscriber())
+                    if (!this._incidentSubscriberDao.HasAnySubscriber())
                     {
                         this._isRunning = false;
                     }
@@ -162,7 +162,7 @@ namespace XayahBot.Command.Incidents
         {
             try
             {
-                TIncident entry = this._incidentsDao.GetIncident(incidentId);
+                TIncident entry = this._incidentsDao.GetSingle(incidentId);
                 if (lastUpdate.Ticks > entry.LastUpdate.Ticks)
                 {
                     return true;
@@ -178,12 +178,12 @@ namespace XayahBot.Command.Incidents
         {
             try
             {
-                TIncident entry = this._incidentsDao.GetIncident(incidentId);
+                TIncident entry = this._incidentsDao.GetSingle(incidentId);
                 foreach (TMessage message in entry.Messages)
                 {
+                    IMessageChannel channel = ChannelRetriever.GetChannel(this._client, message.ChannelId);
                     try
                     {
-                        IMessageChannel channel = ChannelRetriever.GetChannel(this._client, message.ChannelId);
                         IMessage postedMessage = await channel.GetMessageAsync(message.MessageId);
                         await postedMessage?.DeleteAsync();
                     }
@@ -193,10 +193,10 @@ namespace XayahBot.Command.Incidents
                     }
                     catch (HttpException)
                     {
-                        // If your permission got revoked you can't access that channel anymore and it throws HttpException
+                        // If your permission got revoked you can't access that message anymore and it throws HttpException
                     }
                 }
-                await this._messagesDao.RemoveByIncidentIdAsync(entry);
+                await this._messagesDao.RemoveByIncidentIdAsync(entry.IncidentId);
             }
             catch (NotExistingException)
             {
@@ -209,9 +209,9 @@ namespace XayahBot.Command.Incidents
             TIncident entry = this.RetrieveDbIncident(incident);
             foreach (TIncidentSubscriber subscriber in this.GetInterestedSubscriber(entry))
             {
+                IMessageChannel channel = ChannelRetriever.GetChannel(this._client, subscriber.ChannelId);
                 try
                 {
-                    IMessageChannel channel = ChannelRetriever.GetChannel(this._client, subscriber.ChannelId);
                     IUserMessage postedMessage = await channel.SendMessageAsync("", false, message.ToEmbed());
                     await this.SaveMessageIdAsync(entry, postedMessage);
                 }
@@ -241,7 +241,7 @@ namespace XayahBot.Command.Incidents
             TIncident entry = null;
             try
             {
-                entry = this._incidentsDao.GetIncident(incident.Id);
+                entry = this._incidentsDao.GetSingle(incident.Id);
             }
             catch (NotExistingException)
             {
@@ -256,7 +256,7 @@ namespace XayahBot.Command.Incidents
 
         private List<TIncidentSubscriber> GetInterestedSubscriber(TIncident entry)
         {
-            List<TIncidentSubscriber> subscriberList = this._incidentSubscriberDao.GetSubscriber();
+            List<TIncidentSubscriber> subscriberList = this._incidentSubscriberDao.GetAll();
             List<TIncidentSubscriber> reducedList = new List<TIncidentSubscriber>(subscriberList);
             foreach (TIncidentSubscriber subscriber in subscriberList)
             {
@@ -282,7 +282,7 @@ namespace XayahBot.Command.Incidents
 
         private async Task ProcessSolvedIncidentsAsync(List<IncidentData> incidents)
         {
-            List<TIncident> dbIncidents = this._incidentsDao.GetIncidents();
+            List<TIncident> dbIncidents = this._incidentsDao.GetAll();
             foreach (TIncident dbIncident in dbIncidents)
             {
                 if (incidents.Where(x => x.Id.Equals(dbIncident.IncidentId)).Count() == 0)

@@ -37,7 +37,7 @@ namespace XayahBot.Command.Ignore
         [Summary("Displays the ignore list.")]
         public Task Ignore()
         {
-            List<TIgnoreEntry> ignoreList = this._ignoreListDao.GetIgnoreList(this.Context.Guild.Id);
+            List<TIgnoreEntry> ignoreList = this._ignoreListDao.GetAll(this.Context.Guild.Id);
             string userString = this.BuildIgnoreListString(ignoreList.Where(x => !x.IsChannel));
             string channelString = this.BuildIgnoreListString(ignoreList.Where(x => x.IsChannel));
 
@@ -59,7 +59,6 @@ namespace XayahBot.Command.Ignore
         private string BuildIgnoreListString(IEnumerable<TIgnoreEntry> list)
         {
             string text = string.Empty;
-            IOrderedEnumerable<TIgnoreEntry> orderedList = list.OrderBy(x => x.SubjectName);
             text = ListUtil.BuildEnumeration(list);
             if (string.IsNullOrWhiteSpace(text))
             {
@@ -108,13 +107,13 @@ namespace XayahBot.Command.Ignore
         {
             try
             {
-                await this._ignoreListDao.AddAsync(new TIgnoreEntry
+                TIgnoreEntry entry = new TIgnoreEntry
                 {
                     GuildId = this.Context.Guild.Id,
                     IsChannel = isChannel,
-                    SubjectId = subjectId,
-                    SubjectName = subjectName
-                });
+                    SubjectId = subjectId
+                };
+                await this._ignoreListDao.SaveAsync(entry);
                 this._newIgnoredList.Add(subjectName);
                 if (!isChannel)
                 {

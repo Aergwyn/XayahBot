@@ -80,7 +80,6 @@ namespace XayahBot
 
             DiscordEventHandler eventHandler = new DiscordEventHandler(this._dependencyMap);
             this._client.Ready += eventHandler.HandleReady;
-            this._client.ChannelUpdated += eventHandler.HandleChannelUpdated;
             this._client.ChannelDestroyed += eventHandler.HandleChannelDestroyed;
             this._client.LeftGuild += eventHandler.HandleLeftGuild;
             this._client.MessageReceived += this.HandleMessageReceived;

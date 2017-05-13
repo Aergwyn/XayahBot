@@ -8,15 +8,7 @@ namespace XayahBot.Database.DAO
 {
     public class ReminderDAO
     {
-        public List<TRemindEntry> GetReminder()
-        {
-            using (GeneralContext database = new GeneralContext())
-            {
-                return database.Reminder.ToList();
-            }
-        }
-
-        public List<TRemindEntry> GetReminder(ulong userId)
+        public List<TRemindEntry> GetAll(ulong userId)
         {
             using (GeneralContext database = new GeneralContext())
             {
@@ -24,21 +16,19 @@ namespace XayahBot.Database.DAO
             }
         }
 
-        public async Task AddAsync(TRemindEntry entry)
+        public List<TRemindEntry> GetAll()
         {
             using (GeneralContext database = new GeneralContext())
             {
-                List<TRemindEntry> existingReminder = this.GetReminder(entry.UserId);
-                int newUserEntryNumber = 1;
-                while (true)
-                {
-                    if (existingReminder.Where(x => x.UserEntryNumber.Equals(newUserEntryNumber)).Count() == 0)
-                    {
-                        break;
-                    }
-                    newUserEntryNumber++;
-                }
-                entry.UserEntryNumber = newUserEntryNumber;
+                return database.Reminder.ToList();
+            }
+        }
+
+        public async Task SaveAsync(TRemindEntry entry)
+        {
+            using (GeneralContext database = new GeneralContext())
+            {
+                entry.UserEntryNumber = this.GetEntryNumber(entry.UserId);
                 database.Reminder.Add(entry);
                 if (await database.SaveChangesAsync() <= 0)
                 {
@@ -69,11 +59,23 @@ namespace XayahBot.Database.DAO
 
         public bool HasReminder()
         {
-            if (this.GetReminder().Count > 0)
+            if (this.GetAll().Count > 0)
             {
                 return true;
             }
             return false;
+        }
+
+        private int GetEntryNumber(ulong userId)
+        {
+            List<TRemindEntry> existingReminder = this.GetAll(userId);
+            int userEntryNumber = 0;
+            do
+            {
+                userEntryNumber++;
+            }
+            while (existingReminder.Where(x => x.UserEntryNumber.Equals(userEntryNumber)).Count() > 0);
+            return userEntryNumber;
         }
     }
 }

@@ -44,22 +44,13 @@ namespace XayahBot.Utility
             await incidentService.StartAsync();
         }
 
-        public Task HandleChannelUpdated(SocketChannel preUpdateChannel, SocketChannel postUpdateChannel)
-        {
-            if (this._ignoreListDao.HasSubject(preUpdateChannel.Id))
-            {
-                this._ignoreListDao.UpdateAsync(preUpdateChannel.Id, ((IChannel)postUpdateChannel).Name);
-            }
-            return Task.CompletedTask;
-        }
-
         public async Task HandleChannelDestroyed(SocketChannel deletedChannel)
         {
             if (this._ignoreListDao.HasSubject(deletedChannel.Id))
             {
                 await this._ignoreListDao.RemoveBySubjectIdAsync(deletedChannel.Id);
             }
-            if (this._incidentSubscriberDao.HasChannelSubscriber(deletedChannel.Id))
+            if (this._incidentSubscriberDao.HasSubscriber(deletedChannel.Id))
             {
                 await this._incidentSubscriberDao.RemoveByChannelIdAsync(deletedChannel.Id);
             }
@@ -67,17 +58,8 @@ namespace XayahBot.Utility
 
         public async Task HandleLeftGuild(SocketGuild leftGuild)
         {
-            try
-            {
-                await this._ignoreListDao.RemoveByGuildIdAsync(leftGuild.Id);
-            }
-            catch (NotExistingException)
-            {
-            }
-            if (this._incidentSubscriberDao.HasGuildSubscriber(leftGuild.Id))
-            {
-                await this._incidentSubscriberDao.RemoveByGuildIdAsync(leftGuild.Id);
-            }
+            await this._ignoreListDao.RemoveByGuildIdAsync(leftGuild.Id);
+            await this._incidentSubscriberDao.RemoveByGuildIdAsync(leftGuild.Id);
         }
     }
 }

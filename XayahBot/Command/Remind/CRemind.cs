@@ -32,7 +32,7 @@ namespace XayahBot.Command.Remind
         public async Task List()
         {
             IMessageChannel channel = await ChannelRetriever.GetDMChannel(this.Context);
-            List<TRemindEntry> reminders = this._reminderDao.GetReminder(this.Context.User.Id);
+            List<TRemindEntry> reminders = this._reminderDao.GetAll(this.Context.User.Id);
             channel.SendMessageAsync("", false, this.BuildReminderResponse(reminders).ToEmbed());
         }
 
@@ -108,7 +108,7 @@ namespace XayahBot.Command.Remind
         {
             int reminderCap = int.Parse(Property.ReminderCap.Value);
             int reminderTextCap = int.Parse(Property.ReminderTextCap.Value);
-            if (this._reminderDao.GetReminder(this.Context.User.Id).Count >= reminderCap)
+            if (this._reminderDao.GetAll(this.Context.User.Id).Count >= reminderCap)
             {
                 this.SendResponse($"You already reached the maximum of {reminderCap} active reminder.");
                 return false;

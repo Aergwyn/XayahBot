@@ -21,26 +21,22 @@ namespace XayahBot.Database.DAO
             throw new NotExistingException();
         }
 
-        public Task SetValueAsync(Property property)
+        public void SetValueAsync(Property property)
         {
             using (GeneralContext database = new GeneralContext())
             {
                 TProperty dbProperty = database.Properties.FirstOrDefault(x => x.Name.Equals(property.Name));
                 if (dbProperty == null)
                 {
-                    database.Properties.Add(new TProperty
+                    dbProperty = new TProperty
                     {
-                        Name = property.Name,
-                        Value = property.Value
-                    });
+                        Name = property.Name
+                    };
+                    database.Properties.Add(dbProperty);
                 }
-                else
-                {
-                    dbProperty.Value = property.Value;
-                }
+                dbProperty.Value = property.Value;
                 database.SaveChangesAsync();
             }
-            return Task.CompletedTask;
         }
     }
 }

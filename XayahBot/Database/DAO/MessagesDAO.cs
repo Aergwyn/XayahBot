@@ -8,11 +8,19 @@ namespace XayahBot.Database.DAO
 {
     public class MessagesDAO
     {
-        public async Task RemoveByIncidentIdAsync(TIncident incident)
+        public List<TMessage> GetAll(long incidentId)
         {
             using (GeneralContext database = new GeneralContext())
             {
-                List<TMessage> matches = database.Messages.Where(x => x.Incident.Id.Equals(incident.Id)).ToList();
+                return database.Messages.Where(x => x.Incident.Id.Equals(incidentId)).ToList();
+            }
+        }
+
+        public async Task RemoveByIncidentIdAsync(long incidentId)
+        {
+            using (GeneralContext database = new GeneralContext())
+            {
+                List<TMessage> matches = this.GetAll(incidentId);
                 if (matches.Count > 0)
                 {
                     database.RemoveRange(matches);

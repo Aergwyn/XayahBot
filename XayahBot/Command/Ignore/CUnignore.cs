@@ -71,7 +71,7 @@ namespace XayahBot.Command.Ignore
         {
             try
             {
-                await this._ignoreListDao.RemoveAsync(this.Context.Guild.Id, subjectId);
+                await this._ignoreListDao.RemoveByGuildAndSubjectIdAsync(this.Context.Guild.Id, subjectId);
                 this._newUnignoredList.Add(subjectName);
                 if (!isChannel)
                 {
