@@ -32,7 +32,8 @@ namespace XayahBot.API.Riot
 
         public async Task<ChampionDto> GetChampionAsync(int id)
         {
-            return await this.GetAsync<ChampionDto>(new ApiRequest($"champions/{id}", "champData=partype,passive,skins,spells,stats,tags"));
+            return await this.GetAsync<ChampionDto>(new ApiRequest($"champions/{id}",
+            "champData=partype", "champData=passive", "champData=skins", "champData=spells", "champData=stats", "champData=tags"));
         }
     }
 }

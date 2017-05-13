@@ -1,11 +1,11 @@
 ﻿#pragma warning disable 4014
 
-using System;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using XayahBot.API.Error;
 using XayahBot.Utility;
 
 namespace XayahBot.API
@@ -28,19 +28,29 @@ namespace XayahBot.API
             T result = default(T);
             using (HttpClient client = this.SetupHttpClient())
             {
+                HttpResponseMessage response = null;
                 try
                 {
-                    HttpResponseMessage response = await client.GetAsync(this.BuildUrl(request));
-                    response.EnsureSuccessStatusCode();
-                    string responseString = await response.Content.ReadAsStringAsync() ?? string.Empty;
-                    result = JsonConvert.DeserializeObject<T>(responseString);
+                    response = await client.GetAsync(this.BuildUrl(request));
+                    string content = await response.Content.ReadAsStringAsync() ?? string.Empty;
+                    this.CheckResponseStatus(response, content);
+                    result = JsonConvert.DeserializeObject<T>(content);
                 }
-                catch (Exception ex)
+                catch (ErrorResponseException erex)
                 {
-                    Logger.Warning(ex.Message, ex);
+                    Logger.Error(erex.Message);
                 }
             }
             return result;
+        }
+
+        private void CheckResponseStatus(HttpResponseMessage response, string content)
+        {
+            if (!response.IsSuccessStatusCode)
+            {
+                ErrorResponse error = JsonConvert.DeserializeObject<ErrorResponse>(content);
+                throw new ErrorResponseException($"{error.Status.StatusCode} | {error.Status.Message}");
+            }
         }
 
         private HttpClient SetupHttpClient()
