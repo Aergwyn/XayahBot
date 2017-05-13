@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using XayahBot.Error;
 
 namespace XayahBot.Command.Precondition
@@ -41,7 +39,7 @@ namespace XayahBot.Command.Precondition
 
         public static Category GetByType(CategoryType categoryType)
         {
-            return Values.FirstOrDefault(x => x.CategoryType.Equals(categoryType)) ?? throw new NotExistingException();
+            return Values.FirstOrDefault(x => x.CategoryType.Equals(categoryType)) ?? throw new UnknownTypeException();
         }
 
         // ---

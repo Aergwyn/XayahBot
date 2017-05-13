@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using XayahBot.Database.Error;
 using XayahBot.Database.Model;
-using XayahBot.Error;
 using XayahBot.Utility;
 
 namespace XayahBot.Database.DAO

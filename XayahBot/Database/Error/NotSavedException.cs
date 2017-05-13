@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace XayahBot.Error
+namespace XayahBot.Database.Error
 {
     public class NotSavedException : Exception
     {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using XayahBot.Database.DAO;
+using XayahBot.Database.Error;
 using XayahBot.Error;
 
 namespace XayahBot.Utility
@@ -51,7 +52,7 @@ namespace XayahBot.Utility
                     return match;
                 }
             }
-            throw new NotExistingException();
+            throw new UnknownTypeException();
         }
 
         // ---

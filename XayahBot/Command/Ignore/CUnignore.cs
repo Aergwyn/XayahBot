@@ -8,7 +8,7 @@ using Discord;
 using Discord.Commands;
 using XayahBot.Command.Precondition;
 using XayahBot.Database.DAO;
-using XayahBot.Error;
+using XayahBot.Database.Error;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
