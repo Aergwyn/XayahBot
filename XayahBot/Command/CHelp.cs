@@ -42,8 +42,11 @@ namespace XayahBot.Command
             this.ListCommandsForCategory(requestedCategory, message);
             message.AppendDescription(Environment.NewLine + Environment.NewLine);
             this.ListOtherCategories(requestedCategory, message);
-            message.AppendDescription(Environment.NewLine + Environment.NewLine)
-                .AppendDescription(string.Format(this._finishHelp, Property.Author));
+            if (requestedCategory.Equals(Category.Help))
+            {
+                message.AppendDescription(Environment.NewLine + Environment.NewLine)
+                    .AppendDescription(string.Format(this._finishHelp, Property.Author));
+            }
             channel.SendMessageAsync("", false, message.ToEmbed());
         }
 
