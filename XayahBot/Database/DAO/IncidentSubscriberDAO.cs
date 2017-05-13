@@ -8,11 +8,20 @@ namespace XayahBot.Database.DAO
 {
     public class IncidentSubscriberDAO
     {
-        public TIncidentSubscriber GetSingle(ulong channelId)
+        public TIncidentSubscriber GetSingleByChannelId(ulong channelId)
         {
             using (GeneralContext database = new GeneralContext())
             {
                 TIncidentSubscriber match = database.IncidentSubscriber.FirstOrDefault(x => x.ChannelId.Equals(channelId));
+                return match ?? throw new NotExistingException();
+            }
+        }
+
+        public TIncidentSubscriber GetSingleByGuildId(ulong guildId)
+        {
+            using (GeneralContext database = new GeneralContext())
+            {
+                TIncidentSubscriber match = database.IncidentSubscriber.FirstOrDefault(x => x.GuildId.Equals(guildId));
                 return match ?? throw new NotExistingException();
             }
         }
@@ -53,7 +62,7 @@ namespace XayahBot.Database.DAO
         {
             using (GeneralContext database = new GeneralContext())
             {
-                TIncidentSubscriber match = this.GetSingle(channelId);
+                TIncidentSubscriber match = this.GetSingleByChannelId(channelId);
                 database.Remove(match);
                 if (await database.SaveChangesAsync() <= 0)
                 {
@@ -66,18 +75,11 @@ namespace XayahBot.Database.DAO
         {
             using (GeneralContext database = new GeneralContext())
             {
-                TIncidentSubscriber match = database.IncidentSubscriber.FirstOrDefault(x => x.GuildId.Equals(guildId));
-                if (match != null)
+                TIncidentSubscriber match = this.GetSingleByGuildId(guildId);
+                database.Remove(match);
+                if (await database.SaveChangesAsync() <= 0)
                 {
-                    database.Remove(match);
-                    if (await database.SaveChangesAsync() <= 0)
-                    {
-                        throw new NotSavedException();
-                    }
-                }
-                else
-                {
-                    throw new NotExistingException();
+                    throw new NotSavedException();
                 }
             }
         }

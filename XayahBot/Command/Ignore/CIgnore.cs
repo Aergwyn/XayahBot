@@ -42,12 +42,11 @@ namespace XayahBot.Command.Ignore
         [RequireMod]
         [RequireContext(ContextType.Guild)]
         [Summary("Displays the ignore list.")]
-        public Task Ignore()
+        public async Task Ignore()
         {
             List<TIgnoreEntry> ignoreList = this._ignoreListDao.GetAll(this.Context.Guild.Id);
-            string userString = this.BuildIgnoreListString(ignoreList.Where(x => !x.IsChannel));
-            string channelString = this.BuildIgnoreListString(ignoreList.Where(x => x.IsChannel));
-
+            string userString = await this.BuildIgnoreListString(ignoreList.Where(x => !x.IsChannel));
+            string channelString = await this.BuildIgnoreListString(ignoreList.Where(x => x.IsChannel));
             DiscordFormatEmbed message = new DiscordFormatEmbed()
                 .CreateFooter(this.Context)
                 .AppendDescription($"Here is the current ignore list for this server.")
@@ -60,10 +59,9 @@ namespace XayahBot.Command.Ignore
                 .AppendDescription(Environment.NewLine)
                 .AppendDescription(channelString);
             this.ReplyAsync("", false, message.ToEmbed());
-            return Task.CompletedTask;
         }
 
-        private string BuildIgnoreListString(IEnumerable<TIgnoreEntry> ignoreList)
+        private async Task<string> BuildIgnoreListString(IEnumerable<TIgnoreEntry> ignoreList)
         {
             string text = string.Empty;
             List<string> names = new List<string>();
@@ -71,7 +69,7 @@ namespace XayahBot.Command.Ignore
             {
                 if (ignoreEntry.IsChannel)
                 {
-                    IChannel channel = this._client.GetChannel(ignoreEntry.SubjectId) as IChannel;
+                    IChannel channel = await this.Context.Guild.GetChannelAsync(ignoreEntry.SubjectId) as IChannel;
                     names.Add(channel.Name);
                 }
                 else

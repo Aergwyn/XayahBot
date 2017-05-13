@@ -28,7 +28,7 @@ namespace XayahBot.Command.Data
             }
 
             [Command("stats")]
-            [Summary("Displays stats (with stat growth) of a champion.")]
+            [Summary("Displays stats of a champion.")]
             public async Task Stats([Remainder] string name)
             {
                 await this.BuildAndPost(ChampionDataType.STATS, name);

@@ -16,8 +16,8 @@ namespace XayahBot.Command
     [Category(CategoryType.HELP)]
     public class CHelp : ModuleBase
     {
-        private readonly string _finishHelp = "You can also trigger commands with mentioning me instead of the prefix. " +
-            Environment.NewLine + "If you have problems, questions and/or suggestions do not hesitate to message {0}.";
+        private readonly string _finishHelp = "You can also trigger commands by mentioning me instead of the prefix. " +
+            Environment.NewLine + "If you have problems, questions and/or suggestions do not hesitate to message {0} or join my [server]({1}).";
 
         private readonly CommandService _commandService;
 
@@ -45,7 +45,7 @@ namespace XayahBot.Command
             if (requestedCategory.Equals(Category.Help))
             {
                 message.AppendDescription(Environment.NewLine + Environment.NewLine)
-                    .AppendDescription(string.Format(this._finishHelp, Property.Author));
+                    .AppendDescription(string.Format(this._finishHelp, Property.Author, Property.HelpServerLink));
             }
             channel.SendMessageAsync("", false, message.ToEmbed());
         }

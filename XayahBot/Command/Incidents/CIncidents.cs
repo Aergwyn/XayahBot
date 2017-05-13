@@ -4,10 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using XayahBot.Command.Precondition;
 using XayahBot.Database.DAO;
 using XayahBot.Database.Error;
 using XayahBot.Database.Model;
+using XayahBot.Error;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
@@ -17,12 +19,14 @@ namespace XayahBot.Command.Incidents
     [Category(CategoryType.INCIDENTS)]
     public class CIncidents : ModuleBase
     {
+        private readonly DiscordSocketClient _client;
+        private readonly IncidentService _incidentService;
         private readonly IncidentSubscriberDAO _incidentSubscriberDao = new IncidentSubscriberDAO();
-        private IncidentService _incidentService;
 
-        public CIncidents(IncidentService incidentService)
+        public CIncidents(IDependencyMap map)
         {
-            this._incidentService = incidentService;
+            this._client = map.Get<DiscordSocketClient>();
+            this._incidentService = map.Get<IncidentService>();
         }
 
         [Command("enable")]
@@ -31,24 +35,18 @@ namespace XayahBot.Command.Incidents
         [Summary("Enables incident notifications from Riot in the mentioned channel.")]
         public async Task Enable(string channel)
         {
-            ulong channelId = this.Context.Message.MentionedChannelIds.ElementAt(0);
-            IChannel mentionedChannel = await this.Context.Guild.GetChannelAsync(channelId);
-            await this.EnabledGuild(mentionedChannel);
-            await this._incidentService.StartAsync();
-        }
-
-        private async Task EnabledGuild(IChannel channel)
-        {
+            ulong channelId = this.Context.Message.MentionedChannelIds.First();
+            IChannel mentionedChannel = await this.Context.Guild.GetChannelAsync(channelId) ?? throw new NoChannelException();
             DiscordFormatEmbed message = new DiscordFormatEmbed()
                 .CreateFooter(this.Context);
             try
             {
                 await this._incidentSubscriberDao.SaveAsync(new TIncidentSubscriber
                 {
-                    ChannelId = channel.Id,
+                    ChannelId = mentionedChannel.Id,
                     GuildId = this.Context.Guild.Id
                 });
-                message.AppendDescription($"Enabled incident notifications for `{channel.Name}`.");
+                message.AppendDescription($"Enabled incident notifications in `{mentionedChannel.Name}`.");
             }
             catch (AlreadyExistingException)
             {
@@ -56,9 +54,31 @@ namespace XayahBot.Command.Incidents
             }
             catch (NotSavedException nsex)
             {
-                Logger.Error($"Failed to add status setting for {this.Context.Guild.Name} ({this.Context.Guild.Id}).", nsex);
+                Logger.Error($"Failed to enable incident notifications on {this.Context.Guild.Name} ({this.Context.Guild.Id}).", nsex);
             }
             await this.ReplyAsync("", false, message.ToEmbed());
+            await this._incidentService.StartAsync();
+        }
+
+        [Command("status")]
+        [RequireMod]
+        [RequireContext(ContextType.Guild)]
+        [Summary("Shows if incident notifications are enabled or disabled for this server.")]
+        public async Task Status()
+        {
+            DiscordFormatEmbed message = new DiscordFormatEmbed()
+                .CreateFooter(this.Context);
+            try
+            {
+                TIncidentSubscriber subscriber = this._incidentSubscriberDao.GetSingleByGuildId(this.Context.Guild.Id);
+                IChannel channel = await this.Context.Guild.GetChannelAsync(subscriber.ChannelId) as IChannel;
+                message.AppendDescription($"Incident notifications are enabled and will be posted in `{channel.Name}`.");
+            }
+            catch (NotExistingException)
+            {
+                message.AppendDescription("Incident notifications are currently disabled.");
+            }
+            this.ReplyAsync("", false, message.ToEmbed());
         }
 
         [Command("disable")]
@@ -80,7 +100,7 @@ namespace XayahBot.Command.Incidents
             }
             catch (NotSavedException nsex)
             {
-                Logger.Error($"Failed to remove status setting from {this.Context.Guild.Name} ({this.Context.Guild.Id}).", nsex);
+                Logger.Error($"Failed to disable incident notifications on {this.Context.Guild.Name} ({this.Context.Guild.Id}).", nsex);
             }
             this.ReplyAsync("", false, message.ToEmbed());
         }

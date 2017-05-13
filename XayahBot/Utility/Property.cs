@@ -18,6 +18,7 @@ namespace XayahBot.Utility
 
         public static readonly Property GameActive = new Property("game_active", "with Rakan");
         public static readonly Property GameShutdown = new Property("game_shutdown", "shutting down...");
+        public static readonly Property HelpServerLink = new Property("help_serverlink", "https://discord.gg/YhQYAFW");
         public static readonly Property QuizLastReset = new Property("quiz_lastreset", "1/2017");
         public static readonly Property QuizLeaderboardMax = new Property("quiz_leaderboardmax", "10");
         public static readonly Property QuizMatch = new Property("quiz_match", "70"); // Percentage
@@ -32,6 +33,7 @@ namespace XayahBot.Utility
             {
                 yield return GameActive;
                 yield return GameShutdown;
+                yield return HelpServerLink;
                 yield return QuizLastReset;
                 yield return QuizLeaderboardMax;
                 yield return QuizMatch;
