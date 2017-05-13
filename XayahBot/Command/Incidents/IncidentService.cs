@@ -183,7 +183,7 @@ namespace XayahBot.Command.Incidents
                 {
                     try
                     {
-                        IMessageChannel channel = ChannelHelper.GetChannel(this._client, message.ChannelId);
+                        IMessageChannel channel = ChannelRetriever.GetChannel(this._client, message.ChannelId);
                         IMessage postedMessage = await channel.GetMessageAsync(message.MessageId);
                         await postedMessage?.DeleteAsync();
                     }
@@ -211,7 +211,7 @@ namespace XayahBot.Command.Incidents
             {
                 try
                 {
-                    IMessageChannel channel = ChannelHelper.GetChannel(this._client, subscriber.ChannelId);
+                    IMessageChannel channel = ChannelRetriever.GetChannel(this._client, subscriber.ChannelId);
                     IUserMessage postedMessage = await channel.SendMessageAsync("", false, message.ToEmbed());
                     await this.SaveMessageIdAsync(entry, postedMessage);
                 }

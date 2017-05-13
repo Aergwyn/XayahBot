@@ -9,7 +9,6 @@ using Discord.WebSocket;
 using XayahBot.Command.Incidents;
 using XayahBot.Command.Remind;
 using XayahBot.Database.DAO;
-using XayahBot.Error;
 using XayahBot.Utility;
 
 namespace XayahBot
@@ -28,9 +27,6 @@ namespace XayahBot
         private readonly RemindService _remindService;
         private readonly IncidentService _incidentService;
         private readonly IDependencyMap _dependencyMap = new DependencyMap();
-
-        private readonly IgnoreListDAO _ignoreListDao = new IgnoreListDAO();
-        private readonly IncidentSubscriberDAO _incidentSubscriberDao = new IncidentSubscriberDAO();
 
         private Program()
         {
@@ -71,22 +67,23 @@ namespace XayahBot
             }
             else
             {
-                await Logger.Error("No token supplied.");
+                Logger.Error("No token supplied.");
             }
             await Task.Delay(2500);
         }
 
         private async Task InitializeAsync()
         {
-            this._client.Ready += this.HandleReady;
-            this._client.ChannelUpdated += this.HandleChannelUpdated;
-            this._client.ChannelDestroyed += this.HandleChannelDestroyed;
-            this._client.LeftGuild += this.HandleLeftGuild;
-            this._client.MessageReceived += this.HandleMessageReceived;
-
-            this._dependencyMap.Add(new IgnoreListDAO());
+            this._dependencyMap.Add(this._client);
             this._dependencyMap.Add(this._remindService);
             this._dependencyMap.Add(this._incidentService);
+
+            DiscordEventHandler eventHandler = new DiscordEventHandler(this._dependencyMap);
+            this._client.Ready += eventHandler.HandleReady;
+            this._client.ChannelUpdated += eventHandler.HandleChannelUpdated;
+            this._client.ChannelDestroyed += eventHandler.HandleChannelDestroyed;
+            this._client.LeftGuild += eventHandler.HandleLeftGuild;
+            this._client.MessageReceived += this.HandleMessageReceived;
 
             await this._commandService.AddModulesAsync(Assembly.GetEntryAssembly());
         }
@@ -97,77 +94,7 @@ namespace XayahBot
             await this._remindService.StopAsync();
         }
 
-        private Task HandleReady()
-        {
-            this.SetGame();
-            this.StartBackgroundThreads();
-            return Task.CompletedTask;
-        }
-
-        private void SetGame()
-        {
-            string game = string.IsNullOrWhiteSpace(Property.GameActive.Value) ? null : Property.GameActive.Value;
-            this._client.SetGameAsync(game);
-        }
-
-        private Task StartBackgroundThreads()
-        {
-            this._remindService.StartAsync();
-            this._incidentService.StartAsync();
-            return Task.CompletedTask;
-        }
-
-        private Task HandleChannelUpdated(SocketChannel preUpdateChannel, SocketChannel postUpdateChannel)
-        {
-            try
-            {
-                this._ignoreListDao.UpdateAsync(preUpdateChannel.Id, ((IChannel)postUpdateChannel).Name);
-            }
-            catch (NotExistingException)
-            {
-            }
-            return Task.CompletedTask;
-        }
-
-        private Task HandleChannelDestroyed(SocketChannel deletedChannel)
-        {
-            try
-            {
-                this._ignoreListDao.RemoveBySubjectIdAsync(deletedChannel.Id);
-            }
-            catch (NotExistingException)
-            {
-            }
-            try
-            {
-                this._incidentSubscriberDao.RemoveByChannelIdAsync(deletedChannel.Id);
-            }
-            catch (NotExistingException)
-            {
-            }
-            return Task.CompletedTask;
-        }
-
-        private Task HandleLeftGuild(SocketGuild leftGuild)
-        {
-            try
-            {
-                this._ignoreListDao.RemoveByGuildIdAsync(leftGuild.Id);
-            }
-            catch (NotExistingException)
-            {
-            }
-            try
-            {
-                this._incidentSubscriberDao.RemoveByGuildIdAsync(leftGuild.Id);
-            }
-            catch (NotExistingException)
-            {
-            }
-            return Task.CompletedTask;
-        }
-
-        private async Task HandleMessageReceived(SocketMessage arg)
+        public async Task HandleMessageReceived(SocketMessage arg)
         {
             int pos = 0;
             if (arg is SocketUserMessage message && (message.HasCharPrefix(char.Parse(Property.CmdPrefix.Value), ref pos) ||
@@ -179,10 +106,10 @@ namespace XayahBot
                 {
                     if (this.IsUserError(result.Error))
                     {
-                        IMessageChannel dmChannel = await context.User.CreateDMChannelAsync();
-                        dmChannel?.SendMessageAsync($"This did not work! Reason: `{result.ErrorReason}`");
+                        IMessageChannel dmChannel = await ChannelRetriever.GetDMChannel(context);
+                        dmChannel.SendMessageAsync($"This did not work! Reason: `{result.ErrorReason}`");
                     }
-                    else if(this.IsInterestingError(result.Error))
+                    else if (this.IsInterestingError(result.Error))
                     {
                         Logger.Debug($"Command failed: {result.ErrorReason}");
                     }
@@ -192,7 +119,7 @@ namespace XayahBot
 
         private bool IsUserError(CommandError? error)
         {
-            if (error == CommandError.UnmetPrecondition)
+            if (error == CommandError.UnmetPrecondition || error == CommandError.BadArgCount)
             {
                 return true;
             }
@@ -201,7 +128,7 @@ namespace XayahBot
 
         private bool IsInterestingError(CommandError? error)
         {
-            if (error == CommandError.Exception || error == CommandError.ObjectNotFound || error  == CommandError.ParseFailed)
+            if (error == CommandError.Exception || error == CommandError.ObjectNotFound || error == CommandError.ParseFailed)
             {
                 return true;
             }

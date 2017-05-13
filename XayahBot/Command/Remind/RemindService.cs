@@ -123,7 +123,7 @@ namespace XayahBot.Command.Remind
             TRemindEntry reminder = (TRemindEntry)state;
             await this._reminderDao.RemoveAsync(reminder.UserId, reminder.UserEntryNumber);
             StopTimer(this.BuildTimerKey(reminder.UserId, reminder.UserEntryNumber));
-            IMessageChannel channel = await ChannelHelper.GetDMChannel(this._client, reminder.UserId);
+            IMessageChannel channel = await ChannelRetriever.GetDMChannel(this._client, reminder.UserId);
             DiscordFormatEmbed message = new DiscordFormatEmbed()
                 .AppendDescription("Back then you told me to remind you of this:" + Environment.NewLine)
                 .AppendDescription(reminder.Message);

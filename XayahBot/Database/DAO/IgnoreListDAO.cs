@@ -127,5 +127,17 @@ namespace XayahBot.Database.DAO
             }
             return false;
         }
+
+        public bool HasSubject(ulong subjectId)
+        {
+            using (GeneralContext database = new GeneralContext())
+            {
+                if (database.IgnoreList.Where(x => x.SubjectId.Equals(subjectId)).Count() > 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

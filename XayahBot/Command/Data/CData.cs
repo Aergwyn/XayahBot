@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using XayahBot.Command.Precondition;
+using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command.Data
@@ -16,7 +17,7 @@ namespace XayahBot.Command.Data
         [Summary("Displays data of a specific champion. Name does not have to be exact.")]
         public async Task Champ([Remainder] string name)
         {
-            IMessageChannel channel = await ChannelHelper.GetDMChannel(this.Context);
+            IMessageChannel channel = await ChannelRetriever.GetDMChannel(this.Context);
             DiscordFormatMessage message = await InfoService.GetChampionDataText(name);
             channel.SendMessageAsync(message.ToString());
         }

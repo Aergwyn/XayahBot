@@ -78,9 +78,36 @@ namespace XayahBot.Database.DAO
 
         public bool HasSubscriber()
         {
-            if (this.GetSubscriber().Count > 0)
+            using (GeneralContext database = new GeneralContext())
             {
-                return true;
+                if (database.IncidentSubscriber.Count() > 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool HasGuildSubscriber(ulong guildId)
+        {
+            using (GeneralContext database = new GeneralContext())
+            {
+                if (database.IncidentSubscriber.Where(x => x.GuildId.Equals(guildId)).Count() > 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool HasChannelSubscriber(ulong channelId)
+        {
+            using (GeneralContext database = new GeneralContext())
+            {
+                if (database.IncidentSubscriber.Where(x => x.ChannelId.Equals(channelId)).Count() > 0)
+                {
+                    return true;
+                }
             }
             return false;
         }

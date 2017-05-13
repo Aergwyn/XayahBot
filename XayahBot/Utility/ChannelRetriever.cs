@@ -4,13 +4,13 @@ using Discord.Commands;
 using Discord.WebSocket;
 using XayahBot.Error;
 
-namespace XayahBot.Utility.Messages
+namespace XayahBot.Utility
 {
-    public static class ChannelHelper
+    public static class ChannelRetriever
     {
         public static IMessageChannel GetChannel(DiscordSocketClient client, ulong channelId)
         {
-            return client.GetChannel(channelId) as IMessageChannel ?? throw new NoResponseChannelException();
+            return client.GetChannel(channelId) as IMessageChannel ?? throw new NoChannelException();
         }
 
         public static async Task<IMessageChannel> GetDMChannel(CommandContext context)
@@ -22,15 +22,16 @@ namespace XayahBot.Utility.Messages
             }
             else
             {
-                channel = await context.Message.Author.CreateDMChannelAsync() ?? throw new NoResponseChannelException();
+                channel = await context.Message.Author.CreateDMChannelAsync().ConfigureAwait(false);
             }
-            return channel;
+            return channel ?? throw new NoChannelException();
         }
 
         public static async Task<IMessageChannel> GetDMChannel(DiscordSocketClient client, ulong userId)
         {
             IUser user = client.GetUser(userId);
-            return await user?.CreateDMChannelAsync() ?? throw new NoResponseChannelException();
+            IMessageChannel channel = await user?.CreateDMChannelAsync(); // Why can't I ConfigureAwait(false) here?
+            return channel ?? throw new NoChannelException();
         }
     }
 }
