@@ -20,7 +20,8 @@ namespace XayahBot.Command.Owner
             DiscordSocketClient client = this.Context.Client as DiscordSocketClient;
             DiscordFormatEmbed message = new DiscordFormatEmbed()
                 .AppendDescription("Here is a list of all server I'm currently on.")
-                .AppendDescriptionCodeBlock(string.Join(Environment.NewLine, client.Guilds));
+                .AppendDescription(Environment.NewLine + Environment.NewLine)
+                .AppendDescription(string.Join(Environment.NewLine, client.Guilds));
             this.ReplyAsync("", false, message.ToEmbed());
             return Task.CompletedTask;
         }

@@ -33,10 +33,10 @@ namespace XayahBot.Command.Remind
         {
             IMessageChannel channel = await ChannelRetriever.GetDMChannel(this.Context);
             List<TRemindEntry> reminders = this._reminderDao.GetAll(this.Context.User.Id);
-            channel.SendMessageAsync("", false, this.BuildReminderResponse(reminders).ToEmbed());
+            channel.SendMessageAsync("", false, this.BuildReminderList(reminders).ToEmbed());
         }
 
-        private DiscordFormatEmbed BuildReminderResponse(IEnumerable<TRemindEntry> list)
+        private DiscordFormatEmbed BuildReminderList(IEnumerable<TRemindEntry> list)
         {
             DiscordFormatEmbed message = new DiscordFormatEmbed();
             IOrderedEnumerable<TRemindEntry> orderedList = list.OrderBy(x => x.ExpirationTime);
