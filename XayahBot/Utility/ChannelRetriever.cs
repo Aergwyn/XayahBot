@@ -8,7 +8,7 @@ namespace XayahBot.Utility
 {
     public static class ChannelRetriever
     {
-        public static async Task<IMessageChannel> GetDMChannel(CommandContext context)
+        public static async Task<IMessageChannel> GetDMChannelAsync(CommandContext context)
         {
             IMessageChannel channel = null;
             if (context.IsPrivate)
@@ -22,10 +22,10 @@ namespace XayahBot.Utility
             return channel ?? throw new NoChannelException();
         }
 
-        public static async Task<IMessageChannel> GetDMChannel(DiscordSocketClient client, ulong userId)
+        public static async Task<IMessageChannel> GetDMChannelAsync(DiscordSocketClient client, ulong userId)
         {
             IUser user = client.GetUser(userId);
-            IMessageChannel channel = await user?.CreateDMChannelAsync(); // Why can't I ConfigureAwait(false) here?
+            IMessageChannel channel = await user?.CreateDMChannelAsync();
             return channel ?? throw new NoChannelException();
         }
     }

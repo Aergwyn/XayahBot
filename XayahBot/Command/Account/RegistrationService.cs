@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using XayahBot.API.Riot;
 using XayahBot.Utility;
@@ -22,7 +23,7 @@ namespace XayahBot.Command.Account
         // ---
 
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
-        private Dictionary<string, CacheEntry> _openRegistrations = new Dictionary<string, CacheEntry>();
+        private List<RegistrationUser> _openRegistrations = new List<RegistrationUser>();
 
         private RegistrationService()
         {
@@ -30,19 +31,14 @@ namespace XayahBot.Command.Account
 
         public string NewRegistrant(string name, Region region)
         {
-            string code = string.Empty;
             RegistrationUser user = new RegistrationUser
             {
+                Code = this.GetGuid(),
                 Name = name,
                 Region = region
             };
-            do
-            {
-                code = this.GetGuid();
-            }
-            while (this._openRegistrations.ContainsKey(code));
-            this._openRegistrations.Add(code, new CacheEntry(user, DateTime.UtcNow.AddMinutes(20)));
-            return code;
+            this._openRegistrations.Add(user);
+            return user.Code;
         }
 
         private string GetGuid()
@@ -59,6 +55,11 @@ namespace XayahBot.Command.Account
 
         public bool ValidateCode(string name, Region region)
         {
+            RegistrationUser match = this._openRegistrations.FirstOrDefault(x => x.Name.Equals(name) && x.Region.Equals(region));
+            if (!match.IsExpired())
+            {
+                return true;
+            }
             return false;
         }
     }

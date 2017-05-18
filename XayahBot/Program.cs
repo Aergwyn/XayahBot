@@ -108,7 +108,7 @@ namespace XayahBot
                 {
                     if (this.IsUserError(result.Error))
                     {
-                        IMessageChannel dmChannel = await ChannelRetriever.GetDMChannel(context);
+                        IMessageChannel dmChannel = await ChannelRetriever.GetDMChannelAsync(context);
                         DiscordFormatEmbed errorResponse = new DiscordFormatEmbed();
                         errorResponse.AppendDescription("This did not work!")
                             .AppendDescription(Environment.NewLine)

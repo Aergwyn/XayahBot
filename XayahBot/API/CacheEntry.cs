@@ -1,7 +1,7 @@
 ﻿using System;
 using XayahBot.Utility;
 
-namespace XayahBot.Utility
+namespace XayahBot.API
 {
     public class CacheEntry
     {

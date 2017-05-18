@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using XayahBot.API.Riot;
 using XayahBot.Command.Precondition;
+using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command.Account
@@ -16,12 +18,13 @@ namespace XayahBot.Command.Account
         [Command("register")]
         public async Task Register([OverrideTypeReader(typeof(RegionTypeReader))]Region region, [Remainder]string summonerName)
         {
+            IMessageChannel channel = await ChannelRetriever.GetDMChannelAsync(this.Context);
             string code = this._registrationService.NewRegistrant(summonerName, region);
-            DiscordFormatEmbed message = new DiscordFormatEmbed();
-            message.AppendDescription($"Rename one of your mastery pages to the following code \"{code}\" and then use the refresh command.")
+            DiscordFormatEmbed message = new DiscordFormatEmbed()
+                .AppendDescription($"Rename one of your mastery pages to the following code \"{code}\" and then use the refresh command.")
                 .AppendDescription(Environment.NewLine)
                 .AppendDescription("Please remember to do this quick as the code is rendered invalid in a few minutes.");
-            await this.ReplyAsync("", false, message.ToEmbed());
+            await channel.SendMessageAsync("", false, message.ToEmbed());
         }
 
         [Command("refresh")]
@@ -34,6 +37,10 @@ namespace XayahBot.Command.Account
             //      check mastery page against code
             //      if code correct
             //            update cache data
+            bool success = this._registrationService.ValidateCode(summonerName, region);
+            DiscordFormatEmbed message = new DiscordFormatEmbed()
+                .AppendDescription($"TEST: {success}");
+            this.ReplyAsync("", false, message.ToEmbed());
             return Task.CompletedTask;
         }
 
