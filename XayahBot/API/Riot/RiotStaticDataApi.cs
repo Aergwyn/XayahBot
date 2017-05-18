@@ -6,7 +6,7 @@ namespace XayahBot.API.Riot
 {
     public class RiotStaticDataApi : RiotCachedApi
     {
-        public RiotStaticDataApi(Region region = null) : base(region)
+        public RiotStaticDataApi(Region region) : base(region)
         {
         }
 

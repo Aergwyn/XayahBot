@@ -10,12 +10,12 @@ namespace XayahBot.API.Riot
 
         // ---
 
-        private Region _region;
+        protected Region _region;
         private string _apiKey;
 
         protected RiotApi(Region region)
         {
-            this._region = region ?? Region.EUW;
+            this._region = region;
             this._apiKey = FileReader.ReadFirstLine(Property.FilePath.Value + Property.FileRiotApiKey.Value);
         }
 
