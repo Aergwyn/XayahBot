@@ -4,17 +4,33 @@ namespace XayahBot.API.Riot
 {
     public class Region
     {
-        public static readonly Region EUW = new Region("EUW", "euw1");
-        public static readonly Region NA = new Region("NA", "na1");
+        public static readonly Region BR = new Region("BR", "br1");
         public static readonly Region EUNE = new Region("EUNE", "eun1");
+        public static readonly Region EUW = new Region("EUW", "euw1");
+        public static readonly Region JP = new Region("JP", "jp1");
+        public static readonly Region KR = new Region("KR", "kr");
+        public static readonly Region LAN = new Region("LAN", "la1");
+        public static readonly Region LAS = new Region("LAS", "la2");
+        public static readonly Region NA = new Region("NA", "na1");
+        public static readonly Region OCE = new Region("OCE", "oc1");
+        public static readonly Region RU = new Region("RU", "ru");
+        public static readonly Region TR = new Region("TR", "tr1");
 
         public static IEnumerable<Region> Values
         {
             get
             {
-                yield return EUW;
-                yield return NA;
+                yield return BR;
                 yield return EUNE;
+                yield return EUW;
+                yield return JP;
+                yield return KR;
+                yield return LAN;
+                yield return LAS;
+                yield return NA;
+                yield return OCE;
+                yield return RU;
+                yield return TR;
             }
         }
 
