@@ -48,7 +48,7 @@ namespace XayahBot.Utility
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
-                Property match = UpdatableValues.Where(x => x.Updatable).FirstOrDefault(x => x.Name.ToLower().Equals(name.ToLower()));
+                Property match = UpdatableValues.FirstOrDefault(x => x.Name.ToLower().Equals(name.ToLower()));
                 if (match != null)
                 {
                     return match;

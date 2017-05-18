@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using XayahBot.Error;
 
 namespace XayahBot.API.Riot
 {
@@ -32,6 +34,19 @@ namespace XayahBot.API.Riot
                 yield return RU;
                 yield return TR;
             }
+        }
+
+        public static Region GetByName(string name)
+        {
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                Region match = Values.FirstOrDefault(x => x.Name.ToLower().Equals(name.ToLower()));
+                if (match != null)
+                {
+                    return match;
+                }
+            }
+            throw new UnknownTypeException();
         }
 
         // ---

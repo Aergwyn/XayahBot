@@ -7,9 +7,11 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using XayahBot.Command.Incidents;
+using XayahBot.Command.Precondition;
 using XayahBot.Command.Remind;
 using XayahBot.Database.DAO;
 using XayahBot.Utility;
+using XayahBot.Utility.Messages;
 
 namespace XayahBot
 {
@@ -84,6 +86,7 @@ namespace XayahBot
             this._client.LeftGuild += eventHandler.HandleLeftGuild;
             this._client.MessageReceived += this.HandleMessageReceived;
 
+            this._commandService.AddTypeReader<RegionTypeReader>(new RegionTypeReader());
             await this._commandService.AddModulesAsync(Assembly.GetEntryAssembly());
         }
 
@@ -106,7 +109,11 @@ namespace XayahBot
                     if (this.IsUserError(result.Error))
                     {
                         IMessageChannel dmChannel = await ChannelRetriever.GetDMChannel(context);
-                        dmChannel.SendMessageAsync($"This did not work! Reason: `{result.ErrorReason}`");
+                        DiscordFormatEmbed errorResponse = new DiscordFormatEmbed();
+                        errorResponse.AppendDescription("This did not work!")
+                            .AppendDescription(Environment.NewLine)
+                            .AppendDescription($"Reason: { result.ErrorReason}");
+                        dmChannel.SendMessageAsync("", false, errorResponse.ToEmbed());
                     }
                     else if (this.IsInterestingError(result.Error))
                     {
@@ -118,7 +125,7 @@ namespace XayahBot
 
         private bool IsUserError(CommandError? error)
         {
-            if (error == CommandError.UnmetPrecondition || error == CommandError.BadArgCount)
+            if (error == CommandError.UnmetPrecondition || error == CommandError.BadArgCount || error == CommandError.ParseFailed)
             {
                 return true;
             }
@@ -127,7 +134,7 @@ namespace XayahBot
 
         private bool IsInterestingError(CommandError? error)
         {
-            if (error == CommandError.Exception || error == CommandError.ObjectNotFound || error == CommandError.ParseFailed)
+            if (error == CommandError.Exception || error == CommandError.ObjectNotFound)
             {
                 return true;
             }

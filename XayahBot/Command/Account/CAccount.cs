@@ -1,6 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Discord.Commands;
+using XayahBot.API.Riot;
 using XayahBot.Command.Precondition;
+using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command.Account
 {
@@ -8,17 +11,21 @@ namespace XayahBot.Command.Account
     [Category(CategoryType.ACCOUNT)]
     public class CAccount : ModuleBase
     {
+        private readonly RegistrationService _registrationService = RegistrationService.GetInstance();
+
         [Command("register")]
-        public Task Register(string summonerName, string region)
+        public async Task Register([OverrideTypeReader(typeof(RegionTypeReader))]Region region, [Remainder]string summonerName)
         {
-            // create random code
-            // send to user asking to change random mastery page to that name
-            // should refresh if done
-            return Task.CompletedTask;
+            string code = this._registrationService.NewRegistrant(summonerName, region);
+            DiscordFormatEmbed message = new DiscordFormatEmbed();
+            message.AppendDescription($"Rename one of your mastery pages to the following code \"{code}\" and then use the refresh command.")
+                .AppendDescription(Environment.NewLine)
+                .AppendDescription("Please remember to do this quick as the code is rendered invalid in a few minutes.");
+            await this.ReplyAsync("", false, message.ToEmbed());
         }
 
         [Command("refresh")]
-        public Task Refresh(string summonerName, string region)
+        public Task Refresh([OverrideTypeReader(typeof(RegionTypeReader))]Region region, [Remainder]string summonerName)
         {
             // get user from database
             // if registered
