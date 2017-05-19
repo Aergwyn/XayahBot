@@ -9,7 +9,6 @@ using Discord.WebSocket;
 using XayahBot.Command.Incidents;
 using XayahBot.Command.Precondition;
 using XayahBot.Command.Remind;
-using XayahBot.Database.DAO;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 

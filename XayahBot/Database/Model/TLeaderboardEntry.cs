@@ -2,7 +2,7 @@
 {
     public class TLeaderboardEntry
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
         public int Answers { get; set; }

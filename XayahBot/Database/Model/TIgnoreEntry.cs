@@ -2,7 +2,7 @@
 {
     public class TIgnoreEntry
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong SubjectId { get; set; }
         public bool IsChannel { get; set; }

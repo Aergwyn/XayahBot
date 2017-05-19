@@ -21,8 +21,8 @@ namespace XayahBot.Command.Account
             IMessageChannel channel = await ChannelRetriever.GetDMChannelAsync(this.Context);
             string code = this._registrationService.NewRegistrant(summonerName, region);
             DiscordFormatEmbed message = new DiscordFormatEmbed()
-                .AppendDescription($"Rename one of your mastery pages to the following code \"{code}\" and then use the refresh command.")
-                .AppendDescription(Environment.NewLine)
+                .AppendDescription($"Rename one of your mastery pages to the following code `{code}` and then use the `account refresh` command.")
+                .AppendDescription(Environment.NewLine + Environment.NewLine)
                 .AppendDescription("Please remember to do this quick as the code is rendered invalid in a few minutes.");
             await channel.SendMessageAsync("", false, message.ToEmbed());
         }
