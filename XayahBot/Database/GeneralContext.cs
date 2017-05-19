@@ -7,7 +7,6 @@ namespace XayahBot.Database
     public class GeneralContext : DbContext
     {
         public DbSet<TProperty> Properties { get; set; }
-        public DbSet<TLeaderboardEntry> QuizLeaderboard { get; set; }
         public DbSet<TIgnoreEntry> IgnoreList { get; set; }
         public DbSet<TRemindEntry> Reminder { get; set; }
         public DbSet<TIncidentSubscriber> IncidentSubscriber { get; set; }

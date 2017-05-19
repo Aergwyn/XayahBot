@@ -151,7 +151,7 @@ namespace XayahBot.Command.Quiz
                     if (success)
                     {
                         _questionMap.Remove(context.Guild.Id);
-                        await _quizLeaderboardDao.IncrementAnswerAsync(context.Guild.Id, context.User.Id);
+                        //await _quizLeaderboardDao.IncrementAnswerAsync(context.Guild.Id, context.User.Id);
                     }
                     else
                     {
