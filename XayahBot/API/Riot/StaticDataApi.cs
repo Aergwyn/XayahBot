@@ -4,9 +4,9 @@ using XayahBot.API.Riot.Model;
 
 namespace XayahBot.API.Riot
 {
-    public class RiotStaticDataApi : RiotCachedApi
+    public class StaticDataApi : RiotCachedApi
     {
-        public RiotStaticDataApi(Region region) : base(region)
+        public StaticDataApi(Region region) : base(region)
         {
         }
 

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Net;
 using Discord.WebSocket;
+using XayahBot.API.Error;
 using XayahBot.API.Riot;
 using XayahBot.API.Riot.Model;
 using XayahBot.Database.DAO;
@@ -34,10 +35,11 @@ namespace XayahBot.Command.Incidents
         // ---
 
         private readonly DiscordSocketClient _client;
+        private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
         private readonly MessagesDAO _messagesDao = new MessagesDAO();
         private readonly IncidentsDAO _incidentsDao = new IncidentsDAO();
         private readonly IncidentSubscriberDAO _incidentSubscriberDao = new IncidentSubscriberDAO();
-        private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
+        private Task _process;
         private bool _isRunning = false;
 
         private IncidentService(DiscordSocketClient client)
@@ -52,8 +54,7 @@ namespace XayahBot.Command.Incidents
             {
                 if (!this._isRunning && this._incidentSubscriberDao.HasAnySubscriber())
                 {
-                    this._isRunning = true;
-                    Task.Run(() => RunAsync());
+                    this._process = Task.Run(() => this.RunAsync());
                     Logger.Info("IncidentService started.");
                 }
             }
@@ -65,48 +66,56 @@ namespace XayahBot.Command.Incidents
 
         private async Task RunAsync()
         {
-            try
+
+            bool init = true;
+            bool processed = false;
+            this._isRunning = true;
+            while (this._isRunning)
             {
-                bool init = true;
-                bool processed = false;
-                while (this._isRunning)
+                int interval = 5;
+                if (DateTime.UtcNow.Minute % interval == 0 || init)
                 {
-                    int interval = 5;
-                    if (DateTime.UtcNow.Minute % interval == 0 || init)
+                    if (!processed)
                     {
-                        if (!processed)
-                        {
-                            init = false;
-                            processed = true;
-                            await CheckStatusApiAsync();
-                        }
+                        init = false;
+                        processed = true;
+                        await CheckStatusApiAsync();
                     }
-                    else
-                    {
-                        processed = false;
-                    }
-                    if (!this._incidentSubscriberDao.HasAnySubscriber())
-                    {
-                        this._isRunning = false;
-                    }
-                    await Task.Delay(10000);
                 }
-            }
-            finally
-            {
-                this.Stop();
+                else
+                {
+                    processed = false;
+                }
+                if (this._incidentSubscriberDao.HasAnySubscriber())
+                {
+                    await Task.Delay(new TimeSpan(0, 0, 10));
+                }
+                else
+                {
+                    this.StopAsync();
+                }
             }
         }
 
         private async Task CheckStatusApiAsync()
         {
             List<IncidentData> incidents = new List<IncidentData>();
-            RiotStatusApi statusEuw = new RiotStatusApi(Region.EUW);
-            RiotStatusApi statusNa = new RiotStatusApi(Region.NA);
-            RiotStatusApi statusEune = new RiotStatusApi(Region.EUNE);
-            incidents.AddRange(this.AnalyzeData(await statusEuw.GetStatusAsync()));
-            incidents.AddRange(this.AnalyzeData(await statusNa.GetStatusAsync()));
-            incidents.AddRange(this.AnalyzeData(await statusEune.GetStatusAsync()));
+            List<StatusApi> statusApis = new List<StatusApi>{
+                new StatusApi(Region.EUW),
+                new StatusApi(Region.NA),
+                new StatusApi(Region.EUNE)
+            };
+            foreach (StatusApi statusApi in statusApis)
+            {
+                try
+                {
+                    incidents.AddRange(this.AnalyzeData(await statusApi.GetStatusAsync()));
+                }
+                catch (ErrorResponseException)
+                {
+                    Logger.Error("The IncidentService seems to have a problem communicating with the API.");
+                }
+            }
             await this.ProcessCurrentIncidentsAsync(incidents);
             await this.ProcessSolvedIncidentsAsync(incidents);
         }
@@ -293,11 +302,12 @@ namespace XayahBot.Command.Incidents
             }
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
-            if (this._isRunning)
+            this._isRunning = false;
+            if (this._process != null)
             {
-                this._isRunning = false;
+                await this._process;
                 Logger.Info("IncidentService stopped.");
             }
         }

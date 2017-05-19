@@ -18,7 +18,7 @@ namespace XayahBot.Command.Data
     {
         private readonly IMessageChannel _channel;
         private readonly string _requestedName;
-        private readonly RiotStaticDataApi _staticDataApi = new RiotStaticDataApi(Region.EUW);
+        private readonly StaticDataApi _staticDataApi = new StaticDataApi(Region.EUW);
         private ChampionDto _champion;
         private DiscordFormatEmbed _message = new DiscordFormatEmbed();
 

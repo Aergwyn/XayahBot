@@ -22,9 +22,9 @@ namespace XayahBot.Utility
             return channel ?? throw new NoChannelException();
         }
 
-        public static async Task<IMessageChannel> GetDMChannelAsync(DiscordSocketClient client, ulong userId)
+        public static async Task<IMessageChannel> GetDMChannelAsync(IDiscordClient client, ulong userId)
         {
-            IUser user = client.GetUser(userId);
+            IUser user = await client.GetUserAsync(userId);
             IMessageChannel channel = await user?.CreateDMChannelAsync();
             return channel ?? throw new NoChannelException();
         }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using XayahBot.Command.Account;
 using XayahBot.Command.Incidents;
 using XayahBot.Command.Precondition;
 using XayahBot.Command.Remind;
@@ -27,6 +28,7 @@ namespace XayahBot
         private readonly CommandService _commandService;
         private readonly RemindService _remindService;
         private readonly IncidentService _incidentService;
+        private readonly RegistrationService _registrationService;
         private readonly IDependencyMap _dependencyMap = new DependencyMap();
 
         private Program()
@@ -41,6 +43,7 @@ namespace XayahBot
             });
             this._remindService = RemindService.GetInstance(this._client);
             this._incidentService = IncidentService.GetInstance(this._client);
+            this._registrationService = RegistrationService.GetInstance(this._client);
         }
 
         private async Task StartAsync()
@@ -63,7 +66,7 @@ namespace XayahBot
                 }
 
                 await this._client.SetGameAsync(Property.GameShutdown.Value);
-                await this.StopBackgroundThreadsAsync();
+                await this.StopBackgroundThreads();
                 await this._client.StopAsync();
             }
             else
@@ -78,6 +81,7 @@ namespace XayahBot
             this._dependencyMap.Add(this._client);
             this._dependencyMap.Add(this._remindService);
             this._dependencyMap.Add(this._incidentService);
+            this._dependencyMap.Add(this._registrationService);
 
             DiscordEventHandler eventHandler = new DiscordEventHandler(this._dependencyMap);
             this._client.Ready += eventHandler.HandleReady;
@@ -89,10 +93,11 @@ namespace XayahBot
             await this._commandService.AddModulesAsync(Assembly.GetEntryAssembly());
         }
 
-        private async Task StopBackgroundThreadsAsync()
+        private async Task StopBackgroundThreads()
         {
-            this._incidentService.Stop();
             await this._remindService.StopAsync();
+            await this._incidentService.StopAsync();
+            await this._registrationService.StopAsync();
         }
 
         public async Task HandleMessageReceived(SocketMessage arg)

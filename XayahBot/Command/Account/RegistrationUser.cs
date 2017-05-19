@@ -1,4 +1,5 @@
 ﻿using System;
+using Discord;
 using XayahBot.API.Riot;
 
 namespace XayahBot.Command.Account
@@ -8,11 +9,13 @@ namespace XayahBot.Command.Account
         public string Name { get; set; }
         public Region Region { get; set; }
         public string Code { get; set; }
+        public ulong RequestingUserId { get; set; }
+        public long SummonerId { get; set; }
         public DateTime ExpirationTime { get; }
 
         public RegistrationUser()
         {
-            this.ExpirationTime = DateTime.UtcNow.AddMinutes(1);
+            this.ExpirationTime = DateTime.UtcNow.AddMinutes(10);
         }
 
         public bool IsExpired()

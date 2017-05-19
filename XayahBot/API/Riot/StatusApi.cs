@@ -3,9 +3,9 @@ using XayahBot.API.Riot.Model;
 
 namespace XayahBot.API.Riot
 {
-    public class RiotStatusApi : RiotApi
+    public class StatusApi : RiotApi
     {
-        public RiotStatusApi(Region region) : base(region)
+        public StatusApi(Region region) : base(region)
         {
         }
 

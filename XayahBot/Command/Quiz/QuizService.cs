@@ -42,13 +42,13 @@ namespace XayahBot.Command.Quiz
             "How about {0}? Maybe next time I can think of something easier."
         };
 
-        private static string _championBasicNameQ = "Which champion got the title \"{0}\"?";
-        private static string _championBasicTitleQ = "Name the title of {0} with at least {1}% accuracy!";
-        private static string _championBasicResourceQ = "What is {0}'s resource called?";
-        private static string _championBasicTagQ = "List one tag of {0}!";
-        private static string _championSkinNameQ = "Name a skin of {0} with at least {1}% accuracy! Also ignore the classic skin. That'd be too easy.";
-        private static string _championSkinCountQ = "How many skins does {0} have in total?";
-        private static string _championSkinOrderQ = "Name the {0}{1} released skin for {2}! {3}% accuracy is enough. Oh, and exclude the classic skin. It doesn't count.";
+        //private static string _championBasicNameQ = "Which champion got the title \"{0}\"?";
+        //private static string _championBasicTitleQ = "Name the title of {0} with at least {1}% accuracy!";
+        //private static string _championBasicResourceQ = "What is {0}'s resource called?";
+        //private static string _championBasicTagQ = "List one tag of {0}!";
+        //private static string _championSkinNameQ = "Name a skin of {0} with at least {1}% accuracy! Also ignore the classic skin. That'd be too easy.";
+        //private static string _championSkinCountQ = "How many skins does {0} have in total?";
+        //private static string _championSkinOrderQ = "Name the {0}{1} released skin for {2}! {3}% accuracy is enough. Oh, and exclude the classic skin. It doesn't count.";
         private static string _championSpellNameQ = "Name one spell (or passive) of {0}!";
         private static string _championSpellCdQ = "What is the base cooldown on a rank {0} {1} from {2}?";
         private static string _championSpellRangeQ = "What is the range of a rank {0} {1} from {2}?";
@@ -67,195 +67,195 @@ namespace XayahBot.Command.Quiz
         private static Dictionary<ulong, QuizEntry> _questionMap = new Dictionary<ulong, QuizEntry>();
         private static QuizLeaderboardDAO _quizLeaderboardDao = new QuizLeaderboardDAO();
 
-        public static async Task AskQuestionAsync(CommandContext context)
-        {
-            string question = string.Empty;
-            await _syncLock.WaitAsync();
-            try
-            {
-                if (_questionMap.TryGetValue(context.Guild.Id, out QuizEntry entry))
-                {
-                    if (entry.TimeAsked.AddMinutes(int.Parse(Property.QuizTimeout.Value)) < DateTime.UtcNow)
-                    {
-                        _questionMap.Remove(context.Guild.Id);
-                        question = string.Format(RNG.FromList(_questionTimeoutList), entry.GetAllAnswers());
-                    }
-                    else
-                    {
-                        question = entry.Question;
-                    }
-                }
-                else
-                {
-                    entry = await AskChampionAsync();
-                    if (entry != null)
-                    {
-                        question = entry.Question;
-                        _questionMap.Add(context.Guild.Id, entry);
-                    }
-                }
-                if (!string.IsNullOrWhiteSpace(question))
-                {
-                    await context.Channel.SendMessageAsync(question);
-                }
-                else
-                {
-                    Logger.Error("Code returned with no question!");
-                }
-            }
-            finally
-            {
-                _syncLock.Release();
-            }
-        }
+        //public static async Task AskQuestionAsync(CommandContext context)
+        //{
+        //    string question = string.Empty;
+        //    await _syncLock.WaitAsync();
+        //    try
+        //    {
+        //        if (_questionMap.TryGetValue(context.Guild.Id, out QuizEntry entry))
+        //        {
+        //            if (entry.TimeAsked.AddMinutes(int.Parse(Property.QuizTimeout.Value)) < DateTime.UtcNow)
+        //            {
+        //                _questionMap.Remove(context.Guild.Id);
+        //                question = string.Format(RNG.FromList(_questionTimeoutList), entry.GetAllAnswers());
+        //            }
+        //            else
+        //            {
+        //                question = entry.Question;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            entry = await AskChampionAsync();
+        //            if (entry != null)
+        //            {
+        //                question = entry.Question;
+        //                _questionMap.Add(context.Guild.Id, entry);
+        //            }
+        //        }
+        //        if (!string.IsNullOrWhiteSpace(question))
+        //        {
+        //            await context.Channel.SendMessageAsync(question);
+        //        }
+        //        else
+        //        {
+        //            Logger.Error("Code returned with no question!");
+        //        }
+        //    }
+        //    finally
+        //    {
+        //        _syncLock.Release();
+        //    }
+        //}
 
-        public static async Task AnswerQuestionAsync(CommandContext context, string answer)
-        {
-            bool success = false;
-            string response = string.Empty;
-            answer = answer.Trim().ToLower();
-            await _syncLock.WaitAsync();
-            try
-            {
-                if (_questionMap.TryGetValue(context.Guild.Id, out QuizEntry entry))
-                {
-                    string correctAnswer = string.Empty;
-                    if (entry.MatchPercentage >= 100)
-                    {
-                        correctAnswer = entry.Answer.FirstOrDefault(x => x.ToLower().Equals(answer));
-                        if (!string.IsNullOrWhiteSpace(correctAnswer))
-                        {
-                            success = true;
-                            response = string.Format(RNG.FromList(_fullAnswerList), context.User.Mention);
-                        }
-                    }
-                    else
-                    {
-                        correctAnswer = entry.Answer.FirstOrDefault(x => x.ToLower().Contains(answer));
-                        // Check if answer given is at least occuring in a correct answer
-                        if (!string.IsNullOrWhiteSpace(correctAnswer))
-                        {
-                            int percentage = (int)Math.Round((decimal)answer.Length / correctAnswer.Length * 100, 0, MidpointRounding.AwayFromZero);
-                            if (percentage >= 100)
-                            {
-                                success = true;
-                                response = string.Format(RNG.FromList(_fullAnswerList), context.User.Mention);
-                            }
-                            else if (percentage >= int.Parse(Property.QuizMatch.Value))
-                            {
-                                success = true;
-                                response = string.Format(RNG.FromList(_partialAnswerList), context.User.Mention, correctAnswer);
-                            }
-                        }
-                    }
-                    if (success)
-                    {
-                        _questionMap.Remove(context.Guild.Id);
-                        //await _quizLeaderboardDao.IncrementAnswerAsync(context.Guild.Id, context.User.Id);
-                    }
-                    else
-                    {
-                        entry.TimesFailed++;
-                        if (entry.TimesFailed >= int.Parse(Property.QuizMaxTries.Value))
-                        {
-                            _questionMap.Remove(context.Guild.Id);
-                            response = string.Format(RNG.FromList(_questionMaxTriesList), entry.GetAllAnswers());
-                        }
-                        else if (entry.TimeAsked.AddMinutes(int.Parse(Property.QuizTimeout.Value)) < DateTime.UtcNow)
-                        {
-                            _questionMap.Remove(context.Guild.Id);
-                            response = string.Format(RNG.FromList(_questionTimeoutList), entry.GetAllAnswers());
-                        }
-                    }
-                }
-                if (!string.IsNullOrWhiteSpace(response))
-                {
-                    await context.Channel.SendMessageAsync(response);
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex.Message, ex);
-            }
-            finally
-            {
-                _syncLock.Release();
-            }
-        }
+        //public static async Task AnswerQuestionAsync(CommandContext context, string answer)
+        //{
+        //    bool success = false;
+        //    string response = string.Empty;
+        //    answer = answer.Trim().ToLower();
+        //    await _syncLock.WaitAsync();
+        //    try
+        //    {
+        //        if (_questionMap.TryGetValue(context.Guild.Id, out QuizEntry entry))
+        //        {
+        //            string correctAnswer = string.Empty;
+        //            if (entry.MatchPercentage >= 100)
+        //            {
+        //                correctAnswer = entry.Answer.FirstOrDefault(x => x.ToLower().Equals(answer));
+        //                if (!string.IsNullOrWhiteSpace(correctAnswer))
+        //                {
+        //                    success = true;
+        //                    response = string.Format(RNG.FromList(_fullAnswerList), context.User.Mention);
+        //                }
+        //            }
+        //            else
+        //            {
+        //                correctAnswer = entry.Answer.FirstOrDefault(x => x.ToLower().Contains(answer));
+        //                // Check if answer given is at least occuring in a correct answer
+        //                if (!string.IsNullOrWhiteSpace(correctAnswer))
+        //                {
+        //                    int percentage = (int)Math.Round((decimal)answer.Length / correctAnswer.Length * 100, 0, MidpointRounding.AwayFromZero);
+        //                    if (percentage >= 100)
+        //                    {
+        //                        success = true;
+        //                        response = string.Format(RNG.FromList(_fullAnswerList), context.User.Mention);
+        //                    }
+        //                    else if (percentage >= int.Parse(Property.QuizMatch.Value))
+        //                    {
+        //                        success = true;
+        //                        response = string.Format(RNG.FromList(_partialAnswerList), context.User.Mention, correctAnswer);
+        //                    }
+        //                }
+        //            }
+        //            if (success)
+        //            {
+        //                _questionMap.Remove(context.Guild.Id);
+        //                //await _quizLeaderboardDao.IncrementAnswerAsync(context.Guild.Id, context.User.Id);
+        //            }
+        //            else
+        //            {
+        //                entry.TimesFailed++;
+        //                if (entry.TimesFailed >= int.Parse(Property.QuizMaxTries.Value))
+        //                {
+        //                    _questionMap.Remove(context.Guild.Id);
+        //                    response = string.Format(RNG.FromList(_questionMaxTriesList), entry.GetAllAnswers());
+        //                }
+        //                else if (entry.TimeAsked.AddMinutes(int.Parse(Property.QuizTimeout.Value)) < DateTime.UtcNow)
+        //                {
+        //                    _questionMap.Remove(context.Guild.Id);
+        //                    response = string.Format(RNG.FromList(_questionTimeoutList), entry.GetAllAnswers());
+        //                }
+        //            }
+        //        }
+        //        if (!string.IsNullOrWhiteSpace(response))
+        //        {
+        //            await context.Channel.SendMessageAsync(response);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Logger.Error(ex.Message, ex);
+        //    }
+        //    finally
+        //    {
+        //        _syncLock.Release();
+        //    }
+        //}
 
         //
 
-        private static async Task<QuizEntry> AskChampionAsync()
-        {
-            QuizEntry entry = null;
-            ChampionListDto championList = await new RiotStaticDataApi(Region.EUW).GetChampionsAsync();
-            int id = championList.Data.ElementAt(RNG.Next(championList.Data.Count) - 1).Value.Id; // Get random champion id from list
-            ChampionDto champion = await new RiotStaticDataApi(Region.EUW).GetChampionAsync(id); // Get/Update data of champion
-            if (champion != null)
-            {
-                switch (RNG.Next(4))
-                {
-                    case 1:
-                        entry = AskChampionBasic(champion);
-                        break;
-                    case 2:
-                        entry = AskChampionSkin(champion);
-                        break;
-                    case 3:
-                        entry = AskChampionSpell(champion);
-                        break;
-                    case 4:
-                        entry = AskChampionStats(champion);
-                        break;
-                }
-            }
-            return entry;
-        }
+        //private static async Task<QuizEntry> AskChampionAsync()
+        //{
+        //    QuizEntry entry = null;
+        //    ChampionListDto championList = await new RiotStaticDataApi(Region.EUW).GetChampionsAsync();
+        //    int id = championList.Data.ElementAt(RNG.Next(championList.Data.Count) - 1).Value.Id; // Get random champion id from list
+        //    ChampionDto champion = await new RiotStaticDataApi(Region.EUW).GetChampionAsync(id); // Get/Update data of champion
+        //    if (champion != null)
+        //    {
+        //        switch (RNG.Next(4))
+        //        {
+        //            case 1:
+        //                entry = AskChampionBasic(champion);
+        //                break;
+        //            case 2:
+        //                entry = AskChampionSkin(champion);
+        //                break;
+        //            case 3:
+        //                entry = AskChampionSpell(champion);
+        //                break;
+        //            case 4:
+        //                entry = AskChampionStats(champion);
+        //                break;
+        //        }
+        //    }
+        //    return entry;
+        //}
 
-        private static QuizEntry AskChampionBasic(ChampionDto champion)
-        {
-            QuizEntry entry = null;
-            switch (RNG.Next(4))
-            {
-                case 1:
-                    entry = new QuizEntry(string.Format(_championBasicNameQ, champion.Title), int.Parse(Property.QuizMatch.Value), champion.Name);
-                    break;
-                case 2:
-                    entry = new QuizEntry(string.Format(_championBasicTitleQ, champion.Name, Property.QuizMatch), champion.Title);
-                    break;
-                case 3:
-                    entry = new QuizEntry(string.Format(_championBasicResourceQ, champion.Name), champion.Resource);
-                    break;
-                case 4:
-                    entry = new QuizEntry(string.Format(_championBasicTagQ, champion.Name), champion.Tags.ToArray());
-                    break;
-            }
-            return entry;
-        }
+        //private static QuizEntry AskChampionBasic(ChampionDto champion)
+        //{
+        //    QuizEntry entry = null;
+        //    switch (RNG.Next(4))
+        //    {
+        //        case 1:
+        //            entry = new QuizEntry(string.Format(_championBasicNameQ, champion.Title), int.Parse(Property.QuizMatch.Value), champion.Name);
+        //            break;
+        //        case 2:
+        //            entry = new QuizEntry(string.Format(_championBasicTitleQ, champion.Name, Property.QuizMatch), champion.Title);
+        //            break;
+        //        case 3:
+        //            entry = new QuizEntry(string.Format(_championBasicResourceQ, champion.Name), champion.Resource);
+        //            break;
+        //        case 4:
+        //            entry = new QuizEntry(string.Format(_championBasicTagQ, champion.Name), champion.Tags.ToArray());
+        //            break;
+        //    }
+        //    return entry;
+        //}
 
-        private static QuizEntry AskChampionSkin(ChampionDto champion)
-        {
-            QuizEntry entry = null;
-            switch (RNG.Next(3))
-            {
-                case 1:
-                    List<string> answer = new List<string>();
-                    foreach (SkinDto skin in champion.Skins.Where(x => x.Num > 0))
-                    {
-                        answer.Add(skin.Name);
-                    }
-                    entry = new QuizEntry(string.Format(_championSkinNameQ, champion.Name, Property.QuizMatch), int.Parse(Property.QuizMatch.Value), answer.ToArray());
-                    break;
-                case 2:
-                    entry = new QuizEntry(string.Format(_championSkinCountQ, champion.Name), champion.Skins.Count.ToString());
-                    break;
-                case 3:
-                    SkinDto randomSkin = champion.Skins.FirstOrDefault(x => x.Num.Equals(RNG.Next(champion.Skins.Count - 1)));
-                    entry = new QuizEntry(string.Format(_championSkinOrderQ, randomSkin.Num, NumberSuffix(randomSkin.Num), champion.Name, Property.QuizMatch), int.Parse(Property.QuizMatch.Value), randomSkin.Name);
-                    break;
-            }
-            return entry;
-        }
+        //private static QuizEntry AskChampionSkin(ChampionDto champion)
+        //{
+        //    QuizEntry entry = null;
+        //    switch (RNG.Next(3))
+        //    {
+        //        case 1:
+        //            List<string> answer = new List<string>();
+        //            foreach (SkinDto skin in champion.Skins.Where(x => x.Num > 0))
+        //            {
+        //                answer.Add(skin.Name);
+        //            }
+        //            entry = new QuizEntry(string.Format(_championSkinNameQ, champion.Name, Property.QuizMatch), int.Parse(Property.QuizMatch.Value), answer.ToArray());
+        //            break;
+        //        case 2:
+        //            entry = new QuizEntry(string.Format(_championSkinCountQ, champion.Name), champion.Skins.Count.ToString());
+        //            break;
+        //        case 3:
+        //            SkinDto randomSkin = champion.Skins.FirstOrDefault(x => x.Num.Equals(RNG.Next(champion.Skins.Count - 1)));
+        //            entry = new QuizEntry(string.Format(_championSkinOrderQ, randomSkin.Num, NumberSuffix(randomSkin.Num), champion.Name, Property.QuizMatch), int.Parse(Property.QuizMatch.Value), randomSkin.Name);
+        //            break;
+        //    }
+        //    return entry;
+        //}
 
         private static string NumberSuffix(int number)
         {

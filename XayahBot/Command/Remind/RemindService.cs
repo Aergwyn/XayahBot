@@ -18,7 +18,7 @@ namespace XayahBot.Command.Remind
     {
         private static RemindService _instance;
 
-        public static RemindService GetInstance(DiscordSocketClient client)
+        public static RemindService GetInstance(IDiscordClient client)
         {
             if (_instance == null)
             {
@@ -29,13 +29,14 @@ namespace XayahBot.Command.Remind
 
         // ---
 
-        private readonly DiscordSocketClient _client;
+        private readonly IDiscordClient _client;
         private readonly ReminderDAO _reminderDao = new ReminderDAO();
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
+        private Task _process;
         private bool _isRunning = false;
         private Dictionary<string, Timer> _currentTimerList = new Dictionary<string, Timer>();
 
-        private RemindService(DiscordSocketClient client)
+        private RemindService(IDiscordClient client)
         {
             this._client = client;
         }
@@ -47,8 +48,7 @@ namespace XayahBot.Command.Remind
             {
                 if (!this._isRunning && this._reminderDao.HasReminder())
                 {
-                    this._isRunning = true;
-                    Task.Run(() => RunAsync());
+                    this._process = Task.Run(() => this.RunAsync());
                     Logger.Info("ReminderService started.");
                 }
             }
@@ -60,38 +60,35 @@ namespace XayahBot.Command.Remind
 
         private async Task RunAsync()
         {
-            try
+            bool init = true;
+            bool processed = false;
+            this._isRunning = true;
+            while (this._isRunning)
             {
-                bool init = true;
-                bool processed = false;
-                while (this._isRunning)
+                int interval = 5;
+                if (DateTime.UtcNow.Minute % interval == 0 || init)
                 {
-                    int interval = 5;
-                    if (DateTime.UtcNow.Minute % interval == 0 || init)
+                    if (!processed)
                     {
-                        if (!processed)
-                        {
-                            init = false;
-                            processed = true;
-                            List<TRemindEntry> reminder = this._reminderDao.GetAll();
-                            List<TRemindEntry> dueReminder = reminder.Where(x => !this._currentTimerList.Keys.Contains(this.BuildTimerKey(x.UserId, x.UserEntryNumber))).ToList();
-                            await ProcessExpiringRemindersAsync(dueReminder, interval);
-                        }
+                        init = false;
+                        processed = true;
+                        List<TRemindEntry> reminder = this._reminderDao.GetAll();
+                        List<TRemindEntry> dueReminder = reminder.Where(x => !this._currentTimerList.Keys.Contains(this.BuildTimerKey(x.UserId, x.UserEntryNumber))).ToList();
+                        await ProcessExpiringRemindersAsync(dueReminder, interval);
                     }
-                    else
-                    {
-                        processed = false;
-                    }
-                    if (!this._reminderDao.HasReminder())
-                    {
-                        this._isRunning = false;
-                    }
-                    await Task.Delay(10000);
                 }
-            }
-            finally
-            {
-                await this.StopAsync();
+                else
+                {
+                    processed = false;
+                }
+                if (this._reminderDao.HasReminder())
+                {
+                    await Task.Delay(new TimeSpan(0, 0, 10));
+                }
+                else
+                {
+                    this.StopAsync();
+                }
             }
         }
 
@@ -132,10 +129,11 @@ namespace XayahBot.Command.Remind
 
         public async Task StopAsync()
         {
-            if (this._isRunning)
+            this._isRunning = false;
+            await this.StopTimersAsync();
+            if (this._process != null)
             {
-                this._isRunning = false;
-                await this.StopTimersAsync();
+                await this._process;
                 Logger.Info("ReminderService stopped.");
             }
         }

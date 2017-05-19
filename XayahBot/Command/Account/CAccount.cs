@@ -1,50 +1,69 @@
-﻿using System;
+﻿#pragma warning disable 4014
+
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using XayahBot.API.Riot;
 using XayahBot.Command.Precondition;
+using XayahBot.Database.DAO;
+using XayahBot.Database.Error;
+using XayahBot.Database.Model;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command.Account
 {
+
     [Group("account")]
     [Category(CategoryType.ACCOUNT)]
     public class CAccount : ModuleBase
     {
-        private readonly RegistrationService _registrationService = RegistrationService.GetInstance();
+        private readonly RegistrationService _registrationService;
+        private readonly AccountsDAO _accountsDao = new AccountsDAO();
+
+        public CAccount(RegistrationService registrationService)
+        {
+            this._registrationService = registrationService;
+        }
 
         [Command("register")]
+        [Summary("Registers your league account to fetch data from Riot API.")]
         public async Task Register([OverrideTypeReader(typeof(RegionTypeReader))]Region region, [Remainder]string summonerName)
         {
-            IMessageChannel channel = await ChannelRetriever.GetDMChannelAsync(this.Context);
-            string code = this._registrationService.NewRegistrant(summonerName, region);
-            DiscordFormatEmbed message = new DiscordFormatEmbed()
-                .AppendDescription($"Rename one of your mastery pages to the following code `{code}` and then use the `account refresh` command.")
-                .AppendDescription(Environment.NewLine + Environment.NewLine)
-                .AppendDescription("Please remember to do this quick as the code is rendered invalid in a few minutes.");
-            await channel.SendMessageAsync("", false, message.ToEmbed());
+            try
+            {
+                IMessageChannel channel = await ChannelRetriever.GetDMChannelAsync(this.Context);
+                this._accountsDao.GetSingle(summonerName.Trim(), region);
+                DiscordFormatEmbed message = new DiscordFormatEmbed()
+                    .AppendDescription("You are already registered.");
+                await channel.SendMessageAsync("", false, message.ToEmbed());
+            }
+            catch (NotExistingException)
+            {
+                this._registrationService.DoRegistration(this.Context.User, summonerName.Trim(), region);
+            }
         }
 
         [Command("refresh")]
+        [Summary("Updates data of your account.")]
         public Task Refresh([OverrideTypeReader(typeof(RegionTypeReader))]Region region, [Remainder]string summonerName)
         {
-            // get user from database
-            // if registered
-            //      update cache data
-            // if not registered
-            //      check mastery page against code
-            //      if code correct
-            //            update cache data
-            bool success = this._registrationService.ValidateCode(summonerName, region);
-            DiscordFormatEmbed message = new DiscordFormatEmbed()
-                .AppendDescription($"TEST: {success}");
-            this.ReplyAsync("", false, message.ToEmbed());
+            try
+            {
+                TAccount account = this._accountsDao.GetSingle(summonerName.Trim(), region);
+                DiscordFormatEmbed message = new DiscordFormatEmbed()
+                    .AppendDescription("If it would've been implemented I could update your data now.");
+                this.ReplyAsync("", false, message.ToEmbed());
+            }
+            catch (NotExistingException)
+            {
+                // ??? say it's not registered?
+            }
             return Task.CompletedTask;
         }
 
         [Command("unregister")]
+        [Summary("Revokes yadayada.")]
         public Task Unregister()
         {
             // remove user from database

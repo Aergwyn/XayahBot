@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using XayahBot.API.Riot.Model;
 
 namespace XayahBot.API.Riot
 {
@@ -23,9 +24,9 @@ namespace XayahBot.API.Riot
             return $"https://{this._region.Platform}.api.riotgames.com/lol/platform/{this.GetVersion()}/{this.GetService()}";
         }
 
-        public async Task<object> GetMasteriesBySummonerIdAsync(long summonerId)
+        public async Task<MasteryPagesDto> GetMasteriesBySummonerIdAsync(long summonerId)
         {
-            return await this.GetAsync<object>(new ApiRequest($"/by-summoner/{summonerId}"));
+            return await this.GetAsync<MasteryPagesDto>(new ApiRequest($"by-summoner/{summonerId}"));
         }
     }
 }
