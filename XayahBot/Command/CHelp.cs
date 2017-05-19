@@ -30,7 +30,7 @@ namespace XayahBot.Command
         [Summary("Displays the list of commands.")]
         public async Task Help([Remainder] string category = "")
         {
-            IMessageChannel channel = await ChannelRetriever.GetDMChannelAsync(this.Context);
+            IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
             Category requestedCategory = Category.GetByName(category);
             if (!this.CategoryContainsAvailableCommands(requestedCategory))
             {

@@ -1,12 +1,11 @@
 ﻿using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using XayahBot.Error;
 
 namespace XayahBot.Utility
 {
-    public static class ChannelRetriever
+    public static class ChannelProvider
     {
         public static async Task<IMessageChannel> GetDMChannelAsync(CommandContext context)
         {

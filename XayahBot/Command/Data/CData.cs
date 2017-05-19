@@ -36,7 +36,7 @@ namespace XayahBot.Command.Data
 
             private async Task BuildAndPost(ChampionDataType type, string name)
             {
-                IMessageChannel channel = await ChannelRetriever.GetDMChannelAsync(this.Context);
+                IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
                 ChampionDataBuilder builder = new ChampionDataBuilder(channel, name);
                 await builder.BuildAsync(type);
                 await builder.PostAsync();

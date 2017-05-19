@@ -31,7 +31,7 @@ namespace XayahBot.Command.Remind
         [Summary("Displays a list of your active reminder.")]
         public async Task List()
         {
-            IMessageChannel channel = await ChannelRetriever.GetDMChannelAsync(this.Context);
+            IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
             List<TRemindEntry> reminders = this._reminderDao.GetAll(this.Context.User.Id);
             channel.SendMessageAsync("", false, this.BuildReminderList(reminders).ToEmbed());
         }
@@ -172,7 +172,7 @@ namespace XayahBot.Command.Remind
         [Summary("Removes a reminder (by ID!) from your list.")]
         public async Task Not(int id)
         {
-            IMessageChannel channel = await ChannelRetriever.GetDMChannelAsync(this.Context);
+            IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
             DiscordFormatEmbed message = new DiscordFormatEmbed();
             try
             {

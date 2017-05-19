@@ -32,7 +32,7 @@ namespace XayahBot.Command.Account
         {
             try
             {
-                IMessageChannel channel = await ChannelRetriever.GetDMChannelAsync(this.Context);
+                IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
                 this._accountsDao.GetSingle(summonerName.Trim(), region);
                 DiscordFormatEmbed message = new DiscordFormatEmbed()
                     .AppendDescription("You are already registered.");

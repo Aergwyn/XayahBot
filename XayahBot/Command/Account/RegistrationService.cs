@@ -156,7 +156,7 @@ namespace XayahBot.Command.Account
 
         private async Task PostDMResponse(RegistrationUser user, DiscordFormatEmbed message)
         {
-            IMessageChannel channel = await ChannelRetriever.GetDMChannelAsync(this._client, user.RequestingUserId);
+            IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this._client, user.RequestingUserId);
             await channel.SendMessageAsync("", false, message.ToEmbed());
         }
 
