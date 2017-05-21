@@ -1,19 +1,15 @@
 ﻿#pragma warning disable 4014
 
 using System.Threading.Tasks;
-using Discord;
 using Discord.Commands;
 using XayahBot.API.Riot;
 using XayahBot.Command.Precondition;
 using XayahBot.Database.DAO;
 using XayahBot.Database.Error;
-using XayahBot.Database.Model;
-using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command.Account
 {
-
     [Group("account")]
     [Category(CategoryType.ACCOUNT)]
     public class CAccount : ModuleBase
@@ -27,30 +23,20 @@ namespace XayahBot.Command.Account
         }
 
         [Command("register")]
-        [Summary("Registers your league account to fetch data from Riot API.")]
-        public async Task Register([OverrideTypeReader(typeof(RegionTypeReader))]Region region, [Remainder]string summonerName)
+        [Summary("Register yadayada.")]
+        public Task Register([OverrideTypeReader(typeof(RegionTypeReader))]Region region, [Remainder]string summonerName)
         {
-            try
-            {
-                IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
-                this._accountsDao.GetSingle(summonerName.Trim(), region);
-                DiscordFormatEmbed message = new DiscordFormatEmbed()
-                    .AppendDescription("You are already registered.");
-                await channel.SendMessageAsync("", false, message.ToEmbed());
-            }
-            catch (NotExistingException)
-            {
-                this._registrationService.DoRegistration(this.Context.User, summonerName.Trim(), region);
-            }
+            this._registrationService.DoRegistration(this.Context.User, summonerName, region);
+            return Task.CompletedTask;
         }
 
         [Command("refresh")]
-        [Summary("Updates data of your account.")]
-        public Task Refresh([OverrideTypeReader(typeof(RegionTypeReader))]Region region, [Remainder]string summonerName)
+        [Summary("Update yadayada.")]
+        public Task Refresh()
         {
             try
             {
-                TAccount account = this._accountsDao.GetSingle(summonerName.Trim(), region);
+                //TAccount account = this._accountsDao.GetSingle(summonerName.Trim(), region);
                 DiscordFormatEmbed message = new DiscordFormatEmbed()
                     .AppendDescription("If it would've been implemented I could update your data now.");
                 this.ReplyAsync("", false, message.ToEmbed());
@@ -63,12 +49,13 @@ namespace XayahBot.Command.Account
         }
 
         [Command("unregister")]
-        [Summary("Revokes yadayada.")]
-        public Task Unregister()
+        [Summary("Revoke yadayada.")]
+        public async Task Unregister()
         {
-            // remove user from database
-            // notify data is going to expire in X and until then still accessible
-            return Task.CompletedTask;
+            await this._accountsDao.RemoveByUserIdAsync(this.Context.User.Id);
+            DiscordFormatEmbed message = new DiscordFormatEmbed()
+                .AppendDescription("Account unregistered.");
+            this.ReplyAsync("", false, message.ToEmbed());
         }
     }
 }

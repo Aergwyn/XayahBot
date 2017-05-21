@@ -93,28 +93,69 @@ namespace XayahBot.Command.Account
         {
             RegistrationUser regUser = new RegistrationUser
             {
-                Code = this.GetGuid(),
-                Name = name.ToLower(),
+                Name = name.Trim().ToLower(),
                 Region = region,
-                RequestingUserId = user.Id
+                UserId = user.Id
             };
-            if (RiotApiUtil.IsValidName(name))
+            await this._lock.WaitAsync();
+            try
             {
-                if (this.IsNewUser(regUser))
+                if (this._accountsDao.HasAccount(regUser.UserId))
                 {
-                    await this.StartRegisterProcess(regUser);
+                    await this.PostDMResponse(regUser, "You are already registered.");
+                }
+                else if (!RiotApiUtil.IsValidName(name))
+                {
+                    await this.PostDMResponse(regUser, $"The name `{regUser.Name}` is not in a valid format.");
+                }
+                else if (this.IsNewUser(regUser))
+                {
+                    await this.StartRegistering(regUser);
                 }
                 else
                 {
-                    await this.FinishRegisterProcess(regUser);
+                    await this.FinishRegistering(regUser);
                 }
             }
-            else
+            finally
             {
-                DiscordFormatEmbed message = new DiscordFormatEmbed()
-                    .AppendDescription($"The name `{regUser.Name}` is not in a valid format.");
-                await this.PostDMResponse(regUser, message);
+                this._lock.Release();
             }
+        }
+
+        private async Task PostDMResponse(RegistrationUser user, string text)
+        {
+            DiscordFormatEmbed message = new DiscordFormatEmbed()
+                .AppendDescription(text);
+            await this.PostDMResponse(user, message);
+        }
+
+        private async Task PostDMResponse(RegistrationUser user, DiscordFormatEmbed message)
+        {
+            IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this._client, user.UserId);
+            await channel.SendMessageAsync("", false, message.ToEmbed());
+        }
+
+        private bool IsNewUser(RegistrationUser user)
+        {
+            if (this.GetUser(user) == null)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private RegistrationUser GetUser(RegistrationUser user)
+        {
+            return this._openRegistrations.FirstOrDefault(x => x.UserId.Equals(user.UserId) && x.Name.Equals(user.Name) && x.Region.Equals(user.Region));
+        }
+
+        private async Task StartRegistering(RegistrationUser user)
+        {
+            user.Code = this.GetGuid();
+            this._openRegistrations.Add(user);
+            this.StartAsync();
+            await this.NotifyOfCode(user);
         }
 
         private string GetGuid()
@@ -129,24 +170,8 @@ namespace XayahBot.Command.Account
             return code;
         }
 
-        private bool IsNewUser(RegistrationUser user)
+        private async Task NotifyOfCode(RegistrationUser user)
         {
-            if (this.GetUser(user) == null)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        private RegistrationUser GetUser(RegistrationUser user)
-        {
-            return this._openRegistrations.FirstOrDefault(x => x.Name.Equals(user.Name) && x.Region.Equals(user.Region) && x.RequestingUserId.Equals(user.RequestingUserId));
-        }
-
-        private async Task StartRegisterProcess(RegistrationUser user)
-        {
-            this._openRegistrations.Add(user);
-            this.StartAsync();
             DiscordFormatEmbed message = new DiscordFormatEmbed()
                 .AppendDescription($"Rename one of your mastery pages to the following code `{user.Code}` and then use this command again.")
                 .AppendDescription(Environment.NewLine + Environment.NewLine)
@@ -154,70 +179,62 @@ namespace XayahBot.Command.Account
             await this.PostDMResponse(user, message);
         }
 
-        private async Task PostDMResponse(RegistrationUser user, DiscordFormatEmbed message)
-        {
-            IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this._client, user.RequestingUserId);
-            await channel.SendMessageAsync("", false, message.ToEmbed());
-        }
-
-        private async Task FinishRegisterProcess(RegistrationUser user)
+        private async Task FinishRegistering(RegistrationUser user)
         {
             RegistrationUser match = this.GetUser(user);
             if (match.IsExpired())
             {
-                DiscordFormatEmbed message = new DiscordFormatEmbed()
-                    .AppendDescription("Your registration timed out.");
-                await this.PostDMResponse(user, message);
+                await this.PostDMResponse(user, "Your registration timed out.");
             }
             else
             {
-                DiscordFormatEmbed message = new DiscordFormatEmbed();
                 try
                 {
-                    SummonerApi summonerApi = new SummonerApi(match.Region);
-                    MasteriesApi masteriesApi = new MasteriesApi(match.Region);
-                    SummonerDto summoner = await summonerApi.GetSummonerByNameAsync(match.Name);
-                    MasteryPagesDto masteryPages = await masteriesApi.GetMasteriesBySummonerIdAsync(summoner.Id);
-                    foreach (MasteryPageDto page in masteryPages.Pages)
+                    if (await this.ValidateCode(match))
                     {
-                        if (page.Name.Equals(match.Code))
-                        {
-                            user.SummonerId = summoner.Id;
-                            await this.RegistrationSuccess(user);
-                            return;
-                        }
+                        await this.AddToDatabase(user);
+                        await this.PostDMResponse(user, "You successfully completed the registration.");
                     }
-                    message.AppendDescription("No mastery page name matches the registration code. Please try again once done.");
+                    else
+                    {
+                        await this.PostDMResponse(user, "No mastery page name matches the registration code. Please try again once corrected.");
+                    }
                 }
                 catch (ErrorResponseException)
                 {
-                    message.AppendDescription("There seems to be a problem communicating with the API.");
+                    await this.PostDMResponse(user, "There seems to be a problem communicating with the API.");
                 }
-                this.PostDMResponse(user, message);
             }
         }
 
-        private async Task RegistrationSuccess(RegistrationUser user)
+        private async Task<bool> ValidateCode(RegistrationUser user)
         {
-            DiscordFormatEmbed message = new DiscordFormatEmbed();
-            try
+            SummonerApi summonerApi = new SummonerApi(user.Region);
+            MasteriesApi masteriesApi = new MasteriesApi(user.Region);
+            SummonerDto summoner = await summonerApi.GetSummonerByNameAsync(user.Name);
+            MasteryPagesDto masteryPages = await masteriesApi.GetMasteriesBySummonerIdAsync(summoner.Id);
+            foreach (MasteryPageDto page in masteryPages.Pages)
             {
-                TAccount entry = new TAccount
+                if (page.Name.Equals(user.Code))
                 {
-                    Name = user.Name,
-                    Region = user.Region.Name,
-                    SummonerId = user.SummonerId
-                };
-                await this._accountsDao.SaveAsync(entry);
-                this._openRegistrations.Remove(user);
-                message.AppendDescription("You successfully completed the registration.");
+                    user.SummonerId = summoner.Id;
+                    return true;
+                }
             }
-            catch (AlreadyExistingException)
+            return false;
+        }
+
+        private async Task AddToDatabase(RegistrationUser user)
+        {
+            TAccount entry = new TAccount
             {
-                message.AppendDescription("You are already registered.");
-                this.PostDMResponse(user, message);
-            }
-            await this.PostDMResponse(user, message);
+                Name = user.Name,
+                Region = user.Region.Name,
+                SummonerId = user.SummonerId,
+                UserId = user.UserId
+            };
+            await this._accountsDao.SaveAsync(entry);
+            this._openRegistrations.Remove(user);
         }
     }
 }

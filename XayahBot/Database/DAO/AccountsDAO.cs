@@ -1,6 +1,6 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using XayahBot.API.Riot;
 using XayahBot.Database.Error;
 using XayahBot.Database.Model;
 
@@ -8,27 +8,35 @@ namespace XayahBot.Database.DAO
 {
     public class AccountsDAO
     {
-        public TAccount GetSingle(long accountId)
+        public TAccount GetSingle(ulong userId)
         {
             using (GeneralContext database = new GeneralContext())
             {
-                TAccount match = database.Accounts.FirstOrDefault(x => x.SummonerId.Equals(accountId));
+                TAccount match = database.Accounts.FirstOrDefault(x => x.UserId.Equals(userId));
                 return match ?? throw new NotExistingException();
             }
         }
 
-        public TAccount GetSingle(string name, Region region)
+        public List<TAccount> GetAll(ulong userId)
         {
             using (GeneralContext database = new GeneralContext())
             {
-                TAccount match = database.Accounts.FirstOrDefault(x => x.Region.Equals(region.Name) && x.Name.Equals(name));
-                return match ?? throw new NotExistingException();
+                List<TAccount> matches = new List<TAccount>();
+                try
+                {
+                    TAccount match = this.GetSingle(userId);
+                    matches.AddRange(database.Accounts.Where(x => x.SummonerId.Equals(match.SummonerId)));
+                }
+                catch (NotExistingException)
+                {
+                }
+                return matches;
             }
         }
 
         public async Task SaveAsync(TAccount entry)
         {
-            if (this.HasAccount(entry.SummonerId))
+            if (this.HasAccount(entry.UserId))
             {
                 throw new AlreadyExistingException();
             }
@@ -50,11 +58,27 @@ namespace XayahBot.Database.DAO
             }
         }
 
-        public bool HasAccount(long accountId)
+        public async Task RemoveByUserIdAsync(ulong userId)
+        {
+            using (GeneralContext database = new GeneralContext())
+            {
+                List<TAccount> matches = this.GetAll(userId);
+                if (matches.Count > 0)
+                {
+                    database.RemoveRange(matches);
+                    if (await database.SaveChangesAsync() <= 0)
+                    {
+                        throw new NotSavedException();
+                    }
+                }
+            }
+        }
+
+        public bool HasAccount(ulong userId)
         {
             try
             {
-                this.GetSingle(accountId);
+                this.GetSingle(userId);
                 return true;
             }
             catch (NotExistingException)

@@ -9,7 +9,7 @@ namespace XayahBot.Command.Account
         public string Name { get; set; }
         public Region Region { get; set; }
         public string Code { get; set; }
-        public ulong RequestingUserId { get; set; }
+        public ulong UserId { get; set; }
         public long SummonerId { get; set; }
         public DateTime ExpirationTime { get; }
 
