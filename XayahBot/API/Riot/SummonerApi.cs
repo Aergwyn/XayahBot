@@ -22,7 +22,12 @@ namespace XayahBot.API.Riot
 
         protected override DateTime GetDataExpirationTime()
         {
-            return DateTime.UtcNow.AddHours(24);
+            return DateTime.UtcNow.AddDays(7);
+        }
+
+        public async Task<SummonerDto> GetSummonerById(long summonerId)
+        {
+            return await this.GetAsync<SummonerDto>(new ApiRequest($"summoners/{summonerId}"));
         }
 
         public async Task<SummonerDto> GetSummonerByNameAsync(string summonerName)
