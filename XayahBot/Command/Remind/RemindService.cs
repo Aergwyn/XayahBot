@@ -49,7 +49,7 @@ namespace XayahBot.Command.Remind
                 if (!this._isRunning && this._reminderDao.HasReminder())
                 {
                     this._process = Task.Run(() => this.RunAsync());
-                    Logger.Info("ReminderService started.");
+                    Logger.Info($"{nameof(RemindService)} started.");
                 }
             }
             finally
@@ -129,12 +129,12 @@ namespace XayahBot.Command.Remind
 
         public async Task StopAsync()
         {
+            Logger.Info($"Requested stop for {nameof(RemindService)}.");
             this._isRunning = false;
             await this.StopTimersAsync();
             if (this._process != null)
             {
                 await this._process;
-                Logger.Info("ReminderService stopped.");
             }
         }
 

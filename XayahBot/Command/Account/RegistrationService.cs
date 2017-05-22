@@ -53,7 +53,7 @@ namespace XayahBot.Command.Account
                 if (!this._isRunning && this._openRegistrations.Count > 0)
                 {
                     this._process = Task.Run(() => this.RunAsync());
-                    Logger.Info("RegistrationService (Purge) started.");
+                    Logger.Info($"{nameof(RegistrationService)} started.");
                 }
             }
             finally
@@ -81,11 +81,11 @@ namespace XayahBot.Command.Account
 
         public async Task StopAsync()
         {
+            Logger.Info($"Requested stop for {nameof(RegistrationService)}.");
             this._isRunning = false;
             if (this._process != null)
             {
                 await this._process;
-                Logger.Info("RegistrationService (Purge) stopped.");
             }
         }
 
@@ -102,11 +102,11 @@ namespace XayahBot.Command.Account
             {
                 if (this._accountsDao.HasAccount(regUser.UserId))
                 {
-                    await this.PostDMResponse(regUser, "You are already registered.");
+                    await this.PostDMResponse(regUser, "You already have a summoner registered.");
                 }
                 else if (!RiotApiUtil.IsValidName(name))
                 {
-                    await this.PostDMResponse(regUser, $"The name `{regUser.Name}` is not in a valid format.");
+                    await this.PostDMResponse(regUser, $"The summoner name `{regUser.Name}` is not in a valid format.");
                 }
                 else if (this.IsNewUser(regUser))
                 {
@@ -173,9 +173,11 @@ namespace XayahBot.Command.Account
         private async Task NotifyOfCode(RegistrationUser user)
         {
             DiscordFormatEmbed message = new DiscordFormatEmbed()
-                .AppendDescription($"Rename one of your mastery pages to the following code `{user.Code}` and then use this command again.")
+                .AppendDescription("Rename one of your mastery pages to the following registration code ")
+                .AppendDescription($"`{user.Code}`", AppendOption.Underscore)
+                .AppendDescription(" and then use this command again.")
                 .AppendDescription(Environment.NewLine + Environment.NewLine)
-                .AppendDescription("Please remember to do this quick as the code is rendered invalid in a few minutes.");
+                .AppendDescription("Please remember to do this quick as the code is rendered invalid in a few minutes.", AppendOption.Italic);
             await this.PostDMResponse(user, message);
         }
 
@@ -184,7 +186,7 @@ namespace XayahBot.Command.Account
             RegistrationUser match = this.GetUser(user);
             if (match.IsExpired())
             {
-                await this.PostDMResponse(user, "Your registration timed out.");
+                await this.PostDMResponse(user, "Your registration code timed out.");
             }
             else
             {
@@ -193,11 +195,11 @@ namespace XayahBot.Command.Account
                     if (await this.ValidateCode(match))
                     {
                         await this.AddToDatabase(user);
-                        await this.PostDMResponse(user, "You successfully completed the registration.");
+                        await this.PostDMResponse(user, "You successfully registered your summoner.");
                     }
                     else
                     {
-                        await this.PostDMResponse(user, "No mastery page name matches the registration code. Please try again once corrected.");
+                        await this.PostDMResponse(user, "No mastery page name matches the registration code.");
                     }
                 }
                 catch (ErrorResponseException)

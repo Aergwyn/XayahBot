@@ -55,7 +55,7 @@ namespace XayahBot.Command.Incidents
                 if (!this._isRunning && this._incidentSubscriberDao.HasAnySubscriber())
                 {
                     this._process = Task.Run(() => this.RunAsync());
-                    Logger.Info("IncidentService started.");
+                    Logger.Info($"{nameof(IncidentService)} started.");
                 }
             }
             finally
@@ -304,11 +304,11 @@ namespace XayahBot.Command.Incidents
 
         public async Task StopAsync()
         {
+            Logger.Info($"Requested stop for {nameof(IncidentService)}.");
             this._isRunning = false;
             if (this._process != null)
             {
                 await this._process;
-                Logger.Info("IncidentService stopped.");
             }
         }
     }

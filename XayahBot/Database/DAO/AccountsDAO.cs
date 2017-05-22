@@ -71,6 +71,10 @@ namespace XayahBot.Database.DAO
                         throw new NotSavedException();
                     }
                 }
+                else
+                {
+                    throw new NotExistingException();
+                }
             }
         }
 

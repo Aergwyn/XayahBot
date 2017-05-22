@@ -52,9 +52,16 @@ namespace XayahBot.Command.Account
         [Summary("Revoke yadayada.")]
         public async Task Unregister()
         {
-            await this._accountsDao.RemoveByUserIdAsync(this.Context.User.Id);
-            DiscordFormatEmbed message = new DiscordFormatEmbed()
-                .AppendDescription("Account unregistered.");
+            DiscordFormatEmbed message = new DiscordFormatEmbed();
+            try
+            {
+                await this._accountsDao.RemoveByUserIdAsync(this.Context.User.Id);
+                message.AppendDescription("The summoner was successfully unregistered.");
+            }
+            catch (NotExistingException)
+            {
+                message.AppendDescription("There was no registered summoner to begin with.");
+            }
             this.ReplyAsync("", false, message.ToEmbed());
         }
     }
