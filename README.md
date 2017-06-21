@@ -16,7 +16,7 @@ As already mentioned there are essentially three categories of commands.
 ## Usage
 Each command is able to be used by prefixing a message with a `.` and then using command syntax. It is also possible to mention Xayah Bot instead.
 Examples:
-> .help
+> .help  
 > @Xayah Bot help
 
 Following is a list of all commands. If I learn something new I may rework them to be easier to use or more efficient so they are all subject to change. I'll try to keep this list as up to date as possible.
