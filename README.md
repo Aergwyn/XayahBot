@@ -9,7 +9,7 @@ I try to write as much as possible myself to learn and try different approaches.
 
 ## Features
 As already mentioned there are essentially three categories of commands.
-1. Fun commands: something like the 8-ball command ~~or a quiz~~.
+1. Fun commands: Something like the 8-ball command ~~or a quiz~~.
 2. Informational commands: Retrieving data about a champion or notifying about incidents currently ongoing all fueled by Riot Games API
 3. Organisational commands: Excluding users/channels from certain commands to reduce spam or letting XayahBot track your Rank in League and assign corresponding roles
 
@@ -17,7 +17,6 @@ As already mentioned there are essentially three categories of commands.
 Each command is able to be used by prefixing a message with a `.` and then using command syntax. It is also possible to mention Xayah Bot instead.
 Examples:
 > .help  
-or  
 > @Xayah Bot help
 
 Following is a list of all commands. If I learn something new I may rework them to be easier to use or more efficient so they are all subject to change. I'll try to keep this list as up to date as possible.
