@@ -22,8 +22,8 @@ Examples:
 Following is a list of all commands. If I learn something new I may rework them to be easier to use or more efficient so they are all subject to change. I'll try to keep this list as up to date as possible.
 
 ###### Help
-Usable by: Everyone
-Usable in: Guilds, DMs and Groups
+Usable by: Everyone  
+Usable in: Guilds, DMs and Groups  
 Description: The help shows you which commands exist and how to use them. Also contains my contact data. As there are just too many commands to list them flat out they are categorized and you will have to follow up that command with the desired category.
 
 - [ ] Complete list of commands, add pictures and descriptions
