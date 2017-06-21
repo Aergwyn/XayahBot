@@ -5,7 +5,7 @@ This project is comepletey written in C# and references the following frameworks
 - Microsoft Entity Framework Core
 - Discord.Net - [Link](https://github.com/RogueException/Discord.Net)
 
-I try to write as much as possible myself to learn and try different approaches. I welcome any suggestions and feedback (see Contact).
+I try to write as much as possible myself to learn and try different approaches. I welcome any suggestions and feedback (see [Contact](https://github.com/Aergwyn/XayahBot/blob/master/README.md#contact)).
 
 ## Features
 As already mentioned there are essentially three categories of commands.
@@ -17,11 +17,12 @@ As already mentioned there are essentially three categories of commands.
 Each command is able to be used by prefixing a message with a `.` and then using command syntax. It is also possible to mention Xayah Bot instead.
 Examples:
 > .help  
+or  
 > @Xayah Bot help
 
 Following is a list of all commands. If I learn something new I may rework them to be easier to use or more efficient so they are all subject to change. I'll try to keep this list as up to date as possible.
 
-###### Help
+#### Help
 Usable by: Everyone  
 Usable in: Guilds, DMs and Groups  
 Description: The help shows you which commands exist and how to use them. Also contains my contact data. As there are just too many commands to list them flat out they are categorized and you will have to follow up that command with the desired category.
