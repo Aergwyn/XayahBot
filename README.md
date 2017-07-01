@@ -27,9 +27,9 @@ Following is a list of all commands. If I learn something new I may rework them 
 
 **Description:** This help shows you which commands exist and how to use them. As there are just too many commands to list them flat out they are categorized and you will have to follow up that command with the desired category. If the specified category doesn't exist it will default to `help`.  
 
-**Examples:**  
+**Examples:**
 - .help  
-Shows the help  
+Shows the help
 - .help data  
 Show the help for the category data
 
@@ -40,13 +40,13 @@ Show the help for the category data
 **Description:** This command shows you Riot API data (Endpoint: `Static-Data-V3`) to a specified champion. Currently this is split between `misc`, `spells` and `stats`.  
 The name can be a partial input. If you want to retrieve data from `vikt` you will get a response with data for Viktor. If you try to retrieve data from `a` you will get a list of all champions that have an `a` in their name and should try again.  
 
-**Examples:**  
+**Examples:**
 - .data champ misc viktor  
-Shows general data about the specified champion (Title, Tags, Resource and Skins)
+Shows general data about the specified champion (title, tags, resource and skins)
 - .data champ stats viktor  
-Shows champion stats and statgrowth of the specified champion.
+Shows champion stats and statgrowth of the specified champion
 - .data champ spells viktor  
-Shows the spells of specified champion with name, cost, range, cooldown and scaling.
+Shows the spells of specified champion with name, cost, range, cooldown and scaling
 
 ### Remind me
 **Usable by:** Everyone  
@@ -64,7 +64,7 @@ TODO
 
 **Description:** This command allows incident tracking from Riot API (Endpoint: `Status-V3`, Regions: EUW, NA, EUNE) to be updated as fast as possible. If an incident gets updates or is resolved `Xayah Bot` will remove old messages to not litter the channel.  
 
-**Examples:**  
+**Examples:**
 - .incidents status  
 Shows if incident tracking is currently disabled or not and in which channel updates will be posted
 - .incidents enable #news-channel  
