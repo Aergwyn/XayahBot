@@ -16,23 +16,45 @@ As already mentioned there are essentially three categories of commands.
 ## Usage
 Each command is able to be used by prefixing a message with a `.` and then using command syntax. It is also possible to mention Xayah Bot instead.  
 Examples:  
-> .help
-or
-> @Xayah Bot help
+- .help
+- @Xayah Bot help
 
 Following is a list of all commands. If I learn something new I may rework them to be easier to use or more efficient so they are all subject to change. I'll try to keep this list as up to date as possible.
 
 ### Help
 **Usable by:** Everyone  
 **Usable in:** Everywhere  
-**Description:** This help shows you which commands exist and how to use them. As there are just too many commands to list them flat out they are categorized and you will have to follow up that command with the desired category.  
+**Description:** This help shows you which commands exist and how to use them. As there are just too many commands to list them flat out they are categorized and you will have to follow up that command with the desired category. If the specified category doesn't exist it will default to `help`.  
 **Examples:**  
-> .help
+- .help
 Shows the help  
-> .help data
+- .help data
 Show the help for the category data
 
+### Data
+**Usable by:** Everyone  
+**Usable in:** Everywhere  
+**Description:** This command shows you the Riot API data (`Endpoint: Static-Data-V3`) to a specified champion. Currently this is split between `misc`, `spells` and `stats`.  
+The name can be a partial input. If you want to retrieve data from `vikt` you will get a response with data for Viktor. If you try to retrieve data from `a` you will get a list of all champions that have an `a` in their name and should try again.
+**Examples:**  
+- .data champ misc viktor
+Shows general data about the specified champion (Title, Tags, Resource and Skins)
+- .data champ stats viktor
+Shows champion stats and statgrowth of the specified champion.
+- .data champ spells viktor
+Shows the spells of specified champion with name, cost, range, cooldown and scaling.
+
+### Remind me
+**Usable by:** Everyone  
+**Usable in:** Everywhere  
+**Description:** This command will remind you after a set amount of time with the specified text when the command was used.
+**Examples:**  
+TODO
+
+
 - [ ] Complete list of commands, add pictures and descriptions
+- [ ] Rework who can use which command by a specific role (if needed) relevant for that command
+- [ ] Rework remind me command to be... better?
 
 ## Contact
 If you got any problems, questions and/or suggestions you can e-mail me at `aergwyn@t-online.com` or add me in Discord (`Aergwyn#8786`).
