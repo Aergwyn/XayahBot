@@ -14,17 +14,23 @@ As already mentioned there are essentially three categories of commands.
 3. Organisational commands: Excluding users/channels from certain commands to reduce spam or letting XayahBot track your Rank in League and assign corresponding roles
 
 ## Usage
-Each command is able to be used by prefixing a message with a `.` and then using command syntax. It is also possible to mention Xayah Bot instead.
-Examples:
-> .help  
+Each command is able to be used by prefixing a message with a `.` and then using command syntax. It is also possible to mention Xayah Bot instead.  
+Examples:  
+> .help
+or
 > @Xayah Bot help
 
 Following is a list of all commands. If I learn something new I may rework them to be easier to use or more efficient so they are all subject to change. I'll try to keep this list as up to date as possible.
 
-#### Help
-Usable by: Everyone  
-Usable in: Guilds, DMs and Groups  
-Description: The help shows you which commands exist and how to use them. Also contains my contact data. As there are just too many commands to list them flat out they are categorized and you will have to follow up that command with the desired category.
+### Help
+**Usable by:** Everyone  
+**Usable in:** Everywhere  
+**Description:** This help shows you which commands exist and how to use them. As there are just too many commands to list them flat out they are categorized and you will have to follow up that command with the desired category.  
+**Examples:**  
+> .help
+Shows the help  
+> .help data
+Show the help for the category data
 
 - [ ] Complete list of commands, add pictures and descriptions
 
