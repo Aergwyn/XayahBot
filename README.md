@@ -37,7 +37,7 @@ Show the help for the category data
 **Usable by:** Everyone  
 **Usable in:** Everywhere  
 
-**Description:** This command shows you the Riot API data (`Endpoint: Static-Data-V3`) to a specified champion. Currently this is split between `misc`, `spells` and `stats`.  
+**Description:** This command shows you Riot API data (Endpoint: `Static-Data-V3`) to a specified champion. Currently this is split between `misc`, `spells` and `stats`.  
 The name can be a partial input. If you want to retrieve data from `vikt` you will get a response with data for Viktor. If you try to retrieve data from `a` you will get a list of all champions that have an `a` in their name and should try again.  
 
 **Examples:**  
@@ -55,12 +55,26 @@ Shows the spells of specified champion with name, cost, range, cooldown and scal
 **Description:** This command will remind you after a set amount of time with the specified text when the command was used.  
 
 **Examples:**  
-TODO
+TODO  
+- [ ] make command great again
+
+### Incidents
+**Usable by:** ?  
+**Usable in:** Guild  
+
+**Description:** This command allows enabling/disabling incident tracking from Riot API (Endpoint: `Status-V3`, Regions: EUW, NA, EUNE) to be updated as fast as possible. If an incident gets updates or is resolved `Xayah Bot` will remove old messages to not litter the channel.  
+
+**Examples:**  
+- .incidents status  
+Shows if incident tracking is currently disabled or not and in which channel updates will be posted  
+- .incidents enable #news-channel  
+Enables incident tracking and will post updates in the specified channel  
+- .incidents disable  
+Disables incident tracking
 
 
-- [ ] Complete list of commands, add pictures and descriptions
+- [ ] Complete list of commands with descriptions and pictures
 - [ ] Rework who can use which command by a specific role (if needed) relevant for that command
-- [ ] Rework remind me command to be... better?
 
 ## Contact
 If you got any problems, questions and/or suggestions you can e-mail me at `aergwyn@t-online.com` or add me in Discord (`Aergwyn#8786`).
