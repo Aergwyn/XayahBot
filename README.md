@@ -72,7 +72,7 @@ Enables incident tracking and will post updates in the specified channel
 - .incidents disable  
 Disables incident tracking
 
-
+  
 - [ ] Complete list of commands with descriptions and pictures
 - [ ] Rework who can use which command by a specific role (if needed) relevant for that command
 
