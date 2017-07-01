@@ -42,9 +42,9 @@ The name can be a partial input. If you want to retrieve data from `vikt` you wi
 
 **Examples:**  
 - .data champ misc viktor  
-Shows general data about the specified champion (Title, Tags, Resource and Skins)  
+Shows general data about the specified champion (Title, Tags, Resource and Skins)
 - .data champ stats viktor  
-Shows champion stats and statgrowth of the specified champion.  
+Shows champion stats and statgrowth of the specified champion.
 - .data champ spells viktor  
 Shows the spells of specified champion with name, cost, range, cooldown and scaling.
 
@@ -62,13 +62,13 @@ TODO
 **Usable by:** ?  
 **Usable in:** Guild  
 
-**Description:** This command allows enabling/disabling incident tracking from Riot API (Endpoint: `Status-V3`, Regions: EUW, NA, EUNE) to be updated as fast as possible. If an incident gets updates or is resolved `Xayah Bot` will remove old messages to not litter the channel.  
+**Description:** This command allows incident tracking from Riot API (Endpoint: `Status-V3`, Regions: EUW, NA, EUNE) to be updated as fast as possible. If an incident gets updates or is resolved `Xayah Bot` will remove old messages to not litter the channel.  
 
 **Examples:**  
 - .incidents status  
-Shows if incident tracking is currently disabled or not and in which channel updates will be posted  
+Shows if incident tracking is currently disabled or not and in which channel updates will be posted
 - .incidents enable #news-channel  
-Enables incident tracking and will post updates in the specified channel  
+Enables incident tracking and will post updates in the specified channel
 - .incidents disable  
 Disables incident tracking
 
