@@ -1,6 +1,4 @@
-﻿#pragma warning disable 4014
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord.Commands;
 using XayahBot.Command.Precondition;
@@ -51,8 +49,6 @@ namespace XayahBot.Command
         };
 
         [Command("are"), Alias("is", "am")]
-        [CheckIgnoredUser]
-        [CheckIgnoredChannel]
         [Summary("Triggers an 8ball-esque response.")]
         public Task Are([Remainder] string text = "")
         {

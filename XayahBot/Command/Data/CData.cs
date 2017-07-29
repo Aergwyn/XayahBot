@@ -14,6 +14,7 @@ namespace XayahBot.Command.Data
         public class CChamp : ModuleBase
         {
             [Command("misc")]
+            [RequireOwner]
             [Summary("Displays misc data of a champion.")]
             public async Task Misc([Remainder] string name)
             {
@@ -21,6 +22,7 @@ namespace XayahBot.Command.Data
             }
 
             [Command("spells")]
+            [RequireOwner]
             [Summary("Displays spells of a champion.")]
             public async Task Spell([Remainder] string name)
             {
@@ -28,6 +30,7 @@ namespace XayahBot.Command.Data
             }
 
             [Command("stats")]
+            [RequireOwner]
             [Summary("Displays stats of a champion.")]
             public async Task Stats([Remainder] string name)
             {

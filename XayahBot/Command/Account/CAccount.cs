@@ -1,6 +1,4 @@
-﻿#pragma warning disable 4014
-
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord.Commands;
 using XayahBot.API.Riot;
 using XayahBot.Command.Precondition;
@@ -23,6 +21,7 @@ namespace XayahBot.Command.Account
         }
 
         [Command("register")]
+        [RequireOwner]
         [Summary("Register yadayada.")]
         public Task Register([OverrideTypeReader(typeof(RegionTypeReader))]Region region, [Remainder]string summonerName)
         {
@@ -31,6 +30,7 @@ namespace XayahBot.Command.Account
         }
 
         [Command("refresh")]
+        [RequireOwner]
         [Summary("Update yadayada.")]
         public Task Refresh()
         {
@@ -49,6 +49,7 @@ namespace XayahBot.Command.Account
         }
 
         [Command("unregister")]
+        [RequireOwner]
         [Summary("Revoke yadayada.")]
         public async Task Unregister()
         {

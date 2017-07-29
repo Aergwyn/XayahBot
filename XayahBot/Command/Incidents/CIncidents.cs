@@ -29,7 +29,7 @@ namespace XayahBot.Command.Incidents
         }
 
         [Command("enable")]
-        [RequireMod]
+        [RequireOwner]
         [RequireContext(ContextType.Guild)]
         [Summary("Enables incident notifications from Riot in the mentioned channel.")]
         public async Task Enable(string channel)
@@ -60,7 +60,7 @@ namespace XayahBot.Command.Incidents
         }
 
         [Command("status")]
-        [RequireMod]
+        [RequireOwner]
         [RequireContext(ContextType.Guild)]
         [Summary("Shows if incident notifications are enabled or disabled for this server.")]
         public async Task Status()
@@ -81,7 +81,7 @@ namespace XayahBot.Command.Incidents
         }
 
         [Command("disable")]
-        [RequireMod]
+        [RequireOwner]
         [RequireContext(ContextType.Guild)]
         [Summary("Disables incident notifications from Riot.")]
         public async Task Disable()

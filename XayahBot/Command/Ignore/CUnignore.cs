@@ -1,6 +1,4 @@
-﻿#pragma warning disable 4014
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,7 +29,7 @@ namespace XayahBot.Command.Ignore
         private List<string> _notExistingUnignoredList = new List<string>();
 
         [Command("unignore")]
-        [RequireMod]
+        [RequireOwner]
         [RequireContext(ContextType.Guild)]
         [Summary("Removes all mentioned user and channel from the ignore list.")]
         public async Task Unignore([Remainder] string text)

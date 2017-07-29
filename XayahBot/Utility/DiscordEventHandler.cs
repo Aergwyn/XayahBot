@@ -23,20 +23,10 @@ namespace XayahBot.Utility
 
         public async Task HandleReady()
         {
-            await this.SetGameAsync();
-            await this.StartBackgroundThreadsAsync();
-        }
-
-        private Task SetGameAsync()
-        {
             DiscordSocketClient client = this._serviceProvider.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
             string game = string.IsNullOrWhiteSpace(Property.GameActive.Value) ? null : Property.GameActive.Value;
-            client.SetGameAsync(game);
-            return Task.CompletedTask;
-        }
+            await client.SetGameAsync(game);
 
-        private async Task StartBackgroundThreadsAsync()
-        {
             RemindService remindService = this._serviceProvider.GetService(typeof(RemindService)) as RemindService;
             IncidentService incidentService = this._serviceProvider.GetService(typeof(IncidentService)) as IncidentService;
             await remindService.StartAsync();

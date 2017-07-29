@@ -1,6 +1,4 @@
-﻿#pragma warning disable 4014
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -39,7 +37,7 @@ namespace XayahBot.Command.Ignore
         }
 
         [Command("ignore")]
-        [RequireMod]
+        [RequireOwner]
         [RequireContext(ContextType.Guild)]
         [Summary("Displays the ignore list.")]
         public async Task Ignore()
@@ -87,7 +85,7 @@ namespace XayahBot.Command.Ignore
         }
 
         [Command("ignore")]
-        [RequireMod]
+        [RequireOwner]
         [RequireContext(ContextType.Guild)]
         [Summary("Adds all mentioned user and channel to the ignore list.")]
         public async Task Ignore([Remainder] string text)

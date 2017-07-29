@@ -29,10 +29,6 @@ namespace XayahBot
         private IServiceProvider _serviceProvider;
         private readonly IServiceCollection _serviceCollection = new ServiceCollection();
 
-        //private readonly RemindService _remindService;
-        //private readonly IncidentService _incidentService;
-        //private readonly RegistrationService _registrationService;
-
         private Program()
         {
             this._client = new DiscordSocketClient(new DiscordSocketConfig
@@ -43,14 +39,10 @@ namespace XayahBot
             {
                 DefaultRunMode = RunMode.Async
             });
-            //this._remindService = RemindService.GetInstance(this._client);
-            //this._incidentService = IncidentService.GetInstance(this._client);
-            //this._registrationService = RegistrationService.GetInstance(this._client);
         }
 
         private async Task StartAsync()
         {
-            this._client.Log += Logger.Log;
             await this.InitializeAsync();
             string token = FileReader.GetFirstLine(Property.FilePath.Value + Property.FileToken.Value);
             if (!string.IsNullOrWhiteSpace(token))
@@ -68,7 +60,7 @@ namespace XayahBot
                 }
 
                 await this._client.SetGameAsync(Property.GameShutdown.Value);
-                await this.StopBackgroundThreads();
+                await this.StopBackgroundThreads(this._serviceProvider);
                 await this._client.StopAsync();
             }
             else
@@ -82,6 +74,9 @@ namespace XayahBot
         {
             this._serviceCollection.AddSingleton(this._client);
             this._serviceCollection.AddSingleton(this._commandService);
+            this._serviceCollection.AddSingleton(RemindService.GetInstance(this._client));
+            this._serviceCollection.AddSingleton(IncidentService.GetInstance(this._client));
+            this._serviceCollection.AddSingleton(RegistrationService.GetInstance(this._client));
 
             this._serviceProvider = this._serviceCollection.BuildServiceProvider(true);
 
@@ -98,12 +93,11 @@ namespace XayahBot
             this._commandService.AddTypeReader<RegionTypeReader>(new RegionTypeReader());
         }
 
-        private async Task StopBackgroundThreads()
+        private async Task StopBackgroundThreads(IServiceProvider serviceProvider)
         {
-            //await this._remindService.StopAsync();
-            //await this._incidentService.StopAsync();
-            //await this._registrationService.StopAsync();
-            await Task.Delay(1);
+            await (serviceProvider.GetService(typeof(RemindService)) as RemindService)?.StopAsync();
+            await (serviceProvider.GetService(typeof(IncidentService)) as IncidentService)?.StopAsync();
+            await (serviceProvider.GetService(typeof(RegistrationService)) as RegistrationService)?.StopAsync();
         }
     }
 }

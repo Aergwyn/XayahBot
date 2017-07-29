@@ -1,15 +1,4 @@
-﻿#pragma warning disable 4014
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
-using XayahBot.Database.DAO;
-using XayahBot.Database.Model;
-using XayahBot.Utility;
+﻿using Discord.Commands;
 
 namespace XayahBot.Command.Quiz
 {

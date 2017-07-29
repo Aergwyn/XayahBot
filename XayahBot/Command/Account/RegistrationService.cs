@@ -1,6 +1,4 @@
-﻿#pragma warning disable 4014
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
