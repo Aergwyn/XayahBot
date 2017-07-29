@@ -71,7 +71,7 @@ namespace XayahBot.Utility.Messages
             return this;
         }
 
-        public DiscordFormatEmbed CreateFooter(CommandContext commandContext)
+        public DiscordFormatEmbed CreateFooter(ICommandContext commandContext)
         {
             this.SetFooterThumbnail(commandContext.User.GetAvatarUrl())
                 .AppendFooter(commandContext.User.ToString())

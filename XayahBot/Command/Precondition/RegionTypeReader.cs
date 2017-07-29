@@ -9,7 +9,7 @@ namespace XayahBot.Command.Precondition
 {
     public class RegionTypeReader : TypeReader
     {
-        public override Task<TypeReaderResult> Read(ICommandContext context, string input)
+        public override Task<TypeReaderResult> Read(ICommandContext context, string input, IServiceProvider services)
         {
             try
             {

@@ -16,7 +16,7 @@ namespace XayahBot.API.Riot
         protected RiotCachedApi(Region region)
         {
             this._region = region;
-            this._apiKey = FileReader.ReadFirstLine(Property.FilePath.Value + Property.FileRiotApiKey.Value);
+            this._apiKey = FileReader.GetFirstLine(Property.FilePath.Value + Property.FileRiotApiKey.Value);
         }
 
         protected override string GetApiKey()

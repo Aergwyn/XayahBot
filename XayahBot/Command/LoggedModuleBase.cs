@@ -7,9 +7,9 @@ namespace XayahBot.Command
     {
         private readonly string _requestText = "\"{0}\" requested \"{1}\".";
 
-        protected override void BeforeExecute()
+        protected override void BeforeExecute(CommandInfo command)
         {
-            base.BeforeExecute();
+            base.BeforeExecute(command);
             Logger.Warning(string.Format(this._requestText, this.Context.User, this.Context.Message.Resolve()));
         }
     }

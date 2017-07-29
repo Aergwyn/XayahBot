@@ -5,7 +5,7 @@ namespace XayahBot.Utility
 {
     public static class FileReader
     {
-        public static string ReadFirstLine(string path)
+        public static string GetFirstLine(string path)
         {
             string result = string.Empty;
             if (!string.IsNullOrWhiteSpace(path))

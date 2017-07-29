@@ -7,16 +7,17 @@ namespace XayahBot.Utility
 {
     public static class ChannelProvider
     {
-        public static async Task<IMessageChannel> GetDMChannelAsync(CommandContext context)
+        public static async Task<IMessageChannel> GetDMChannelAsync(ICommandContext context)
         {
             IMessageChannel channel = null;
-            if (context.IsPrivate)
+            CommandContext realContext = context as CommandContext;
+            if (realContext.IsPrivate)
             {
                 channel = context.Channel;
             }
             else
             {
-                channel = await context.Message.Author.CreateDMChannelAsync().ConfigureAwait(false);
+                channel = await context.Message.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
             }
             return channel ?? throw new NoChannelException();
         }
@@ -24,7 +25,7 @@ namespace XayahBot.Utility
         public static async Task<IMessageChannel> GetDMChannelAsync(IDiscordClient client, ulong userId)
         {
             IUser user = await client.GetUserAsync(userId);
-            IMessageChannel channel = await user?.CreateDMChannelAsync();
+            IMessageChannel channel = await user?.GetOrCreateDMChannelAsync();
             return channel ?? throw new NoChannelException();
         }
     }

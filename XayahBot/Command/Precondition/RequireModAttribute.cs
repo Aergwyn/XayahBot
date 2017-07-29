@@ -1,5 +1,4 @@
-﻿#pragma warning disable 1998
-
+﻿using System;
 using System.Threading.Tasks;
 using Discord.Commands;
 
@@ -7,17 +6,17 @@ namespace XayahBot.Command.Precondition
 {
     public class RequireModAttribute : PreconditionAttribute
     {
-        public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IDependencyMap map)
+        public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             string errorText = "You don't have the required permission for this command";
 
             if (DiscordPermissions.IsOwnerOrMod(context))
             {
-                return PreconditionResult.FromSuccess();
+                return Task.FromResult(PreconditionResult.FromSuccess());
             }
             else
             {
-                return PreconditionResult.FromError(errorText);
+                return Task.FromResult(PreconditionResult.FromError(errorText));
             }
         }
     }

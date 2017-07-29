@@ -125,7 +125,7 @@ namespace XayahBot.Command.Remind
         {
             DiscordFormatEmbed message = null;
             message = new DiscordFormatEmbed();
-            if (!this.Context.IsPrivate)
+            if (!(this.Context as CommandContext).IsPrivate)
             {
                 message.CreateFooter(this.Context);
             }

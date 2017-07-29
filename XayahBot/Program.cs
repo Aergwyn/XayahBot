@@ -1,11 +1,10 @@
-﻿#pragma warning disable 4014
-
-using System;
+﻿using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using XayahBot.Command.Account;
 using XayahBot.Command.Incidents;
 using XayahBot.Command.Precondition;
@@ -22,14 +21,17 @@ namespace XayahBot
             new Program().StartAsync().GetAwaiter().GetResult();
         }
 
-        // ---
+        // -
 
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commandService;
-        private readonly RemindService _remindService;
-        private readonly IncidentService _incidentService;
-        private readonly RegistrationService _registrationService;
-        private readonly IDependencyMap _dependencyMap = new DependencyMap();
+
+        private IServiceProvider _serviceProvider;
+        private readonly IServiceCollection _serviceCollection = new ServiceCollection();
+
+        //private readonly RemindService _remindService;
+        //private readonly IncidentService _incidentService;
+        //private readonly RegistrationService _registrationService;
 
         private Program()
         {
@@ -41,16 +43,16 @@ namespace XayahBot
             {
                 DefaultRunMode = RunMode.Async
             });
-            this._remindService = RemindService.GetInstance(this._client);
-            this._incidentService = IncidentService.GetInstance(this._client);
-            this._registrationService = RegistrationService.GetInstance(this._client);
+            //this._remindService = RemindService.GetInstance(this._client);
+            //this._incidentService = IncidentService.GetInstance(this._client);
+            //this._registrationService = RegistrationService.GetInstance(this._client);
         }
 
         private async Task StartAsync()
         {
             this._client.Log += Logger.Log;
             await this.InitializeAsync();
-            string token = FileReader.ReadFirstLine(Property.FilePath.Value + Property.FileToken.Value);
+            string token = FileReader.GetFirstLine(Property.FilePath.Value + Property.FileToken.Value);
             if (!string.IsNullOrWhiteSpace(token))
             {
                 await this._client.LoginAsync(TokenType.Bot, token);
@@ -71,78 +73,37 @@ namespace XayahBot
             }
             else
             {
-                Logger.Error("No token supplied.");
+                await Logger.Error("No token supplied.");
             }
             await Task.Delay(2500);
         }
 
         private async Task InitializeAsync()
         {
-            this._dependencyMap.Add(this._client);
-            this._dependencyMap.Add(this._remindService);
-            this._dependencyMap.Add(this._incidentService);
-            this._dependencyMap.Add(this._registrationService);
+            this._serviceCollection.AddSingleton(this._client);
+            this._serviceCollection.AddSingleton(this._commandService);
 
-            DiscordEventHandler eventHandler = new DiscordEventHandler(this._dependencyMap);
+            this._serviceProvider = this._serviceCollection.BuildServiceProvider(true);
+
+            await this._commandService.AddModulesAsync(Assembly.GetEntryAssembly());
+
+            DiscordEventHandler eventHandler = new DiscordEventHandler(this._serviceProvider);
+            this._client.Log += Logger.Log;
+            this._commandService.Log += Logger.Log;
             this._client.Ready += eventHandler.HandleReady;
             this._client.ChannelDestroyed += eventHandler.HandleChannelDestroyed;
             this._client.LeftGuild += eventHandler.HandleLeftGuild;
-            this._client.MessageReceived += this.HandleMessageReceived;
+            this._client.MessageReceived += eventHandler.HandleMessageReceived;
 
             this._commandService.AddTypeReader<RegionTypeReader>(new RegionTypeReader());
-            await this._commandService.AddModulesAsync(Assembly.GetEntryAssembly());
         }
 
         private async Task StopBackgroundThreads()
         {
-            await this._remindService.StopAsync();
-            await this._incidentService.StopAsync();
-            await this._registrationService.StopAsync();
-        }
-
-        public async Task HandleMessageReceived(SocketMessage arg)
-        {
-            int pos = 0;
-            if (arg is SocketUserMessage message && (message.HasCharPrefix(char.Parse(Property.CmdPrefix.Value), ref pos) ||
-                message.HasMentionPrefix(message.Discord.CurrentUser, ref pos)))
-            {
-                CommandContext context = new CommandContext(message.Discord, message);
-                IResult result = await this._commandService.ExecuteAsync(context, pos, this._dependencyMap);
-                if (!result.IsSuccess)
-                {
-                    if (this.IsUserError(result.Error))
-                    {
-                        IMessageChannel dmChannel = await ChannelProvider.GetDMChannelAsync(context);
-                        DiscordFormatEmbed errorResponse = new DiscordFormatEmbed();
-                        errorResponse.AppendDescription("This did not work!")
-                            .AppendDescription(Environment.NewLine)
-                            .AppendDescription($"Reason: { result.ErrorReason}");
-                        dmChannel.SendMessageAsync("", false, errorResponse.ToEmbed());
-                    }
-                    else if (this.IsInterestingError(result.Error))
-                    {
-                        Logger.Debug($"Command failed: {result.ErrorReason}");
-                    }
-                }
-            }
-        }
-
-        private bool IsUserError(CommandError? error)
-        {
-            if (error == CommandError.UnmetPrecondition || error == CommandError.BadArgCount || error == CommandError.ParseFailed)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        private bool IsInterestingError(CommandError? error)
-        {
-            if (error == CommandError.Exception || error == CommandError.ObjectNotFound)
-            {
-                return true;
-            }
-            return false;
+            //await this._remindService.StopAsync();
+            //await this._incidentService.StopAsync();
+            //await this._registrationService.StopAsync();
+            await Task.Delay(1);
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿#pragma warning disable 1998
-
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Discord.Commands;
 
@@ -16,9 +14,9 @@ namespace XayahBot.Command.Precondition
             this.CategoryType = category;
         }
 
-        public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IDependencyMap map)
+        public override Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
-            return PreconditionResult.FromSuccess();
+            return Task.FromResult(PreconditionResult.FromSuccess());
         }
     }
 }

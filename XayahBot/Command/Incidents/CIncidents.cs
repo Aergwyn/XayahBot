@@ -1,5 +1,4 @@
-﻿#pragma warning disable 4014
-
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -23,10 +22,10 @@ namespace XayahBot.Command.Incidents
         private readonly IncidentService _incidentService;
         private readonly IncidentSubscriberDAO _incidentSubscriberDao = new IncidentSubscriberDAO();
 
-        public CIncidents(IDependencyMap map)
+        public CIncidents(IServiceProvider serviceProvider)
         {
-            this._client = map.Get<DiscordSocketClient>();
-            this._incidentService = map.Get<IncidentService>();
+            this._client = serviceProvider.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
+            this._incidentService = serviceProvider.GetService(typeof(IncidentService)) as IncidentService;
         }
 
         [Command("enable")]
@@ -54,7 +53,7 @@ namespace XayahBot.Command.Incidents
             }
             catch (NotSavedException nsex)
             {
-                Logger.Error($"Failed to enable incident notifications on {this.Context.Guild.Name} ({this.Context.Guild.Id}).", nsex);
+                await Logger.Error($"Failed to enable incident notifications on {this.Context.Guild.Name} ({this.Context.Guild.Id}).", nsex);
             }
             await this.ReplyAsync("", false, message.ToEmbed());
             await this._incidentService.StartAsync();
@@ -100,7 +99,7 @@ namespace XayahBot.Command.Incidents
             }
             catch (NotSavedException nsex)
             {
-                Logger.Error($"Failed to disable incident notifications on {this.Context.Guild.Name} ({this.Context.Guild.Id}).", nsex);
+                await Logger.Error($"Failed to disable incident notifications on {this.Context.Guild.Name} ({this.Context.Guild.Id}).", nsex);
             }
             this.ReplyAsync("", false, message.ToEmbed());
         }
