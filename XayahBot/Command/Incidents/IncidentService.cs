@@ -10,8 +10,8 @@ using XayahBot.API.Error;
 using XayahBot.API.Riot;
 using XayahBot.API.Riot.Model;
 using XayahBot.Database.DAO;
-using XayahBot.Database.Error;
 using XayahBot.Database.Model;
+using XayahBot.Error;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
@@ -64,7 +64,6 @@ namespace XayahBot.Command.Incidents
 
         private async Task RunAsync()
         {
-
             bool init = true;
             bool processed = false;
             this._isRunning = true;

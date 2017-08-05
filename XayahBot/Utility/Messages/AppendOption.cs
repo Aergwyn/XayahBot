@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace XayahBot.Utility.Messages
 {
@@ -8,6 +9,7 @@ namespace XayahBot.Utility.Messages
         public static readonly AppendOption Italic = new AppendOption("*");
         public static readonly AppendOption Strikethrough = new AppendOption("~~");
         public static readonly AppendOption Underscore = new AppendOption("__");
+        public static readonly AppendOption Codeblock = new AppendOption($"{Environment.NewLine}```{Environment.NewLine}");
 
         public static string Start(params AppendOption[] options)
         {

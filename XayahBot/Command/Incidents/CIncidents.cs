@@ -4,18 +4,14 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using XayahBot.Command.Precondition;
 using XayahBot.Database.DAO;
-using XayahBot.Database.Error;
 using XayahBot.Database.Model;
 using XayahBot.Error;
-using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command.Incidents
 {
     [Group("incidents")]
-    [Category(CategoryType.INCIDENTS)]
     public class CIncidents : ModuleBase
     {
         private readonly DiscordSocketClient _client;
@@ -50,10 +46,6 @@ namespace XayahBot.Command.Incidents
             catch (AlreadyExistingException)
             {
                 message.AppendDescription("Could not enable incident notifications because it is already enabled.");
-            }
-            catch (NotSavedException nsex)
-            {
-                await Logger.Error($"Failed to enable incident notifications on {this.Context.Guild.Name} ({this.Context.Guild.Id}).", nsex);
             }
             await this.ReplyAsync("", false, message.ToEmbed());
             await this._incidentService.StartAsync();
@@ -96,10 +88,6 @@ namespace XayahBot.Command.Incidents
             catch (NotExistingException)
             {
                 message.AppendDescription("Could not disable incident notifications because it was not enabled.");
-            }
-            catch (NotSavedException nsex)
-            {
-                await Logger.Error($"Failed to disable incident notifications on {this.Context.Guild.Name} ({this.Context.Guild.Id}).", nsex);
             }
             this.ReplyAsync("", false, message.ToEmbed());
         }

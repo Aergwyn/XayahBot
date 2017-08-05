@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using XayahBot.Database.Error;
 using XayahBot.Database.Model;
 
 namespace XayahBot.Database.DAO
@@ -24,10 +23,7 @@ namespace XayahBot.Database.DAO
                 if (matches.Count > 0)
                 {
                     database.RemoveRange(matches);
-                    if (await database.SaveChangesAsync() <= 0)
-                    {
-                        throw new NotSavedException();
-                    }
+                    await database.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
         }

@@ -42,16 +42,7 @@ namespace XayahBot.Utility.Messages
             return this;
         }
 
-        public DiscordFormatEmbed AppendDescriptionCodeBlock(string text)
-        {
-            if (!string.IsNullOrWhiteSpace(text))
-            {
-                this._builder.Description += Environment.NewLine + "```" + Environment.NewLine + text + Environment.NewLine + "```" + Environment.NewLine;
-            }
-            return this;
-        }
-
-        public DiscordFormatEmbed AddField(string name, string value, FieldFormatType? formatType = null, params AppendOption[] options)
+        public DiscordFormatEmbed AddField(string name, string value, bool inline = true, FieldFormatType? formatType = null, params AppendOption[] options)
         {
             string nameText = name;
             string valueText = value;
@@ -67,7 +58,7 @@ namespace XayahBot.Utility.Messages
                     valueText = this.ApplyOptions(value, options);
                     break;
             }
-            this._builder.AddField(nameText, valueText);
+            this._builder.AddField(nameText, valueText, inline);
             return this;
         }
 

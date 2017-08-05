@@ -5,12 +5,11 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using XayahBot.Command.Account;
 using XayahBot.Command.Incidents;
 using XayahBot.Command.Precondition;
 using XayahBot.Command.Remind;
+using XayahBot.Database;
 using XayahBot.Utility;
-using XayahBot.Utility.Messages;
 
 namespace XayahBot
 {
@@ -21,10 +20,10 @@ namespace XayahBot
             new Program().StartAsync().GetAwaiter().GetResult();
         }
 
-        // -
+        // ---
 
         private readonly DiscordSocketClient _client;
-        private readonly CommandService _commandService;
+        private readonly CommandService _commandService = new CommandService();
 
         private IServiceProvider _serviceProvider;
         private readonly IServiceCollection _serviceCollection = new ServiceCollection();
@@ -34,10 +33,6 @@ namespace XayahBot
             this._client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 LogLevel = LogSeverity.Info
-            });
-            this._commandService = new CommandService(new CommandServiceConfig
-            {
-                DefaultRunMode = RunMode.Async
             });
         }
 
@@ -53,19 +48,19 @@ namespace XayahBot
                 bool exit = false;
                 while (!exit)
                 {
-                    if (Console.ReadLine().ToLower().Equals("exit"))
+                    if (Console.ReadLine().ToLower().Equals("logout"))
                     {
                         exit = true;
                     }
                 }
 
-                await this._client.SetGameAsync(Property.GameShutdown.Value);
-                await this.StopBackgroundThreads(this._serviceProvider);
+                await this._client.SetGameAsync("shutting down...");
+                await this.StopBackgroundThreadsAsync();
                 await this._client.StopAsync();
             }
             else
             {
-                await Logger.Error("No token supplied.");
+                Logger.Error("No token supplied.");
             }
             await Task.Delay(2500);
         }
@@ -76,11 +71,11 @@ namespace XayahBot
             this._serviceCollection.AddSingleton(this._commandService);
             this._serviceCollection.AddSingleton(RemindService.GetInstance(this._client));
             this._serviceCollection.AddSingleton(IncidentService.GetInstance(this._client));
-            this._serviceCollection.AddSingleton(RegistrationService.GetInstance(this._client));
 
             this._serviceProvider = this._serviceCollection.BuildServiceProvider(true);
 
             await this._commandService.AddModulesAsync(Assembly.GetEntryAssembly());
+            this._commandService.AddTypeReader<TimeUnitTypeReader>(new TimeUnitTypeReader());
 
             DiscordEventHandler eventHandler = new DiscordEventHandler(this._serviceProvider);
             this._client.Log += Logger.Log;
@@ -90,14 +85,16 @@ namespace XayahBot
             this._client.LeftGuild += eventHandler.HandleLeftGuild;
             this._client.MessageReceived += eventHandler.HandleMessageReceived;
 
-            this._commandService.AddTypeReader<RegionTypeReader>(new RegionTypeReader());
+            using (GeneralContext database = new GeneralContext())
+            {
+                await database.Database.EnsureCreatedAsync();
+            }
         }
 
-        private async Task StopBackgroundThreads(IServiceProvider serviceProvider)
+        private async Task StopBackgroundThreadsAsync()
         {
-            await (serviceProvider.GetService(typeof(RemindService)) as RemindService)?.StopAsync();
-            await (serviceProvider.GetService(typeof(IncidentService)) as IncidentService)?.StopAsync();
-            await (serviceProvider.GetService(typeof(RegistrationService)) as RegistrationService)?.StopAsync();
+            await (this._serviceProvider.GetService(typeof(RemindService)) as RemindService)?.StopAsync();
+            await (this._serviceProvider.GetService(typeof(IncidentService)) as IncidentService)?.StopAsync();
         }
     }
 }

@@ -1,19 +1,22 @@
 ﻿using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
-using XayahBot.Command.Precondition;
 using XayahBot.Utility;
 
 namespace XayahBot.Command.Owner
 {
-    [Category(CategoryType.OWNER)]
-    public class CGame : LoggedModuleBase
+    public class CGame : ModuleBase
     {
         [Command("game")]
         [RequireOwner]
         [RequireContext(ContextType.DM)]
-        [Summary("Updates the current game.")]
         public Task Game([Remainder] string text = "")
+        {
+            Task.Run(() => this.SetGame(text));
+            return Task.CompletedTask;
+        }
+
+        private async Task SetGame(string text)
         {
             DiscordSocketClient client = this.Context.Client as DiscordSocketClient;
             string game = null;
@@ -22,8 +25,7 @@ namespace XayahBot.Command.Owner
                 game = text.Trim();
             }
             Property.GameActive.Value = game;
-            client.SetGameAsync(game);
-            return Task.CompletedTask;
+            await client.SetGameAsync(game);
         }
     }
 }

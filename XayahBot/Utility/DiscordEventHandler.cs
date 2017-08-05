@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable 4014
+
+using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -13,7 +15,6 @@ namespace XayahBot.Utility
     public class DiscordEventHandler
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly IgnoreListDAO _ignoreListDao = new IgnoreListDAO();
         private readonly IncidentSubscriberDAO _incidentSubscriberDao = new IncidentSubscriberDAO();
 
         public DiscordEventHandler(IServiceProvider serviceProvider)
@@ -21,16 +22,18 @@ namespace XayahBot.Utility
             this._serviceProvider = serviceProvider;
         }
 
-        public async Task HandleReady()
+        public Task HandleReady()
         {
             DiscordSocketClient client = this._serviceProvider.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
-            string game = string.IsNullOrWhiteSpace(Property.GameActive.Value) ? null : Property.GameActive.Value;
-            await client.SetGameAsync(game);
-
             RemindService remindService = this._serviceProvider.GetService(typeof(RemindService)) as RemindService;
             IncidentService incidentService = this._serviceProvider.GetService(typeof(IncidentService)) as IncidentService;
-            await remindService.StartAsync();
-            await incidentService.StartAsync();
+
+            string game = string.IsNullOrWhiteSpace(Property.GameActive.Value) ? null : Property.GameActive.Value;
+            client.SetGameAsync(game);
+            remindService.StartAsync();
+            incidentService.StartAsync();
+
+            return Task.CompletedTask;
         }
 
         public async Task HandleMessageReceived(SocketMessage arg)
@@ -42,7 +45,7 @@ namespace XayahBot.Utility
             }
             int pos = 0;
             DiscordSocketClient client = this._serviceProvider.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
-            if ((message.HasCharPrefix(char.Parse(Property.CmdPrefix.Value), ref pos) || message.HasMentionPrefix(client.CurrentUser, ref pos)))
+            if (message.HasMentionPrefix(client.CurrentUser, ref pos))
             {
                 CommandContext context = new CommandContext(client, message);
                 CommandService commandService = this._serviceProvider.GetService(typeof(CommandService)) as CommandService;
@@ -53,17 +56,14 @@ namespace XayahBot.Utility
                     if (this.IsUserError(result.Error))
                     {
                         IMessageChannel dmChannel = await ChannelProvider.GetDMChannelAsync(context);
-
-                        DiscordFormatEmbed errorResponse = new DiscordFormatEmbed();
-                        errorResponse.AppendDescription("This did not work!")
-                            .AppendDescription(Environment.NewLine)
-                            .AppendDescription($"Reason: { result.ErrorReason}");
-
-                        await dmChannel.SendMessageAsync("", false, errorResponse.ToEmbed());
+                        DiscordFormatEmbed errorResponse = new DiscordFormatEmbed()
+                            .AppendTitle($"{XayahReaction.Error} This didn't work")
+                            .AddField("Why, you ask?", result.ErrorReason);
+                        dmChannel.SendMessageAsync("", false, errorResponse.ToEmbed());
                     }
                     else if (this.IsInterestingError(result.Error))
                     {
-                        await Logger.Debug($"Command failed: {result.ErrorReason}");
+                        Logger.Debug($"Command failed: {result.ErrorReason}");
                     }
                 }
             }
@@ -87,25 +87,22 @@ namespace XayahBot.Utility
             return false;
         }
 
-        public async Task HandleChannelDestroyed(SocketChannel deletedChannel)
+        public Task HandleChannelDestroyed(SocketChannel deletedChannel)
         {
-            if (this._ignoreListDao.HasSubject(deletedChannel.Id))
-            {
-                await this._ignoreListDao.RemoveBySubjectIdAsync(deletedChannel.Id);
-            }
             if (this._incidentSubscriberDao.HasChannelSubscribed(deletedChannel.Id))
             {
-                await this._incidentSubscriberDao.RemoveByChannelIdAsync(deletedChannel.Id);
+                this._incidentSubscriberDao.RemoveByChannelIdAsync(deletedChannel.Id);
             }
+            return Task.CompletedTask;
         }
 
-        public async Task HandleLeftGuild(SocketGuild leftGuild)
+        public Task HandleLeftGuild(SocketGuild leftGuild)
         {
-            await this._ignoreListDao.RemoveByGuildIdAsync(leftGuild.Id);
             if (this._incidentSubscriberDao.HasGuildSubscribed(leftGuild.Id))
             {
-                await this._incidentSubscriberDao.RemoveByGuildIdAsync(leftGuild.Id);
+                this._incidentSubscriberDao.RemoveByGuildIdAsync(leftGuild.Id);
             }
+            return Task.CompletedTask;
         }
     }
 }

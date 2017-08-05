@@ -127,7 +127,7 @@ namespace XayahBot.Command.Data
             {
                 text += $"{Environment.NewLine}{skin.Num.ToString().PadLeft(2)} - {skin.Name}";
             }
-            this._message.AppendDescriptionCodeBlock(text);
+            this._message.AppendDescription(text, AppendOption.Codeblock);
         }
 
         private void AppendSpellData()
@@ -142,7 +142,7 @@ namespace XayahBot.Command.Data
                     $"Cooldown - {spell.GetCooldownString()}{Environment.NewLine}" +
                     $"Scaling  - {spell.GetVarsString()}";
             }
-            this._message.AppendDescriptionCodeBlock(text);
+            this._message.AppendDescription(text, AppendOption.Codeblock);
         }
 
         private void AppendStatisticData()
@@ -171,7 +171,7 @@ namespace XayahBot.Command.Data
                 $"Attack Range   - {statList.Align(stats.AttackRange)}" +
                 Environment.NewLine +
                 $"Movement Speed - {statList.Align(stats.MoveSpeed)}";
-            this._message.AppendDescriptionCodeBlock(text);
+            this._message.AppendDescription(text, AppendOption.Codeblock);
         }
 
         public async Task PostAsync()

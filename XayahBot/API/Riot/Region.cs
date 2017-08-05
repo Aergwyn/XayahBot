@@ -40,13 +40,14 @@ namespace XayahBot.API.Riot
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
-                Region match = Values.FirstOrDefault(x => x.Name.ToLower().Equals(name.ToLower()));
+                name = name.ToLower();
+                Region match = Values.FirstOrDefault(x => x.Name.ToLower().Equals(name));
                 if (match != null)
                 {
                     return match;
                 }
             }
-            throw new UnknownTypeException();
+            throw new NotExistingException();
         }
 
         // ---

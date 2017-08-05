@@ -9,9 +9,13 @@ namespace XayahBot.Utility
     {
         public static async Task<IMessageChannel> GetDMChannelAsync(ICommandContext context)
         {
+            return await GetDMChannelAsync(context as CommandContext).ConfigureAwait(false);
+        }
+
+        public static async Task<IMessageChannel> GetDMChannelAsync(CommandContext context)
+        {
             IMessageChannel channel = null;
-            CommandContext realContext = context as CommandContext;
-            if (realContext.IsPrivate)
+            if (context.IsPrivate)
             {
                 channel = context.Channel;
             }

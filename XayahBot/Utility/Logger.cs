@@ -6,29 +6,29 @@ namespace XayahBot.Utility
 {
     public static class Logger
     {
-        public static Task Debug(object message, Exception exception = null)
+        public static void Debug(object message, Exception exception = null)
         {
-            return Log(LogSeverity.Debug, message?.ToString(), exception);
+            Log(LogSeverity.Debug, message?.ToString(), exception);
         }
 
-        public static Task Info(object message, Exception exception = null)
+        public static void Info(object message, Exception exception = null)
         {
-            return Log(LogSeverity.Info, message?.ToString(), exception);
+            Log(LogSeverity.Info, message?.ToString(), exception);
         }
 
-        public static Task Warning(object message, Exception exception = null)
+        public static void Warning(object message, Exception exception = null)
         {
-            return Log(LogSeverity.Warning, message?.ToString(), exception);
+            Log(LogSeverity.Warning, message?.ToString(), exception);
         }
 
-        public static Task Error(object message, Exception exception = null)
+        public static void Error(object message, Exception exception = null)
         {
-            return Log(LogSeverity.Warning, message?.ToString(), exception);
+            Log(LogSeverity.Warning, message?.ToString(), exception);
         }
 
-        public static Task Log(LogSeverity severity, string message, Exception exception = null)
+        public static void Log(LogSeverity severity, string message, Exception exception = null)
         {
-            return Log(new LogMessage(severity, nameof(Logger), message, exception));
+            Task.Run(() => Log(new LogMessage(severity, nameof(Logger), message, exception)).ConfigureAwait(false));
         }
 
         public static Task Log(LogMessage message)
@@ -71,17 +71,17 @@ namespace XayahBot.Utility
         {
             string result = text?.ToString() ?? string.Empty;
             result = result.PadRight(size);
-            return CutDown(result, size);
+            return Trim(result, size);
         }
 
         private static string PadNumber(object number, int size)
         {
             string result = number?.ToString() ?? string.Empty;
             result = result.PadLeft(size, '0');
-            return CutDown(result, size);
+            return Trim(result, size);
         }
 
-        private static string CutDown(string text, int size)
+        private static string Trim(string text, int size)
         {
             if (text.Length > size)
             {

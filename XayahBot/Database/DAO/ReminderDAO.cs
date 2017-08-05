@@ -1,22 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using XayahBot.Database.Error;
 using XayahBot.Database.Model;
+using XayahBot.Error;
 
 namespace XayahBot.Database.DAO
 {
-    public class ReminderDAO
+    public class ReminderDAO : AbstractDAO<TReminder>
     {
-        public List<TRemindEntry> GetAll(ulong userId)
-        {
-            using (GeneralContext database = new GeneralContext())
-            {
-                return database.Reminder.Where(x => x.UserId.Equals(userId)).ToList();
-            }
-        }
-
-        public List<TRemindEntry> GetAll()
+        public List<TReminder> GetAll()
         {
             using (GeneralContext database = new GeneralContext())
             {
@@ -24,36 +16,20 @@ namespace XayahBot.Database.DAO
             }
         }
 
-        public async Task SaveAsync(TRemindEntry entry)
+        public List<TReminder> GetAll(ulong userId)
         {
             using (GeneralContext database = new GeneralContext())
             {
-                entry.UserEntryNumber = this.GetEntryNumber(entry.UserId);
-                database.Reminder.Add(entry);
-                if (await database.SaveChangesAsync() <= 0)
-                {
-                    throw new NotSavedException();
-                }
+                return database.Reminder.Where(x => x.UserId.Equals(userId)).ToList();
             }
         }
 
-        public async Task RemoveAsync(ulong userId, int userEntryNumber)
+        public async Task RemoveByUserAsync(ulong userId)
         {
             using (GeneralContext database = new GeneralContext())
             {
-                TRemindEntry match = database.Reminder.FirstOrDefault(x => x.UserId.Equals(userId) && x.UserEntryNumber.Equals(userEntryNumber));
-                if (match != null)
-                {
-                    database.Remove(match);
-                    if (await database.SaveChangesAsync() <= 0)
-                    {
-                        throw new NotSavedException();
-                    }
-                }
-                else
-                {
-                    throw new NotExistingException();
-                }
+                database.Reminder.RemoveRange(database.Reminder.Where(x => x.UserId.Equals(userId)));
+                await database.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -64,18 +40,6 @@ namespace XayahBot.Database.DAO
                 return true;
             }
             return false;
-        }
-
-        private int GetEntryNumber(ulong userId)
-        {
-            List<TRemindEntry> existingReminder = this.GetAll(userId);
-            int userEntryNumber = 0;
-            do
-            {
-                userEntryNumber++;
-            }
-            while (existingReminder.Where(x => x.UserEntryNumber.Equals(userEntryNumber)).Count() > 0);
-            return userEntryNumber;
         }
     }
 }

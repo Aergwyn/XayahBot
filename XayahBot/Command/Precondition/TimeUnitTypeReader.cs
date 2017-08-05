@@ -1,25 +1,25 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Discord.Commands;
-using XayahBot.API.Riot;
+using XayahBot.Command.Remind;
 using XayahBot.Error;
 using XayahBot.Utility;
 
 namespace XayahBot.Command.Precondition
 {
-    public class RegionTypeReader : TypeReader
+    public class TimeUnitTypeReader : TypeReader
     {
         public override Task<TypeReaderResult> Read(ICommandContext context, string input, IServiceProvider services)
         {
             try
             {
-                Region match = Region.GetByName(input);
+                TimeUnit match = TimeUnit.Get(input);
                 return Task.FromResult(TypeReaderResult.FromSuccess(match));
             }
-            catch (UnknownTypeException)
+            catch (NotExistingException)
             {
-                string regions = ListUtil.BuildEnumeration(Region.Values);
-                return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed, $"Region \"{input}\" does not exist. Choose one: {regions}"));
+                string timeUnits = ListUtil.BuildEnumeration(TimeUnit.Values);
+                return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed, $"Time-unit `{input}` doesn't exist. Choose one of `{timeUnits}`"));
             }
         }
     }

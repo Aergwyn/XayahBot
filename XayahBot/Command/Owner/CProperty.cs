@@ -2,31 +2,25 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
-using XayahBot.Command.Precondition;
-using XayahBot.Database.Error;
+using XayahBot.Error;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command.Owner
 {
     [Group("prop")]
-    [Category(CategoryType.OWNER)]
-    public class CProperty : LoggedModuleBase
+    public class CProperty : ModuleBase
     {
         [Command("get")]
         [RequireOwner]
         [RequireContext(ContextType.DM)]
-        [Summary("Displays all properties.")]
         public Task Get()
         {
-            DiscordFormatEmbed message = new DiscordFormatEmbed()
-                .AppendDescription("Here is a list of available properties.")
-                .AppendDescriptionCodeBlock(this.BuildPropertyList());
-            this.ReplyAsync("", false, message.ToEmbed());
+            Task.Run(() => this.BuildPropertyList());
             return Task.CompletedTask;
         }
 
-        private string BuildPropertyList()
+        private async Task BuildPropertyList()
         {
             string text = string.Empty;
             int maxWidth = Property.UpdatableValues.OrderByDescending(x => x.Name.Length).First().Name.Length;
@@ -39,14 +33,22 @@ namespace XayahBot.Command.Owner
                 Property property = Property.UpdatableValues.ElementAt(i);
                 text += property.Name.PadRight(maxWidth) + ":" + property.Value;
             }
-            return text;
+            DiscordFormatEmbed message = new DiscordFormatEmbed()
+                .AppendTitle($"{XayahReaction.Option} Property list")
+                .AppendDescription(text, AppendOption.Codeblock);
+            await this.ReplyAsync("", false, message.ToEmbed());
         }
 
         [Command("set")]
         [RequireOwner]
         [RequireContext(ContextType.DM)]
-        [Summary("Updates a specific property.")]
         public Task Set(string name, [Remainder]string value = "")
+        {
+            Task.Run(() => this.SetProperty(name, value));
+            return Task.CompletedTask;
+        }
+
+        private async Task SetProperty(string name, string value)
         {
             value = value.Trim();
             DiscordFormatEmbed message = new DiscordFormatEmbed();
@@ -55,15 +57,17 @@ namespace XayahBot.Command.Owner
                 Property property = Property.GetUpdatableByName(name);
                 string oldValue = property.Value;
                 property.Value = value;
-                message.AppendDescription($"Value of property named `{property.Name}` changed.")
-                    .AppendDescriptionCodeBlock($"Old:{oldValue}{Environment.NewLine}New:{value}");
+                message
+                    .AppendTitle($"{XayahReaction.Success} Done")
+                    .AppendDescription($"Old:{oldValue}{Environment.NewLine}New:{value}", AppendOption.Codeblock);
             }
             catch (NotExistingException)
             {
-                message.AppendDescription($"Could not find property named `{name}`!");
+                message
+                    .AppendTitle($"{XayahReaction.Error} Nope")
+                    .AppendDescription($"I couldn't find property named `{name}`.");
             }
-            this.ReplyAsync("", false, message.ToEmbed());
-            return Task.CompletedTask;
+            await this.ReplyAsync("", false, message.ToEmbed());
         }
     }
 }

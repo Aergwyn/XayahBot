@@ -1,11 +1,12 @@
 ﻿using System.Linq;
-using XayahBot.Database.Error;
+using System.Threading.Tasks;
 using XayahBot.Database.Model;
+using XayahBot.Error;
 using XayahBot.Utility;
 
 namespace XayahBot.Database.DAO
 {
-    public class PropertiesDAO
+    public class PropertyDAO
     {
         public string GetValue(Property property)
         {
@@ -20,7 +21,7 @@ namespace XayahBot.Database.DAO
             throw new NotExistingException();
         }
 
-        public void SetValueAsync(Property property)
+        public void SetValue(Property property)
         {
             using (GeneralContext database = new GeneralContext())
             {
@@ -34,7 +35,7 @@ namespace XayahBot.Database.DAO
                     database.Properties.Add(dbProperty);
                 }
                 dbProperty.Value = property.Value;
-                database.SaveChangesAsync();
+                database.SaveChanges();
             }
         }
     }

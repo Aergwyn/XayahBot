@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace XayahBot.Utility.Messages
+﻿namespace XayahBot.Utility.Messages
 {
     public class DiscordFormatMessage
     {
@@ -20,15 +18,6 @@ namespace XayahBot.Utility.Messages
             else
             {
                 this.Text += AppendOption.Start(options) + text + AppendOption.End(options);
-            }
-            return this;
-        }
-
-        public DiscordFormatMessage AppendCodeBlock(string text)
-        {
-            if (!string.IsNullOrWhiteSpace(text))
-            {
-                this.Text += Environment.NewLine + "```" + Environment.NewLine + text + Environment.NewLine + "```" + Environment.NewLine;
             }
             return this;
         }

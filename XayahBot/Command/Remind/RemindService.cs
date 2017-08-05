@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
-using Discord.WebSocket;
 using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
 using XayahBot.Utility;
@@ -28,7 +27,7 @@ namespace XayahBot.Command.Remind
         // ---
 
         private readonly IDiscordClient _client;
-        private readonly ReminderDAO _reminderDao = new ReminderDAO();
+        private readonly ReminderDAO _reminderDAO = new ReminderDAO();
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
         private Task _process;
         private bool _isRunning = false;
@@ -44,7 +43,7 @@ namespace XayahBot.Command.Remind
             await this._lock.WaitAsync();
             try
             {
-                if (!this._isRunning && this._reminderDao.HasReminder())
+                if (this.IsEnabled() && !this._isRunning && this._reminderDAO.HasReminder())
                 {
                     this._process = Task.Run(() => this.RunAsync());
                     Logger.Info($"{nameof(RemindService)} started.");
@@ -54,6 +53,16 @@ namespace XayahBot.Command.Remind
             {
                 this._lock.Release();
             }
+        }
+
+        private bool IsEnabled()
+        {
+            string value = Property.RemindDisabled.Value;
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return true;
+            }
+            return false;
         }
 
         private async Task RunAsync()
@@ -70,16 +79,16 @@ namespace XayahBot.Command.Remind
                     {
                         init = false;
                         processed = true;
-                        List<TRemindEntry> reminder = this._reminderDao.GetAll();
-                        List<TRemindEntry> dueReminder = reminder.Where(x => !this._currentTimerList.Keys.Contains(this.BuildTimerKey(x.UserId, x.UserEntryNumber))).ToList();
-                        await ProcessExpiringRemindersAsync(dueReminder, interval);
+                        List<TReminder> reminder = this._reminderDAO.GetAll();
+                        List<TReminder> dueReminder = reminder.Where(x => !this._currentTimerList.Keys.Contains(this.BuildTimerKey(x.UserId, x.ExpirationTime))).ToList();
+                        await ProcessExpiringReminderAsync(dueReminder, interval);
                     }
                 }
                 else
                 {
                     processed = false;
                 }
-                if (this._reminderDao.HasReminder())
+                if (this.IsEnabled() && this._reminderDAO.HasReminder())
                 {
                     await Task.Delay(new TimeSpan(0, 0, 10));
                 }
@@ -90,9 +99,9 @@ namespace XayahBot.Command.Remind
             }
         }
 
-        private Task ProcessExpiringRemindersAsync(List<TRemindEntry> list, int interval)
+        private Task ProcessExpiringReminderAsync(List<TReminder> dueReminder, int interval)
         {
-            foreach (TRemindEntry reminder in list)
+            foreach (TReminder reminder in dueReminder)
             {
                 if (DateTime.UtcNow.AddMinutes(interval) > reminder.ExpirationTime)
                 {
@@ -101,61 +110,29 @@ namespace XayahBot.Command.Remind
                     {
                         remainingTicks = 0;
                     }
-                    this._currentTimerList.Add(this.BuildTimerKey(reminder.UserId, reminder.UserEntryNumber),
+                    this._currentTimerList.Add(this.BuildTimerKey(reminder.UserId, reminder.ExpirationTime),
                         new Timer(this.HandleExpiredReminder, reminder, new TimeSpan(remainingTicks), new TimeSpan(Timeout.Infinite)));
                 }
             }
             return Task.CompletedTask;
         }
 
-        private string BuildTimerKey(ulong userId, int userEntryNumber)
+        private string BuildTimerKey(ulong userId, DateTime expirationTime)
         {
-            return userId.ToString() + userEntryNumber;
+            return userId.ToString() + expirationTime.ToString();
         }
 
         private async void HandleExpiredReminder(object state)
         {
-            TRemindEntry reminder = (TRemindEntry)state;
-            await this._reminderDao.RemoveAsync(reminder.UserId, reminder.UserEntryNumber);
-            StopTimer(this.BuildTimerKey(reminder.UserId, reminder.UserEntryNumber));
+            TReminder reminder = state as TReminder;
+            await this._reminderDAO.RemoveAsync(reminder);
+            StopTimer(this.BuildTimerKey(reminder.UserId, reminder.ExpirationTime));
+
             IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this._client, reminder.UserId);
             DiscordFormatEmbed message = new DiscordFormatEmbed()
-                .AppendDescription("Back then you told me to remind you of this:" + Environment.NewLine)
+                .AppendTitle($"{XayahReaction.Time} Reminder expired")
                 .AppendDescription(reminder.Message);
-            channel.SendMessageAsync("", false, message.ToEmbed());
-        }
-
-        public async Task StopAsync()
-        {
-            Logger.Info($"Requested stop for {nameof(RemindService)}.");
-            this._isRunning = false;
-            await this.StopTimersAsync();
-            if (this._process != null)
-            {
-                await this._process;
-            }
-        }
-
-        private Task StopTimersAsync()
-        {
-            foreach (Timer timer in this._currentTimerList.Values)
-            {
-                timer.Dispose();
-            }
-            this._currentTimerList.Clear();
-            return Task.CompletedTask;
-        }
-
-        public async Task AddNewAsync(TRemindEntry reminder)
-        {
-            await this._reminderDao.SaveAsync(reminder);
-            await StartAsync();
-        }
-
-        public async Task RemoveAsync(ulong userId, int userEntryNumber)
-        {
-            await this._reminderDao.RemoveAsync(userId, userEntryNumber);
-            StopTimer(this.BuildTimerKey(userId, userEntryNumber));
+            await channel.SendMessageAsync("", false, message.ToEmbed());
         }
 
         private void StopTimer(string key)
@@ -164,6 +141,38 @@ namespace XayahBot.Command.Remind
             {
                 timer.Dispose();
                 this._currentTimerList.Remove(key);
+            }
+        }
+
+        public async Task StopAsync()
+        {
+            Logger.Info($"Requested stop for {nameof(RemindService)}.");
+            this._isRunning = false;
+
+            foreach (Timer timer in this._currentTimerList.Values)
+            {
+                timer.Dispose();
+            }
+            this._currentTimerList.Clear();
+
+            if (this._process != null)
+            {
+                await this._process;
+            }
+        }
+
+        public async Task AddNewAsync(TReminder reminder)
+        {
+            await this._reminderDAO.SaveAsync(reminder);
+            await StartAsync();
+        }
+
+        public async Task ClearUserAsync(ulong userId)
+        {
+            await this._reminderDAO.RemoveByUserAsync(userId);
+            foreach (KeyValuePair<string, Timer> pair in this._currentTimerList.Where(x => x.Key.StartsWith(userId.ToString())))
+            {
+                pair.Value.Dispose();
             }
         }
     }

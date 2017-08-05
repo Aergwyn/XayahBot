@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord.Commands;
-using XayahBot.Command.Precondition;
 using XayahBot.Utility;
 
 namespace XayahBot.Command
 {
-    [Category(CategoryType.MISC)]
     public class CAre : ModuleBase
     {
         private readonly List<string> _responseList = new List<string>
@@ -16,13 +14,13 @@ namespace XayahBot.Command
             "I kinda have to agree there.",
             "Yup.",
             "This is a bit weird but I'd say yes.",
-            "Rakan agrees. So I can't say no.",
             "Alright!",
+            "Rakan agrees. So I can't say no.",
             // Neutral
-            "It's not impossible? *shrugs*",
             "Maybe...",
-            "*looks confused*",
+            "It's not impossible? *shrugs*",
             "Yesnoidonotwanttoanswerthis! *gasps for air*",
+            "*looks confused*",
             "Uhm...",
             "I'm a little busy at the moment.",
             // Negative
@@ -35,7 +33,7 @@ namespace XayahBot.Command
         };
         private readonly List<string> _noQuestionList = new List<string>
         {
-            "Did you not learn how to correctly phrase a question?",
+            "Didn't you learn how to correctly phrase a question?",
             "I could sell you a beautiful set of question marks.",
             "Was that for me?",
             "I nearly thought you were asking me something.",
@@ -49,8 +47,13 @@ namespace XayahBot.Command
         };
 
         [Command("are"), Alias("is", "am")]
-        [Summary("Triggers an 8ball-esque response.")]
         public Task Are([Remainder] string text = "")
+        {
+            Task.Run(() => this.CreateResponse(text));
+            return Task.CompletedTask;
+        }
+
+        private async Task CreateResponse(string text)
         {
             text = text.Trim();
             string response = string.Empty;
@@ -66,8 +69,7 @@ namespace XayahBot.Command
             {
                 response = RNG.FromList(this._noSentenceList);
             }
-            this.ReplyAsync(response);
-            return Task.CompletedTask;
+            await this.ReplyAsync(response);
         }
 
         private bool IsQuestion(string text)

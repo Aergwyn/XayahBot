@@ -6,7 +6,6 @@ using Discord;
 using Discord.Commands;
 using XayahBot.Command.Precondition;
 using XayahBot.Database.DAO;
-using XayahBot.Database.Error;
 using XayahBot.Database.Model;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
@@ -14,79 +13,85 @@ using XayahBot.Utility.Messages;
 namespace XayahBot.Command.Remind
 {
     [Group("remind me")]
-    [Category(CategoryType.REMIND)]
     public class CRemind : ModuleBase
     {
         private readonly RemindService _remindService;
-        private readonly ReminderDAO _reminderDao = new ReminderDAO();
+        private readonly ReminderDAO _reminderDAO = new ReminderDAO();
 
         public CRemind(RemindService remindService)
         {
             this._remindService = remindService;
         }
 
+        private bool IsDisabled()
+        {
+            string value = Property.RemindDisabled.Value;
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private async Task NotifyDisabledCommand()
+        {
+            DiscordFormatEmbed message = new DiscordFormatEmbed()
+                .AppendTitle($"{XayahReaction.Warning} Disabled")
+                .AppendDescription("This command is disabled because a certain someone is too lazy to fix it.");
+            await this.ReplyAsync("", false, message.ToEmbed());
+        }
+
         [Command]
-        [Summary("Displays a list of your active reminder.")]
-        public async Task List()
+        public Task RemindMe(int value, [OverrideTypeReader(typeof(TimeUnitTypeReader))]TimeUnit timeUnit, [Remainder] string text)
         {
-            IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
-            List<TRemindEntry> reminders = this._reminderDao.GetAll(this.Context.User.Id);
-            channel.SendMessageAsync("", false, this.BuildReminderList(reminders).ToEmbed());
+            Task.Run(() => this.CreateReminder(value, timeUnit, text));
+            return Task.CompletedTask;
         }
 
-        private DiscordFormatEmbed BuildReminderList(IEnumerable<TRemindEntry> list)
+        private async Task CreateReminder(int value, TimeUnit timeUnit, string text)
         {
-            DiscordFormatEmbed message = new DiscordFormatEmbed();
-            IOrderedEnumerable<TRemindEntry> orderedList = list.OrderBy(x => x.ExpirationTime);
-            if (orderedList.Count() > 0)
+            if (this.IsDisabled())
             {
-                message.AppendDescription("Here is a list of your active reminder.");
-                foreach (TRemindEntry entry in orderedList)
-                {
-                    message.AddField($"ID: {entry.UserEntryNumber} | Expires: {entry.ExpirationTime} UTC", entry.Message);
-                }
+                await this.NotifyDisabledCommand();
+                return;
             }
-            else
-            {
-                message.AppendDescription("You have no active reminder right now.");
-            }
-            return message;
-        }
-
-        [Command("d")]
-        [Summary("Reminds you in 1-30 days with your specified message.")]
-        public async Task Days(int d, [Remainder] string text)
-        {
             text = text.Trim();
-            d = this.SetValueInRange(d, 1, 30);
-            if (this.IsValidReminder(text) && await CreateReminder(text, DateTime.UtcNow.AddDays(d)))
+            DateTime expirationTime = DateTime.UtcNow;
+            int maxTime = 30;
+            if (timeUnit == TimeUnit.Day)
             {
-                this.SendSuccessResponse("day", d);
+                value = this.SetValueInRange(value, 1, maxTime);
+                expirationTime = DateTime.UtcNow.AddDays(value);
             }
-        }
-
-        [Command("h")]
-        [Summary("Reminds you in 1-23 hours with your specified message.")]
-        public async Task Hours(int h, [Remainder] string text)
-        {
-            text = text.Trim();
-            h = this.SetValueInRange(h, 1, 23);
-            if (this.IsValidReminder(text) && await CreateReminder(text, DateTime.UtcNow.AddHours(h)))
+            else if (timeUnit == TimeUnit.Hour)
             {
-                this.SendSuccessResponse("hour", h);
+                value = this.SetValueInRange(value, 1, maxTime * 24);
+                expirationTime = DateTime.UtcNow.AddHours(value);
             }
-        }
-
-        [Command("m")]
-        [Summary("Reminds you in 15-59 minutes with your specified message.")]
-        public async Task Mins(int m, [Remainder] string text)
-        {
-            text = text.Trim();
-            m = this.SetValueInRange(m, 15, 59);
-            if (this.IsValidReminder(text) && await CreateReminder(text, DateTime.UtcNow.AddMinutes(m)))
+            else // Minute == Default
             {
-                this.SendSuccessResponse("minute", m);
+                value = this.SetValueInRange(value, 1, maxTime * 24 * 60);
+                expirationTime = DateTime.UtcNow.AddMinutes(value);
             }
+            int maxLength = 80;
+            if (text.Length > maxLength)
+            {
+                text = text.Substring(0, maxLength);
+            }
+            await this._remindService.AddNewAsync(new TReminder
+            {
+                ExpirationTime = expirationTime,
+                Message = text,
+                UserId = this.Context.User.Id
+            });
+            DiscordFormatEmbed message = new DiscordFormatEmbed()
+                .AppendTitle($"{XayahReaction.Success} Done")
+                .AppendDescription($"I'm going to remind you at `{expirationTime} UTC`.{Environment.NewLine}I think...");
+            if (!(this.Context as CommandContext).IsPrivate)
+            {
+                message.CreateFooter(this.Context);
+            }
+            await this.ReplyAsync("", false, message.ToEmbed());
         }
 
         private int SetValueInRange(int value, int min, int max)
@@ -102,90 +107,61 @@ namespace XayahBot.Command.Remind
             return value;
         }
 
-        private bool IsValidReminder(string textToCheck)
+        [Command("list")]
+        public Task List()
         {
-            int reminderCap = int.Parse(Property.ReminderCap.Value);
-            int reminderTextCap = int.Parse(Property.ReminderTextCap.Value);
-            if (this._reminderDao.GetAll(this.Context.User.Id).Count >= reminderCap)
-            {
-                this.SendResponse($"You already reached the maximum of {reminderCap} active reminder.");
-                return false;
-            }
-            if (textToCheck.Length > reminderTextCap)
-            {
-                this.SendResponse($"Your message contains more than {reminderTextCap} characters and is too long.");
-                return false;
-            }
-            return true;
+            Task.Run(() => this.BuildReminderList());
+            return Task.CompletedTask;
         }
 
-        private void SendResponse(string text)
+        private async Task BuildReminderList()
         {
-            DiscordFormatEmbed message = null;
-            message = new DiscordFormatEmbed();
-            if (!(this.Context as CommandContext).IsPrivate)
+            if (this.IsDisabled())
             {
-                message.CreateFooter(this.Context);
+                await this.NotifyDisabledCommand();
+                return;
             }
-            message.AppendDescription(text);
-            this.ReplyAsync("", false, message.ToEmbed());
-        }
-
-        private async Task<bool> CreateReminder(string text, DateTime expirationTime)
-        {
-            try
-            {
-                await this._remindService.AddNewAsync(new TRemindEntry
-                {
-                    ExpirationTime = expirationTime,
-                    Message = text,
-                    UserId = this.Context.User.Id
-                });
-                return true;
-            }
-            catch (NotSavedException nsex)
-            {
-                Logger.Error($"Failed to create reminder for {this.Context.User.ToString()}.", nsex);
-            }
-            return false;
-        }
-
-        private string AddSForMultiple(int value)
-        {
-            string text = string.Empty;
-            if (value > 1)
-            {
-                text = "s";
-            }
-            return text;
-        }
-
-        private void SendSuccessResponse(string timeUnit, int timeValue)
-        {
-            string text = string.Format("I'm going to remind you in `{0}` {1}{2}. I think...", timeValue, timeUnit, this.AddSForMultiple(timeValue));
-            this.SendResponse(text);
-        }
-
-        [Command("not")]
-        [Summary("Removes a reminder (by ID!) from your list.")]
-        public async Task Not(int id)
-        {
             IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
-            DiscordFormatEmbed message = new DiscordFormatEmbed();
-            try
+            List<TReminder> reminders = this._reminderDAO.GetAll(this.Context.User.Id);
+            IOrderedEnumerable<TReminder> orderedList = reminders.OrderBy(x => x.ExpirationTime);
+
+            DiscordFormatEmbed message = new DiscordFormatEmbed()
+                .AppendTitle($"{XayahReaction.Time} Active reminder");
+            if (orderedList.Count() > 0)
             {
-                await this._remindService.RemoveAsync(this.Context.User.Id, id);
-                message.AppendDescription($"Removed reminder with ID `{id}` from your list.");
+                foreach (TReminder entry in orderedList)
+                {
+                    message.AddField($"Expires: {entry.ExpirationTime} UTC", entry.Message, false);
+                }
             }
-            catch (NotExistingException)
+            else
             {
-                message.AppendDescription($"Reminder with ID `{id}` does not exist on your list.");
+                message.AppendDescription("imagine a soulrending void", AppendOption.Italic);
             }
-            catch (NotSavedException nsex)
+            await channel.SendMessageAsync("", false, message.ToEmbed());
+        }
+
+        [Command("clear")]
+        public Task Clear()
+        {
+            Task.Run(() => this.ClearReminder());
+            return Task.CompletedTask;
+        }
+
+        private async Task ClearReminder()
+        {
+            if (this.IsDisabled())
             {
-                Logger.Error($"Failed to remove reminder with ID {id} for {this.Context.User}.", nsex);
+                await this.NotifyDisabledCommand();
+                return;
             }
-            channel.SendMessageAsync("", false, message.ToEmbed());
+            IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
+            await this._remindService.ClearUserAsync(this.Context.User.Id);
+
+            DiscordFormatEmbed message = new DiscordFormatEmbed()
+                .AppendTitle($"{XayahReaction.Success} Done")
+                .AppendDescription("I purged all of your reminder for you.");
+            await channel.SendMessageAsync("", false, message.ToEmbed());
         }
     }
 }

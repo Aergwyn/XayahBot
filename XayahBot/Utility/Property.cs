@@ -2,35 +2,29 @@
 using System.Collections.Generic;
 using System.Linq;
 using XayahBot.Database.DAO;
-using XayahBot.Database.Error;
 using XayahBot.Error;
 
 namespace XayahBot.Utility
 {
     public sealed class Property
     {
-        public static readonly Property Author = new Property("author", "Aergwyn#8786", false);
-        public static readonly Property CmdPrefix = new Property("cmd_prefix", ".", false);
-        public static readonly Property DbName = new Property("db_name", "xayah.db", false);
         public static readonly Property FilePath = new Property("file_path", AppContext.BaseDirectory + "/", false);
         public static readonly Property FileRiotApiKey = new Property("file_riotapikey", "riotapikey.txt", false);
         public static readonly Property FileToken = new Property("file_token", "token.txt", false);
 
         public static readonly Property GameActive = new Property("game_active", "with Rakan");
-        public static readonly Property GameShutdown = new Property("game_shutdown", "shutting down...");
-        public static readonly Property HelpServerLink = new Property("help_serverlink", "https://discord.gg/YhQYAFW");
-        public static readonly Property ReminderCap = new Property("reminder_cap", "6");
-        public static readonly Property ReminderTextCap = new Property("reminder_textcap", "60");
+        public static readonly Property RemindDisabled = new Property("remind_disabled", "");
+        public static readonly Property IncidentDisabled = new Property("incident_disabled", "");
+        public static readonly Property DataDisabled = new Property("data_disabled", "");
 
         public static IEnumerable<Property> UpdatableValues
         {
             get
             {
                 yield return GameActive;
-                yield return GameShutdown;
-                yield return HelpServerLink;
-                yield return ReminderCap;
-                yield return ReminderTextCap;
+                yield return RemindDisabled;
+                yield return IncidentDisabled;
+                yield return DataDisabled;
             }
         }
 
@@ -38,18 +32,19 @@ namespace XayahBot.Utility
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
-                Property match = UpdatableValues.FirstOrDefault(x => x.Name.ToLower().Equals(name.ToLower()));
+                name = name.ToLower();
+                Property match = UpdatableValues.FirstOrDefault(x => x.Name.ToLower().Equals(name));
                 if (match != null)
                 {
                     return match;
                 }
             }
-            throw new UnknownTypeException();
+            throw new NotExistingException();
         }
 
         // ---
 
-        private PropertiesDAO _propertiesDao = new PropertiesDAO();
+        private PropertyDAO _propertyDAO = new PropertyDAO();
 
         public string Name { get; private set; }
         private string _value { get; set; }
@@ -62,11 +57,11 @@ namespace XayahBot.Utility
                     this.Loaded = true;
                     try
                     {
-                        this._value = this._propertiesDao.GetValue(this);
+                        this._value = this._propertyDAO.GetValue(this);
                     }
                     catch (NotExistingException)
                     {
-                        this._propertiesDao.SetValueAsync(this);
+                        this._propertyDAO.SetValue(this);
                     }
                 }
                 return this._value;
@@ -79,7 +74,7 @@ namespace XayahBot.Utility
                     this._value = realValue;
                     if (this.Updatable)
                     {
-                        this._propertiesDao.SetValueAsync(this);
+                        this._propertyDAO.SetValue(this);
                     }
                 }
             }

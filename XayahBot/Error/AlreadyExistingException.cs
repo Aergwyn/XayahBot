@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace XayahBot.Database.Error
+namespace XayahBot.Error
 {
     public class AlreadyExistingException : Exception
     {

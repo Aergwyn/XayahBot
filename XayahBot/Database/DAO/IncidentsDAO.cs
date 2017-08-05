@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using XayahBot.Database.Error;
 using XayahBot.Database.Model;
+using XayahBot.Error;
 
 namespace XayahBot.Database.DAO
 {
@@ -46,10 +46,7 @@ namespace XayahBot.Database.DAO
             using (GeneralContext database = new GeneralContext())
             {
                 database.Incidents.Add(entry);
-                if (await database.SaveChangesAsync() <= 0)
-                {
-                    throw new NotSavedException();
-                }
+                await database.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -58,10 +55,7 @@ namespace XayahBot.Database.DAO
             using (GeneralContext database = new GeneralContext())
             {
                 database.Update(entry);
-                if (await database.SaveChangesAsync() <= 0)
-                {
-                    throw new NotSavedException();
-                }
+                await database.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -73,10 +67,7 @@ namespace XayahBot.Database.DAO
                 if (matches.Count > 0)
                 {
                     database.RemoveRange(matches);
-                    if (await database.SaveChangesAsync() <= 0)
-                    {
-                        throw new NotSavedException();
-                    }
+                    await database.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
         }

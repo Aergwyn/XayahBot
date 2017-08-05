@@ -1,13 +1,11 @@
 ﻿using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using XayahBot.Command.Precondition;
 using XayahBot.Utility;
 
 namespace XayahBot.Command.Data
 {
     [Group("data")]
-    [Category(CategoryType.DATA)]
     public class CData : ModuleBase
     {
         [Group("champ"), Alias("c")]
