@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using XayahBot.Command.Precondition;
+using XayahBot.Command.Logic;
 using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
 using XayahBot.Utility;
@@ -13,7 +13,7 @@ using XayahBot.Utility.Messages;
 namespace XayahBot.Command.Remind
 {
     [Group("remind me")]
-    public class CRemind : ModuleBase
+    public class CRemind : ToggleableModuleBase
     {
         private readonly RemindService _remindService;
         private readonly ReminderDAO _reminderDAO = new ReminderDAO();
@@ -23,22 +23,9 @@ namespace XayahBot.Command.Remind
             this._remindService = remindService;
         }
 
-        private bool IsDisabled()
+        protected override Property GetDisableProperty()
         {
-            string value = Property.RemindDisabled.Value;
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                return false;
-            }
-            return true;
-        }
-
-        private async Task NotifyDisabledCommand()
-        {
-            DiscordFormatEmbed message = new DiscordFormatEmbed()
-                .AppendTitle($"{XayahReaction.Warning} Disabled")
-                .AppendDescription("This command is disabled because a certain someone is too lazy to fix it.");
-            await this.ReplyAsync("", false, message.ToEmbed());
+            return Property.RemindDisabled;
         }
 
         [Command]
@@ -52,7 +39,7 @@ namespace XayahBot.Command.Remind
         {
             if (this.IsDisabled())
             {
-                await this.NotifyDisabledCommand();
+                this.NotifyDisabledCommand();
                 return;
             }
             text = text.Trim();
@@ -110,15 +97,15 @@ namespace XayahBot.Command.Remind
         [Command("list")]
         public Task List()
         {
-            Task.Run(() => this.BuildReminderList());
+            Task.Run(() => this.ListReminder());
             return Task.CompletedTask;
         }
 
-        private async Task BuildReminderList()
+        private async Task ListReminder()
         {
             if (this.IsDisabled())
             {
-                await this.NotifyDisabledCommand();
+                this.NotifyDisabledCommand();
                 return;
             }
             IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
@@ -152,7 +139,7 @@ namespace XayahBot.Command.Remind
         {
             if (this.IsDisabled())
             {
-                await this.NotifyDisabledCommand();
+                this.NotifyDisabledCommand();
                 return;
             }
             IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);

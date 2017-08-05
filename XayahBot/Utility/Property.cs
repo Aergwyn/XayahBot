@@ -16,6 +16,7 @@ namespace XayahBot.Utility
         public static readonly Property RemindDisabled = new Property("remind_disabled", "");
         public static readonly Property IncidentDisabled = new Property("incident_disabled", "");
         public static readonly Property DataDisabled = new Property("data_disabled", "");
+        public static readonly Property RiotUrlVersion = new Property("rioturl_version", "7.16.1");
 
         public static IEnumerable<Property> UpdatableValues
         {
@@ -25,6 +26,7 @@ namespace XayahBot.Utility
                 yield return RemindDisabled;
                 yield return IncidentDisabled;
                 yield return DataDisabled;
+                yield return RiotUrlVersion;
             }
         }
 

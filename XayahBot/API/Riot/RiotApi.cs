@@ -4,12 +4,6 @@ namespace XayahBot.API.Riot
 {
     public abstract class RiotApi : Api
     {
-        protected abstract string GetService();
-
-        protected abstract string GetVersion();
-
-        // ---
-
         protected Region _region;
         private string _apiKey;
 
@@ -17,6 +11,11 @@ namespace XayahBot.API.Riot
         {
             this._region = region;
             this._apiKey = FileReader.GetFirstLine(Property.FilePath.Value + Property.FileRiotApiKey.Value);
+        }
+
+        public Region GetRegion()
+        {
+            return this._region;
         }
 
         protected override string GetApiKey()
@@ -28,5 +27,9 @@ namespace XayahBot.API.Riot
         {
             return $"https://{this._region.Platform}.api.riotgames.com/lol/{this.GetService()}/{this.GetVersion()}";
         }
+
+        protected abstract string GetService();
+
+        protected abstract string GetVersion();
     }
 }

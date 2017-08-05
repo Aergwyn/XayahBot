@@ -81,7 +81,7 @@ namespace XayahBot.Command.Remind
                         processed = true;
                         List<TReminder> reminder = this._reminderDAO.GetAll();
                         List<TReminder> dueReminder = reminder.Where(x => !this._currentTimerList.Keys.Contains(this.BuildTimerKey(x.UserId, x.ExpirationTime))).ToList();
-                        await ProcessExpiringReminderAsync(dueReminder, interval);
+                        await this.ProcessExpiringReminderAsync(dueReminder, interval);
                     }
                 }
                 else
@@ -94,7 +94,9 @@ namespace XayahBot.Command.Remind
                 }
                 else
                 {
+#pragma warning disable 4014
                     this.StopAsync();
+#pragma warning restore 4014
                 }
             }
         }

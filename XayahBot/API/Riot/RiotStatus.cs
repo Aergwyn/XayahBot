@@ -1,12 +1,18 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using XayahBot.API.Riot.Model;
 
 namespace XayahBot.API.Riot
 {
-    public class StatusApi : RiotApi
+    public class RiotStatus : RiotApi
     {
-        public StatusApi(Region region) : base(region)
+        public RiotStatus(Region region) : base(region)
         {
+        }
+
+        protected override DateTime GetDataExpirationTime()
+        {
+            return DateTime.UtcNow;
         }
 
         protected override string GetService()

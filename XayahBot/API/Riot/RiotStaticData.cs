@@ -4,9 +4,9 @@ using XayahBot.API.Riot.Model;
 
 namespace XayahBot.API.Riot
 {
-    public class StaticDataApi : RiotCachedApi
+    public class RiotStaticData : RiotApi
     {
-        public StaticDataApi(Region region) : base(region)
+        public RiotStaticData(Region region) : base(region)
         {
         }
 
@@ -22,7 +22,8 @@ namespace XayahBot.API.Riot
 
         protected override DateTime GetDataExpirationTime()
         {
-            return DateTime.UtcNow.AddHours(24);
+            DateTime now = DateTime.UtcNow;
+            return new DateTime(now.Year, now.Month, now.Day, 0, 0, 0).AddDays(1);
         }
 
         public async Task<ChampionListDto> GetChampionsAsync()

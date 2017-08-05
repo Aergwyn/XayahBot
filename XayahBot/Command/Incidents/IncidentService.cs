@@ -33,10 +33,10 @@ namespace XayahBot.Command.Incidents
         // ---
 
         private readonly DiscordSocketClient _client;
+        private readonly IncidentDAO _incidentDAO = new IncidentDAO();
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
-        private readonly MessagesDAO _messagesDao = new MessagesDAO();
-        private readonly IncidentsDAO _incidentsDao = new IncidentsDAO();
-        private readonly IncidentSubscriberDAO _incidentSubscriberDao = new IncidentSubscriberDAO();
+        private readonly IncidentMessageDAO _incidentMessageDAO = new IncidentMessageDAO();
+        private readonly IncidentSubscriberDAO _incidentSubscriberDAO = new IncidentSubscriberDAO();
         private Task _process;
         private bool _isRunning = false;
 
@@ -50,7 +50,7 @@ namespace XayahBot.Command.Incidents
             await this._lock.WaitAsync();
             try
             {
-                if (!this._isRunning && this._incidentSubscriberDao.HasAnySubscriber())
+                if (this.IsEnabled() && !this._isRunning && this._incidentSubscriberDAO.HasSubscriber())
                 {
                     this._process = Task.Run(() => this.RunAsync());
                     Logger.Info($"{nameof(IncidentService)} started.");
@@ -62,6 +62,16 @@ namespace XayahBot.Command.Incidents
             }
         }
 
+        private bool IsEnabled()
+        {
+            string value = Property.IncidentDisabled.Value;
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return true;
+            }
+            return false;
+        }
+
         private async Task RunAsync()
         {
             bool init = true;
@@ -69,52 +79,55 @@ namespace XayahBot.Command.Incidents
             this._isRunning = true;
             while (this._isRunning)
             {
-                int interval = 5;
+                int interval = 15;
                 if (DateTime.UtcNow.Minute % interval == 0 || init)
                 {
                     if (!processed)
                     {
                         init = false;
                         processed = true;
-                        await CheckStatusApiAsync();
+                        await this.CheckStatusApiAsync();
                     }
                 }
                 else
                 {
                     processed = false;
                 }
-                if (this._incidentSubscriberDao.HasAnySubscriber())
+                if (this.IsEnabled() && this._incidentSubscriberDAO.HasSubscriber())
                 {
                     await Task.Delay(new TimeSpan(0, 0, 10));
                 }
                 else
                 {
+#pragma warning disable 4014
                     this.StopAsync();
+#pragma warning restore 4014
                 }
             }
         }
 
         private async Task CheckStatusApiAsync()
         {
-            List<IncidentData> incidents = new List<IncidentData>();
-            List<StatusApi> statusApis = new List<StatusApi>{
-                new StatusApi(Region.EUW),
-                new StatusApi(Region.NA),
-                new StatusApi(Region.EUNE)
+            List<RiotStatus> statusApis = new List<RiotStatus>{
+                new RiotStatus(Region.EUW),
+                new RiotStatus(Region.NA),
+                new RiotStatus(Region.EUNE)
             };
-            foreach (StatusApi statusApi in statusApis)
+            foreach (RiotStatus statusApi in statusApis)
             {
+                List<IncidentData> incidents = new List<IncidentData>();
                 try
                 {
-                    incidents.AddRange(this.AnalyzeData(await statusApi.GetStatusAsync()));
+                    ShardStatusDto shardStatus = await statusApi.GetStatusAsync();
+                    incidents.AddRange(this.AnalyzeData(shardStatus));
+                    await this.ProcessCurrentIncidentsAsync(incidents);
+                    await this.ProcessSolvedIncidentsAsync(incidents);
                 }
-                catch (ErrorResponseException)
+                catch (ErrorResponseException ex)
                 {
-                    Logger.Error("The IncidentService seems to have a problem communicating with the API.");
+                    Logger.Error($"The {statusApi.GetRegion()} Status-API returned an error.", ex);
                 }
             }
-            await this.ProcessCurrentIncidentsAsync(incidents);
-            await this.ProcessSolvedIncidentsAsync(incidents);
         }
 
         private List<IncidentData> AnalyzeData(ShardStatusDto status)
@@ -156,7 +169,7 @@ namespace XayahBot.Command.Incidents
         {
             foreach (IncidentData incident in incidents)
             {
-                if (this.IsNewUpdate(incident.Id, incident.LastUpdate))
+                if (this.GotNewUpdate(incident.Id, incident.LastUpdate))
                 {
                     await this.DeletePostsAsync(incident.Id);
                 }
@@ -164,11 +177,11 @@ namespace XayahBot.Command.Incidents
             }
         }
 
-        private bool IsNewUpdate(long incidentId, DateTime lastUpdate)
+        private bool GotNewUpdate(long incidentId, DateTime lastUpdate)
         {
             try
             {
-                TIncident entry = this._incidentsDao.GetSingle(incidentId);
+                TIncident entry = this._incidentDAO.Get(incidentId);
                 if (lastUpdate.Ticks > entry.LastUpdate.Ticks)
                 {
                     return true;
@@ -184,8 +197,8 @@ namespace XayahBot.Command.Incidents
         {
             try
             {
-                TIncident entry = this._incidentsDao.GetSingle(incidentId);
-                foreach (TMessage message in entry.Messages)
+                TIncident dbIncident = this._incidentDAO.Get(incidentId);
+                foreach (TIncidentMessage message in dbIncident.Messages)
                 {
                     IMessageChannel channel = this._client.GetChannel(message.ChannelId) as IMessageChannel;
                     try
@@ -201,8 +214,8 @@ namespace XayahBot.Command.Incidents
                     {
                         // If your permission got revoked you can't access that message anymore and it throws HttpException
                     }
+                    await this._incidentMessageDAO.RemoveAsync(message);
                 }
-                await this._messagesDao.RemoveByIncidentIdAsync(entry.IncidentId);
             }
             catch (NotExistingException)
             {
@@ -211,21 +224,52 @@ namespace XayahBot.Command.Incidents
 
         private async Task PostIncidentAsync(IncidentData incident)
         {
-            DiscordFormatEmbed message = this.CreateEmbed(incident);
-            TIncident entry = this.RetrieveDbIncident(incident);
-            foreach (TIncidentSubscriber subscriber in this.GetInterestedSubscriber(entry))
+            TIncident dbIncident = this.GetDbIncident(incident);
+            foreach (TIncidentSubscriber subscriber in this.GetInterestedSubscriber(dbIncident))
             {
                 IMessageChannel channel = this._client.GetChannel(subscriber.ChannelId) as IMessageChannel;
                 try
                 {
-                    IUserMessage postedMessage = await channel.SendMessageAsync("", false, message.ToEmbed());
-                    await this.SaveMessageIdAsync(entry, postedMessage);
+                    IUserMessage postedMessage = await channel.SendMessageAsync("", false, this.CreateEmbed(incident).ToEmbed());
+                    await this.SaveMessageIdAsync(dbIncident, postedMessage);
                 }
                 catch (HttpException)
                 {
                     // If your permission got revoked you can't access that channel anymore and it throws HttpException
                 }
             }
+        }
+
+        private TIncident GetDbIncident(IncidentData incident)
+        {
+            TIncident newDbIncident = null;
+            try
+            {
+                newDbIncident = this._incidentDAO.Get(incident.Id);
+            }
+            catch (NotExistingException)
+            {
+                newDbIncident = new TIncident
+                {
+                    IncidentId = incident.Id,
+                };
+            }
+            newDbIncident.LastUpdate = incident.LastUpdate;
+            return newDbIncident;
+        }
+
+        private List<TIncidentSubscriber> GetInterestedSubscriber(TIncident dbIncident)
+        {
+            List<TIncidentSubscriber> subscriberList = this._incidentSubscriberDAO.GetAll();
+            List<TIncidentSubscriber> reducedList = new List<TIncidentSubscriber>(subscriberList);
+            foreach (TIncidentSubscriber subscriber in subscriberList)
+            {
+                if (dbIncident.Messages.Where(x => x.ChannelId.Equals(subscriber.ChannelId)).Count() > 0)
+                {
+                    reducedList.Remove(subscriber);
+                }
+            }
+            return reducedList;
         }
 
         private DiscordFormatEmbed CreateEmbed(IncidentData incident)
@@ -242,59 +286,27 @@ namespace XayahBot.Command.Incidents
             return message;
         }
 
-        private TIncident RetrieveDbIncident(IncidentData incident)
+        private async Task SaveMessageIdAsync(TIncident dbIncident, IUserMessage postedMessage)
         {
-            TIncident entry = null;
-            try
-            {
-                entry = this._incidentsDao.GetSingle(incident.Id);
-            }
-            catch (NotExistingException)
-            {
-                entry = new TIncident
-                {
-                    IncidentId = incident.Id,
-                };
-            }
-            entry.LastUpdate = incident.LastUpdate;
-            return entry;
-        }
-
-        private List<TIncidentSubscriber> GetInterestedSubscriber(TIncident entry)
-        {
-            List<TIncidentSubscriber> subscriberList = this._incidentSubscriberDao.GetAll();
-            List<TIncidentSubscriber> reducedList = new List<TIncidentSubscriber>(subscriberList);
-            foreach (TIncidentSubscriber subscriber in subscriberList)
-            {
-                if (entry.Messages.Where(x => x.ChannelId.Equals(subscriber.ChannelId)).Count() > 0)
-                {
-                    reducedList.Remove(subscriber);
-                }
-            }
-            return reducedList;
-        }
-
-        private async Task SaveMessageIdAsync(TIncident entry, IUserMessage postedMessage)
-        {
-            TMessage message = new TMessage
+            TIncidentMessage message = new TIncidentMessage
             {
                 ChannelId = postedMessage.Channel.Id,
-                Incident = entry,
+                Incident = dbIncident,
                 MessageId = postedMessage.Id
             };
-            entry.Messages.Add(message);
-            await this._incidentsDao.SaveAsync(entry);
+            dbIncident.Messages.Add(message);
+            await this._incidentDAO.SaveAsync(dbIncident);
         }
 
         private async Task ProcessSolvedIncidentsAsync(List<IncidentData> incidents)
         {
-            List<TIncident> dbIncidents = this._incidentsDao.GetAll();
+            List<TIncident> dbIncidents = this._incidentDAO.Get();
             foreach (TIncident dbIncident in dbIncidents)
             {
                 if (incidents.Where(x => x.Id.Equals(dbIncident.IncidentId)).Count() == 0)
                 {
                     await this.DeletePostsAsync(dbIncident.IncidentId);
-                    await this._incidentsDao.RemoveByIncidentIdAsync(dbIncident.IncidentId);
+                    await this._incidentDAO.RemoveAsync(dbIncident);
                 }
             }
         }

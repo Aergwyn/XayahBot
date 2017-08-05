@@ -1,10 +1,11 @@
 ﻿namespace XayahBot.Database.Model
 {
-    public class TIncidentSubscriber : IIdentifiable
+    public class TIncidentMessage : IIdentifiable
     {
         public long Id { get; set; }
-        public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
+        public ulong MessageId { get; set; }
+        public virtual TIncident Incident { get; set; }
 
         public bool IsNew()
         {

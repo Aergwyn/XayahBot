@@ -9,7 +9,7 @@ namespace XayahBot.API.Riot.Model
         //public string Blurb { get; set; } // Mini-Lore or something...
         //public List<string> EnemyTips { get; set; }
         public int Id { get; set; }
-        //public ImageDto Image { get;set;}
+        //public ImageDto Image { get; set; }
         //public InfoDto Info { get; set; } // Attack, Defense, Difficulty, ...
         //public string Key { get; set; }
         //public string Lore { get; set; }

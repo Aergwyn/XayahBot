@@ -89,19 +89,13 @@ namespace XayahBot.Utility
 
         public Task HandleChannelDestroyed(SocketChannel deletedChannel)
         {
-            if (this._incidentSubscriberDao.HasChannelSubscribed(deletedChannel.Id))
-            {
-                this._incidentSubscriberDao.RemoveByChannelIdAsync(deletedChannel.Id);
-            }
+            this._incidentSubscriberDao.RemoveByChannelIdAsync(deletedChannel.Id);
             return Task.CompletedTask;
         }
 
         public Task HandleLeftGuild(SocketGuild leftGuild)
         {
-            if (this._incidentSubscriberDao.HasGuildSubscribed(leftGuild.Id))
-            {
-                this._incidentSubscriberDao.RemoveByGuildIdAsync(leftGuild.Id);
-            }
+            this._incidentSubscriberDao.RemoveByGuildIdAsync(leftGuild.Id);
             return Task.CompletedTask;
         }
     }

@@ -6,7 +6,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using XayahBot.Command.Incidents;
-using XayahBot.Command.Precondition;
+using XayahBot.Command.Logic;
 using XayahBot.Command.Remind;
 using XayahBot.Database;
 using XayahBot.Utility;

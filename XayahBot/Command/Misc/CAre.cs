@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using XayahBot.Utility;
 
-namespace XayahBot.Command
+namespace XayahBot.Command.Misc
 {
     public class CAre : ModuleBase
     {

@@ -2,6 +2,6 @@
 {
     public enum FieldFormatType
     {
-        NAME, VALUE, BOTH
+        NAME, VALUE
     }
 }

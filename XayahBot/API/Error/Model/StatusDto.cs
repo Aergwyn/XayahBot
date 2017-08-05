@@ -2,7 +2,7 @@
 
 namespace XayahBot.API.Error
 {
-    public class Status
+    public class StatusDto
     {
         [JsonProperty("Status_Code")]
         public int StatusCode { get; set; }

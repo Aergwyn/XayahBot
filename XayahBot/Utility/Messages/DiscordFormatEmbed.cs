@@ -53,10 +53,6 @@ namespace XayahBot.Utility.Messages
                 case FieldFormatType.VALUE:
                     valueText = this.ApplyOptions(value, options);
                     break;
-                case FieldFormatType.BOTH:
-                    nameText = this.ApplyOptions(name, options);
-                    valueText = this.ApplyOptions(value, options);
-                    break;
             }
             this._builder.AddField(nameText, valueText, inline);
             return this;

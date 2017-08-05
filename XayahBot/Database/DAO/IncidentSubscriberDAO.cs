@@ -6,9 +6,9 @@ using XayahBot.Error;
 
 namespace XayahBot.Database.DAO
 {
-    public class IncidentSubscriberDAO
+    public class IncidentSubscriberDAO : AbstractDAO<TIncidentSubscriber>
     {
-        public TIncidentSubscriber GetSingleByChannelId(ulong channelId)
+        public TIncidentSubscriber GetByChannelId(ulong channelId)
         {
             using (GeneralContext database = new GeneralContext())
             {
@@ -17,7 +17,7 @@ namespace XayahBot.Database.DAO
             }
         }
 
-        public TIncidentSubscriber GetSingleByGuildId(ulong guildId)
+        public TIncidentSubscriber GetByGuildId(ulong guildId)
         {
             using (GeneralContext database = new GeneralContext())
             {
@@ -34,34 +34,18 @@ namespace XayahBot.Database.DAO
             }
         }
 
-        public async Task SaveAsync(TIncidentSubscriber entry)
-        {
-            if (this.HasChannelSubscribed(entry.ChannelId))
-            {
-                throw new AlreadyExistingException();
-            }
-            else
-            {
-                await this.AddAsync(entry);
-            }
-        }
-
-        private async Task AddAsync(TIncidentSubscriber entry)
-        {
-            using (GeneralContext database = new GeneralContext())
-            {
-                database.IncidentSubscriber.Add(entry);
-                await database.SaveChangesAsync().ConfigureAwait(false);
-            }
-        }
-
         public async Task RemoveByChannelIdAsync(ulong channelId)
         {
             using (GeneralContext database = new GeneralContext())
             {
-                TIncidentSubscriber match = this.GetSingleByChannelId(channelId);
-                database.Remove(match);
-                await database.SaveChangesAsync().ConfigureAwait(false);
+                try
+                {
+                    TIncidentSubscriber match = this.GetByChannelId(channelId);
+                    await this.RemoveAsync(match);
+                }
+                catch (NotExistingException)
+                {
+                }
             }
         }
 
@@ -69,37 +53,18 @@ namespace XayahBot.Database.DAO
         {
             using (GeneralContext database = new GeneralContext())
             {
-                TIncidentSubscriber match = this.GetSingleByGuildId(guildId);
-                database.Remove(match);
-                await database.SaveChangesAsync().ConfigureAwait(false);
-            }
-        }
-
-        public bool HasChannelSubscribed(ulong channelId)
-        {
-            using (GeneralContext database = new GeneralContext())
-            {
-                if (database.IncidentSubscriber.Where(x => x.ChannelId.Equals(channelId)).Count() > 0)
+                try
                 {
-                    return true;
+                    TIncidentSubscriber match = this.GetByGuildId(guildId);
+                    await this.RemoveAsync(match);
+                }
+                catch (NotExistingException)
+                {
                 }
             }
-            return false;
         }
 
-        public bool HasGuildSubscribed(ulong guildId)
-        {
-            using (GeneralContext database = new GeneralContext())
-            {
-                if (database.IncidentSubscriber.Where(x => x.GuildId.Equals(guildId)).Count() > 0)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public bool HasAnySubscriber()
+        public bool HasSubscriber()
         {
             if (this.GetAll().Count > 0)
             {

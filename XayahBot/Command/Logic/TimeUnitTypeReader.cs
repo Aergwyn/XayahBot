@@ -5,7 +5,7 @@ using XayahBot.Command.Remind;
 using XayahBot.Error;
 using XayahBot.Utility;
 
-namespace XayahBot.Command.Precondition
+namespace XayahBot.Command.Logic
 {
     public class TimeUnitTypeReader : TypeReader
     {

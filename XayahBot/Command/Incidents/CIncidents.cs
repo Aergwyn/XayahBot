@@ -1,95 +1,145 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
+using XayahBot.Command.Logic;
 using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
 using XayahBot.Error;
+using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command.Incidents
 {
     [Group("incidents")]
-    public class CIncidents : ModuleBase
+    public class CIncidents : ToggleableModuleBase
     {
-        private readonly DiscordSocketClient _client;
         private readonly IncidentService _incidentService;
-        private readonly IncidentSubscriberDAO _incidentSubscriberDao = new IncidentSubscriberDAO();
+        private readonly IncidentSubscriberDAO _incidentSubscriberDAO = new IncidentSubscriberDAO();
 
-        public CIncidents(IServiceProvider serviceProvider)
+        public CIncidents(IncidentService incidentService)
         {
-            this._client = serviceProvider.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
-            this._incidentService = serviceProvider.GetService(typeof(IncidentService)) as IncidentService;
+            this._incidentService = incidentService;
         }
 
-        [Command("enable")]
-        [RequireOwner]
-        [RequireContext(ContextType.Guild)]
-        [Summary("Enables incident notifications from Riot in the mentioned channel.")]
-        public async Task Enable(string channel)
+        protected override Property GetDisableProperty()
         {
+            return Property.IncidentDisabled;
+        }
+
+        [Command("on")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [RequireContext(ContextType.Guild)]
+        public Task Enable(string channel)
+        {
+            Task.Run(() => this.EnableIncidents(channel));
+            return Task.CompletedTask;
+        }
+
+        private async Task EnableIncidents(string channel)
+        {
+            if (this.IsDisabled())
+            {
+                this.NotifyDisabledCommand();
+                return;
+            }
             ulong channelId = this.Context.Message.MentionedChannelIds.First();
-            IChannel mentionedChannel = await this.Context.Guild.GetChannelAsync(channelId) ?? throw new NoChannelException();
             DiscordFormatEmbed message = new DiscordFormatEmbed()
                 .CreateFooter(this.Context);
             try
             {
-                await this._incidentSubscriberDao.SaveAsync(new TIncidentSubscriber
+                IChannel mentionedChannel = await this.Context.Guild.GetChannelAsync(channelId) ?? throw new NoChannelException();
+                TIncidentSubscriber subscriber = null;
+                try
                 {
-                    ChannelId = mentionedChannel.Id,
-                    GuildId = this.Context.Guild.Id
-                });
-                message.AppendDescription($"Enabled incident notifications in `{mentionedChannel.Name}`.");
+                    subscriber = this._incidentSubscriberDAO.GetByGuildId(this.Context.Guild.Id);
+                }
+                catch (NotExistingException)
+                {
+                    subscriber = new TIncidentSubscriber
+                    {
+                        GuildId = this.Context.Guild.Id
+                    };
+                }
+                subscriber.ChannelId = mentionedChannel.Id;
+                await this._incidentSubscriberDAO.SaveAsync(subscriber);
+                message
+                    .AppendTitle($"{XayahReaction.Success} Done")
+                    .AppendDescription($"Incident notifications will now go to `{mentionedChannel.Name}`.");
             }
-            catch (AlreadyExistingException)
+            catch (NoChannelException)
             {
-                message.AppendDescription("Could not enable incident notifications because it is already enabled.");
+                message
+                    .AppendTitle($"{XayahReaction.Error} This didn't work")
+                    .AppendDescription($"I couldn't find the mentioned channel.");
             }
             await this.ReplyAsync("", false, message.ToEmbed());
             await this._incidentService.StartAsync();
         }
 
         [Command("status")]
-        [RequireOwner]
+        [RequireUserPermission(GuildPermission.Administrator)]
         [RequireContext(ContextType.Guild)]
-        [Summary("Shows if incident notifications are enabled or disabled for this server.")]
-        public async Task Status()
+        public Task Status()
         {
-            DiscordFormatEmbed message = new DiscordFormatEmbed()
-                .CreateFooter(this.Context);
-            try
-            {
-                TIncidentSubscriber subscriber = this._incidentSubscriberDao.GetSingleByGuildId(this.Context.Guild.Id);
-                IChannel channel = await this.Context.Guild.GetChannelAsync(subscriber.ChannelId) as IChannel;
-                message.AppendDescription($"Incident notifications are enabled and will be posted in `{channel.Name}`.");
-            }
-            catch (NotExistingException)
-            {
-                message.AppendDescription("Incident notifications are currently disabled.");
-            }
-            this.ReplyAsync("", false, message.ToEmbed());
+            Task.Run(() => this.ShowStatus());
+            return Task.CompletedTask;
         }
 
-        [Command("disable")]
-        [RequireOwner]
-        [RequireContext(ContextType.Guild)]
-        [Summary("Disables incident notifications from Riot.")]
-        public async Task Disable()
+        private async Task ShowStatus()
         {
+            if (this.IsDisabled())
+            {
+                this.NotifyDisabledCommand();
+                return;
+            }
             DiscordFormatEmbed message = new DiscordFormatEmbed()
                 .CreateFooter(this.Context);
             try
             {
-                await this._incidentSubscriberDao.RemoveByGuildIdAsync(this.Context.Guild.Id);
-                message.AppendDescription("Disabled incident notifications.");
+                TIncidentSubscriber subscriber = this._incidentSubscriberDAO.GetByGuildId(this.Context.Guild.Id);
+                IChannel channel = await this.Context.Guild.GetChannelAsync(subscriber.ChannelId) ?? throw new NoChannelException();
+                message
+                    .AppendTitle($"{XayahReaction.Success} Enabled")
+                    .AppendDescription($"Incident notifications are currently enabled and posted in `{channel.Name}`.");
             }
             catch (NotExistingException)
             {
-                message.AppendDescription("Could not disable incident notifications because it was not enabled.");
+                message
+                    .AppendTitle($"{XayahReaction.Error} Disabled")
+                    .AppendDescription("Incident notifications are currently disabled.");
             }
-            this.ReplyAsync("", false, message.ToEmbed());
+            catch (NoChannelException)
+            {
+                message
+                    .AppendTitle($"{XayahReaction.Error} This didn't work")
+                    .AppendDescription($"I couldn't find the configured channel.");
+            }
+            await this.ReplyAsync("", false, message.ToEmbed());
+        }
+
+        [Command("off")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [RequireContext(ContextType.Guild)]
+        public Task Disable()
+        {
+            Task.Run(() => this.DisableIncidents());
+            return Task.CompletedTask;
+        }
+
+        private async Task DisableIncidents()
+        {
+            if (this.IsDisabled())
+            {
+                this.NotifyDisabledCommand();
+                return;
+            }
+            await this._incidentSubscriberDAO.RemoveByGuildIdAsync(this.Context.Guild.Id);
+            DiscordFormatEmbed message = new DiscordFormatEmbed()
+                .CreateFooter(this.Context)
+                .AppendTitle($"{XayahReaction.Success} Done");
+                message.AppendDescription("Incident notifications are now disabled.");
+            await this.ReplyAsync("", false, message.ToEmbed());
         }
     }
 }

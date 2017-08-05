@@ -64,8 +64,8 @@ namespace XayahBot.Command.Owner
             catch (NotExistingException)
             {
                 message
-                    .AppendTitle($"{XayahReaction.Error} Nope")
-                    .AppendDescription($"I couldn't find property named `{name}`.");
+                    .AppendTitle($"{XayahReaction.Error} This didn't work")
+                    .AppendDescription($"I couldn't find a property named `{name}`.");
             }
             await this.ReplyAsync("", false, message.ToEmbed());
         }

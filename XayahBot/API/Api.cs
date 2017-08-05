@@ -1,6 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using XayahBot.API.Error;
@@ -10,6 +13,11 @@ namespace XayahBot.API
 {
     public abstract class Api
     {
+        private static SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
+        private static Dictionary<string, CacheEntry> _cache = new Dictionary<string, CacheEntry>();
+
+        protected abstract DateTime GetDataExpirationTime();
+
         protected abstract string GetApiKey();
 
         protected abstract string GetBaseUrl();
@@ -18,7 +26,39 @@ namespace XayahBot.API
 
         protected async Task<T> GetAsync<T>(ApiRequest request)
         {
-            return await this.GetFromApiAsync<T>(request);
+            T result = default(T);
+            await _lock.WaitAsync();
+            try
+            {
+                result = this.GetFromCache<T>(request.CacheId);
+                if (result == null)
+                {
+                    result = await this.GetFromApiAsync<T>(request);
+                    _cache.Add(request.CacheId, new CacheEntry(result, this.GetDataExpirationTime()));
+                }
+            }
+            finally
+            {
+                _lock.Release();
+            }
+            return result;
+        }
+
+        private T GetFromCache<T>(string cacheId)
+        {
+            T result = default(T);
+            if (_cache.TryGetValue(cacheId, out CacheEntry entry))
+            {
+                if (entry.IsExpired())
+                {
+                    _cache.Remove(cacheId);
+                }
+                else
+                {
+                    result = (T)entry.Data;
+                }
+            }
+            return result;
         }
 
         private async Task<T> GetFromApiAsync<T>(ApiRequest request)
@@ -34,10 +74,10 @@ namespace XayahBot.API
                     this.CheckResponseStatus(response, content);
                     result = JsonConvert.DeserializeObject<T>(content);
                 }
-                catch (ErrorResponseException erex)
+                catch (ErrorResponseException ex)
                 {
-                    Logger.Error(erex.Message);
-                    throw erex;
+                    Logger.Error(ex.Message);
+                    throw ex;
                 }
             }
             return result;
@@ -47,7 +87,7 @@ namespace XayahBot.API
         {
             if (!response.IsSuccessStatusCode)
             {
-                ErrorResponse error = JsonConvert.DeserializeObject<ErrorResponse>(content);
+                ErrorDto error = JsonConvert.DeserializeObject<ErrorDto>(content);
                 throw new ErrorResponseException($"{error.Status.StatusCode} {error.Status.Message}");
             }
         }

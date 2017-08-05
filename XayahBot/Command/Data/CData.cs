@@ -1,47 +1,41 @@
 ﻿using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using XayahBot.API.Error;
 using XayahBot.Utility;
+using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command.Data
 {
-    [Group("data")]
     public class CData : ModuleBase
     {
-        [Group("champ"), Alias("c")]
-        public class CChamp : ModuleBase
+        [Command("champ")]
+        public Task Data([Remainder] string name)
         {
-            [Command("misc")]
-            [RequireOwner]
-            [Summary("Displays misc data of a champion.")]
-            public async Task Misc([Remainder] string name)
-            {
-                await this.BuildAndPost(ChampionDataType.MISC, name);
-            }
+            Task.Run(() => this.PostChampion(name));
+            return Task.CompletedTask;
+        }
 
-            [Command("spells")]
-            [RequireOwner]
-            [Summary("Displays spells of a champion.")]
-            public async Task Spell([Remainder] string name)
+        private async Task PostChampion(string name)
+        {
+            IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
+            DiscordFormatEmbed message = null;
+            try
             {
-                await this.BuildAndPost(ChampionDataType.SPELLS, name);
+                message = await ChampionDataBuilder.BuildAsync(name);
             }
-
-            [Command("stats")]
-            [RequireOwner]
-            [Summary("Displays stats of a champion.")]
-            public async Task Stats([Remainder] string name)
+            catch (ErrorResponseException ex)
             {
-                await this.BuildAndPost(ChampionDataType.STATS, name);
+                message = new DiscordFormatEmbed()
+                    .AppendTitle($"{XayahReaction.Error} This didn't work")
+                    .AppendDescription("Apparently the Riot-API refuses cooperation. Have some patience while I convince them again...");
+                Logger.Error($"The StaticData-API returned an error.", ex);
             }
-
-            private async Task BuildAndPost(ChampionDataType type, string name)
+            if (!(this.Context as CommandContext).IsPrivate)
             {
-                IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
-                ChampionDataBuilder builder = new ChampionDataBuilder(channel, name);
-                await builder.BuildAsync(type);
-                await builder.PostAsync();
+                message.CreateFooter(this.Context);
             }
+            await channel.SendMessageAsync("", false, message.ToEmbed());
         }
     }
 }
