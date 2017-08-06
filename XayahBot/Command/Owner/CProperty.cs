@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
 using XayahBot.Error;
+using XayahBot.Extension;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
@@ -33,10 +34,10 @@ namespace XayahBot.Command.Owner
                 Property property = Property.UpdatableValues.ElementAt(i);
                 text += property.Name.PadRight(maxWidth) + ":" + property.Value;
             }
-            DiscordFormatEmbed message = new DiscordFormatEmbed()
+            FormattedEmbedBuilder message = new FormattedEmbedBuilder()
                 .AppendTitle($"{XayahReaction.Option} Property list")
                 .AppendDescription(text, AppendOption.Codeblock);
-            await this.ReplyAsync("", false, message.ToEmbed());
+            await this.ReplyAsync(message);
         }
 
         [Command("set")]
@@ -51,7 +52,7 @@ namespace XayahBot.Command.Owner
         private async Task SetProperty(string name, string value)
         {
             value = value.Trim();
-            DiscordFormatEmbed message = new DiscordFormatEmbed();
+            FormattedEmbedBuilder message = new FormattedEmbedBuilder();
             try
             {
                 Property property = Property.GetUpdatableByName(name);
@@ -67,7 +68,7 @@ namespace XayahBot.Command.Owner
                     .AppendTitle($"{XayahReaction.Error} This didn't work")
                     .AppendDescription($"I couldn't find a property named `{name}`.");
             }
-            await this.ReplyAsync("", false, message.ToEmbed());
+            await this.ReplyAsync(message);
         }
     }
 }

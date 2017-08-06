@@ -9,13 +9,14 @@ namespace XayahBot.Utility
     public sealed class Property
     {
         public static readonly Property FilePath = new Property("file_path", AppContext.BaseDirectory + "/", false);
-        public static readonly Property FileRiotApiKey = new Property("file_riotapikey", "riotapikey.txt", false);
-        public static readonly Property FileToken = new Property("file_token", "token.txt", false);
+        public static readonly Property FileDiscordToken = new Property("file__discord_token", "discord.txt", false);
+        public static readonly Property FileRiotApiKey = new Property("file_riot_api_key", "riot.txt", false);
+        public static readonly Property FileChampionGGApiKey = new Property("file_championgg_api_key", "championgg.txt", false);
 
         public static readonly Property GameActive = new Property("game_active", "with Rakan");
         public static readonly Property RemindDisabled = new Property("remind_disabled", "");
         public static readonly Property IncidentDisabled = new Property("incident_disabled", "");
-        public static readonly Property DataDisabled = new Property("data_disabled", "");
+        public static readonly Property ChampDisabled = new Property("champ_disabled", "");
         public static readonly Property RiotUrlVersion = new Property("rioturl_version", "7.16.1");
 
         public static IEnumerable<Property> UpdatableValues
@@ -25,7 +26,7 @@ namespace XayahBot.Utility
                 yield return GameActive;
                 yield return RemindDisabled;
                 yield return IncidentDisabled;
-                yield return DataDisabled;
+                yield return ChampDisabled;
                 yield return RiotUrlVersion;
             }
         }

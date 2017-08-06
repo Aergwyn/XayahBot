@@ -1,12 +1,16 @@
-﻿namespace XayahBot.Utility
+﻿using Discord;
+
+namespace XayahBot.Utility
 {
     public static class XayahReaction
     {
-        public static readonly string Success = ":white_check_mark:";
-        public static readonly string Warning = ":warning:";
-        public static readonly string Error = ":x:";
-        public static readonly string Question = ":question:";
-        public static readonly string Time = ":hourglass:";
-        public static readonly string Option = ":gear:";
+        public static readonly IEmote Success = new Emoji("✅");
+        public static readonly IEmote Warning = new Emoji("⚠️");
+        public static readonly IEmote Error = new Emoji("❌");
+        public static readonly IEmote Question = new Emoji("❓");
+        public static readonly IEmote Time = new Emoji("⏳");
+        public static readonly IEmote Option = new Emoji("⚙️");
+        public static readonly IEmote LeftArrow = new Emoji("⬅");
+        public static readonly IEmote RightArrow = new Emoji("➡");
     }
 }

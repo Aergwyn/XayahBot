@@ -4,11 +4,11 @@ using Discord.Commands;
 
 namespace XayahBot.Utility.Messages
 {
-    public class DiscordFormatEmbed
+    public class FormattedEmbedBuilder
     {
         private EmbedBuilder _builder;
 
-        public DiscordFormatEmbed()
+        public FormattedEmbedBuilder()
         {
             this._builder = new EmbedBuilder()
             {
@@ -18,47 +18,45 @@ namespace XayahBot.Utility.Messages
             this.SetColor(XayahColor.Purple);
         }
 
-        public DiscordFormatEmbed SetColor(Color color)
+        public FormattedEmbedBuilder SetColor(Color color)
         {
             this._builder.Color = color;
             return this;
         }
 
-        public DiscordFormatEmbed SetThumbnail(string thumbnailUrl)
+        public FormattedEmbedBuilder SetThumbnail(string thumbnailUrl)
         {
             this._builder.ThumbnailUrl = thumbnailUrl;
             return this;
         }
 
-        public DiscordFormatEmbed AppendTitle(string text, params AppendOption[] options)
+        public FormattedEmbedBuilder AppendTitle(string text, params AppendOption[] options)
         {
             this._builder.Title += this.ApplyOptions(text, options);
             return this;
         }
 
-        public DiscordFormatEmbed AppendDescription(string text, params AppendOption[] options)
+        public FormattedEmbedBuilder AppendDescription(string text, params AppendOption[] options)
         {
             this._builder.Description += this.ApplyOptions(text, options);
             return this;
         }
 
-        public DiscordFormatEmbed AddField(string name, string value, bool inline = true, FieldFormatType? formatType = null, params AppendOption[] options)
+        public FormattedEmbedBuilder AppendDescriptionNewLine()
         {
-            string nameText = name;
-            string valueText = value;
-            switch (formatType) {
-                case FieldFormatType.NAME:
-                    nameText = this.ApplyOptions(name, options);
-                    break;
-                case FieldFormatType.VALUE:
-                    valueText = this.ApplyOptions(value, options);
-                    break;
-            }
+            this._builder.Description += Environment.NewLine;
+            return this;
+        }
+
+        public FormattedEmbedBuilder AddField(string name, string value, AppendOption[] nameOptions = null, AppendOption[] valueOptions = null, bool inline = true)
+        {
+            string nameText = this.ApplyOptions(name, nameOptions);
+            string valueText = this.ApplyOptions(value, valueOptions);
             this._builder.AddField(nameText, valueText, inline);
             return this;
         }
 
-        public DiscordFormatEmbed CreateFooter(ICommandContext commandContext)
+        public FormattedEmbedBuilder CreateFooter(ICommandContext commandContext)
         {
             this.SetFooterThumbnail(commandContext.User.GetAvatarUrl())
                 .AppendFooter(commandContext.User.ToString())
@@ -66,19 +64,19 @@ namespace XayahBot.Utility.Messages
             return this;
         }
 
-        public DiscordFormatEmbed SetFooterThumbnail(string thumbnailUrl)
+        public FormattedEmbedBuilder SetFooterThumbnail(string thumbnailUrl)
         {
             this._builder.Footer.IconUrl = thumbnailUrl;
             return this;
         }
 
-        public DiscordFormatEmbed SetFooterTimestamp()
+        public FormattedEmbedBuilder SetFooterTimestamp()
         {
             this._builder.Timestamp = DateTimeOffset.UtcNow;
             return this;
         }
 
-        public DiscordFormatEmbed AppendFooter(string text)
+        public FormattedEmbedBuilder AppendFooter(string text)
         {
             if (!string.IsNullOrWhiteSpace(text))
             {

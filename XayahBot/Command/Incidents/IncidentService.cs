@@ -12,6 +12,7 @@ using XayahBot.API.Riot.Model;
 using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
 using XayahBot.Error;
+using XayahBot.Extension;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
@@ -230,7 +231,7 @@ namespace XayahBot.Command.Incidents
                 IMessageChannel channel = this._client.GetChannel(subscriber.ChannelId) as IMessageChannel;
                 try
                 {
-                    IUserMessage postedMessage = await channel.SendMessageAsync("", false, this.CreateEmbed(incident).ToEmbed());
+                    IUserMessage postedMessage = await channel.SendEmbedAsync(this.CreateEmbed(incident));
                     await this.SaveMessageIdAsync(dbIncident, postedMessage);
                 }
                 catch (HttpException)
@@ -272,15 +273,16 @@ namespace XayahBot.Command.Incidents
             return reducedList;
         }
 
-        private DiscordFormatEmbed CreateEmbed(IncidentData incident)
+        private FormattedEmbedBuilder CreateEmbed(IncidentData incident)
         {
-            DiscordFormatEmbed message = new DiscordFormatEmbed()
+            FormattedEmbedBuilder message = new FormattedEmbedBuilder()
                 .AppendDescription($"{incident.Region} | {incident.Service} | {incident.Status}", AppendOption.Bold);
             foreach (UpdateData update in incident.Updates)
             {
-                message.AppendDescription(Environment.NewLine)
+                message
+                    .AppendDescriptionNewLine()
                     .AppendDescription($"{update.Severity} - {update.UpdateTime}", AppendOption.Italic)
-                    .AppendDescription(Environment.NewLine)
+                    .AppendDescriptionNewLine()
                     .AppendDescription(update.Text);
             }
             return message;

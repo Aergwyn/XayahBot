@@ -1,4 +1,5 @@
 ﻿using Discord.Commands;
+using XayahBot.Extension;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
@@ -20,11 +21,11 @@ namespace XayahBot.Command.Logic
 
         protected void NotifyDisabledCommand()
         {
-            DiscordFormatEmbed message = new DiscordFormatEmbed()
+            FormattedEmbedBuilder message = new FormattedEmbedBuilder()
                 .AppendTitle($"{XayahReaction.Warning} Command disabled")
                 .AppendDescription("This command is disabled because a certain someone is too lazy to fix it.")
                 .CreateFooter(this.Context);
-            this.ReplyAsync("", false, message.ToEmbed());
+            this.ReplyAsync(message);
         }
     }
 }

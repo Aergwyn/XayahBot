@@ -7,6 +7,7 @@ using Discord.Commands;
 using XayahBot.Command.Logic;
 using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
+using XayahBot.Extension;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
@@ -71,14 +72,14 @@ namespace XayahBot.Command.Remind
                 Message = text,
                 UserId = this.Context.User.Id
             });
-            DiscordFormatEmbed message = new DiscordFormatEmbed()
+            FormattedEmbedBuilder message = new FormattedEmbedBuilder()
                 .AppendTitle($"{XayahReaction.Success} Done")
                 .AppendDescription($"I'm going to remind you at `{expirationTime} UTC`.{Environment.NewLine}I think...");
             if (!(this.Context as CommandContext).IsPrivate)
             {
                 message.CreateFooter(this.Context);
             }
-            await this.ReplyAsync("", false, message.ToEmbed());
+            await this.ReplyAsync(message);
         }
 
         private int SetValueInRange(int value, int min, int max)
@@ -112,20 +113,20 @@ namespace XayahBot.Command.Remind
             List<TReminder> reminders = this._reminderDAO.GetAll(this.Context.User.Id);
             IOrderedEnumerable<TReminder> orderedList = reminders.OrderBy(x => x.ExpirationTime);
 
-            DiscordFormatEmbed message = new DiscordFormatEmbed()
+            FormattedEmbedBuilder message = new FormattedEmbedBuilder()
                 .AppendTitle($"{XayahReaction.Time} Active reminder");
             if (orderedList.Count() > 0)
             {
                 foreach (TReminder entry in orderedList)
                 {
-                    message.AddField($"Expires: {entry.ExpirationTime} UTC", entry.Message, false);
+                    message.AddField($"Expires: {entry.ExpirationTime} UTC", entry.Message, inline: false);
                 }
             }
             else
             {
                 message.AppendDescription("imagine a soulrending void", AppendOption.Italic);
             }
-            await channel.SendMessageAsync("", false, message.ToEmbed());
+            await this.ReplyAsync(message);
         }
 
         [Command("clear")]
@@ -144,11 +145,10 @@ namespace XayahBot.Command.Remind
             }
             IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
             await this._remindService.ClearUserAsync(this.Context.User.Id);
-
-            DiscordFormatEmbed message = new DiscordFormatEmbed()
+            FormattedEmbedBuilder message = new FormattedEmbedBuilder()
                 .AppendTitle($"{XayahReaction.Success} Done")
                 .AppendDescription("I purged all of your reminder for you.");
-            await channel.SendMessageAsync("", false, message.ToEmbed());
+            await this.ReplyAsync(message);
         }
     }
 }

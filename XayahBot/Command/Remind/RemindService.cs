@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
+using XayahBot.Extension;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
@@ -131,10 +132,10 @@ namespace XayahBot.Command.Remind
             StopTimer(this.BuildTimerKey(reminder.UserId, reminder.ExpirationTime));
 
             IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this._client, reminder.UserId);
-            DiscordFormatEmbed message = new DiscordFormatEmbed()
+            FormattedEmbedBuilder message = new FormattedEmbedBuilder()
                 .AppendTitle($"{XayahReaction.Time} Reminder expired")
                 .AppendDescription(reminder.Message);
-            await channel.SendMessageAsync("", false, message.ToEmbed());
+            await channel.SendEmbedAsync(message);
         }
 
         private void StopTimer(string key)

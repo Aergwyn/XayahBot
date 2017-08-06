@@ -1,11 +1,11 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using XayahBot.Command.Logic;
 using XayahBot.Database.DAO;
 using XayahBot.Database.Model;
 using XayahBot.Error;
+using XayahBot.Extension;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
@@ -30,50 +30,39 @@ namespace XayahBot.Command.Incidents
         [Command("on")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [RequireContext(ContextType.Guild)]
-        public Task Enable(string channel)
+        public Task Enable(IChannel channel)
         {
             Task.Run(() => this.EnableIncidents(channel));
             return Task.CompletedTask;
         }
 
-        private async Task EnableIncidents(string channel)
+        private async Task EnableIncidents(IChannel channel)
         {
             if (this.IsDisabled())
             {
                 this.NotifyDisabledCommand();
                 return;
             }
-            ulong channelId = this.Context.Message.MentionedChannelIds.First();
-            DiscordFormatEmbed message = new DiscordFormatEmbed()
-                .CreateFooter(this.Context);
+            TIncidentSubscriber subscriber = null;
             try
             {
-                IChannel mentionedChannel = await this.Context.Guild.GetChannelAsync(channelId) ?? throw new NoChannelException();
-                TIncidentSubscriber subscriber = null;
-                try
-                {
-                    subscriber = this._incidentSubscriberDAO.GetByGuildId(this.Context.Guild.Id);
-                }
-                catch (NotExistingException)
-                {
-                    subscriber = new TIncidentSubscriber
-                    {
-                        GuildId = this.Context.Guild.Id
-                    };
-                }
-                subscriber.ChannelId = mentionedChannel.Id;
-                await this._incidentSubscriberDAO.SaveAsync(subscriber);
-                message
-                    .AppendTitle($"{XayahReaction.Success} Done")
-                    .AppendDescription($"Incident notifications will now go to `{mentionedChannel.Name}`.");
+                subscriber = this._incidentSubscriberDAO.GetByGuildId(this.Context.Guild.Id);
             }
-            catch (NoChannelException)
+            catch (NotExistingException)
             {
-                message
-                    .AppendTitle($"{XayahReaction.Error} This didn't work")
-                    .AppendDescription($"I couldn't find the mentioned channel.");
+                subscriber = new TIncidentSubscriber
+                {
+                    GuildId = this.Context.Guild.Id
+                };
             }
-            await this.ReplyAsync("", false, message.ToEmbed());
+            subscriber.ChannelId = channel.Id;
+            await this._incidentSubscriberDAO.SaveAsync(subscriber);
+
+            FormattedEmbedBuilder message = new FormattedEmbedBuilder()
+                .CreateFooter(this.Context)
+                .AppendTitle($"{XayahReaction.Success} Done")
+                .AppendDescription($"Incident notifications will now go to `{channel.Name}`.");
+            await this.ReplyAsync(message);
             await this._incidentService.StartAsync();
         }
 
@@ -93,7 +82,7 @@ namespace XayahBot.Command.Incidents
                 this.NotifyDisabledCommand();
                 return;
             }
-            DiscordFormatEmbed message = new DiscordFormatEmbed()
+            FormattedEmbedBuilder message = new FormattedEmbedBuilder()
                 .CreateFooter(this.Context);
             try
             {
@@ -115,7 +104,7 @@ namespace XayahBot.Command.Incidents
                     .AppendTitle($"{XayahReaction.Error} This didn't work")
                     .AppendDescription($"I couldn't find the configured channel.");
             }
-            await this.ReplyAsync("", false, message.ToEmbed());
+            await this.ReplyAsync(message);
         }
 
         [Command("off")]
@@ -135,11 +124,11 @@ namespace XayahBot.Command.Incidents
                 return;
             }
             await this._incidentSubscriberDAO.RemoveByGuildIdAsync(this.Context.Guild.Id);
-            DiscordFormatEmbed message = new DiscordFormatEmbed()
+            FormattedEmbedBuilder message = new FormattedEmbedBuilder()
                 .CreateFooter(this.Context)
                 .AppendTitle($"{XayahReaction.Success} Done");
                 message.AppendDescription("Incident notifications are now disabled.");
-            await this.ReplyAsync("", false, message.ToEmbed());
+            await this.ReplyAsync(message);
         }
     }
 }

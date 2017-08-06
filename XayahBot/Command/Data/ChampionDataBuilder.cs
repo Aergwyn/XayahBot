@@ -14,10 +14,10 @@ namespace XayahBot.Command.Data
     {
         private static readonly RiotStaticData _riotStaticData = new RiotStaticData(Region.EUW);
 
-        public static async Task<DiscordFormatEmbed> BuildAsync(string name)
+        public static async Task<FormattedEmbedBuilder> BuildAsync(string name)
         {
             name = name.Trim();
-            DiscordFormatEmbed message = new DiscordFormatEmbed();
+            FormattedEmbedBuilder message = new FormattedEmbedBuilder();
             List<ChampionDto> matches = await GetMatchingChampions(name);
             if (matches.Count == 0)
             {
@@ -65,7 +65,7 @@ namespace XayahBot.Command.Data
             return Regex.Replace(name, @"[^ a-zA-Z0-9]+", string.Empty);
         }
 
-        private static void AppendMiscData(ChampionDto champion, DiscordFormatEmbed message)
+        private static void AppendMiscData(ChampionDto champion, FormattedEmbedBuilder message)
         {
             champion.Tags.Sort();
             message
@@ -73,21 +73,20 @@ namespace XayahBot.Command.Data
                 .AppendTitle($"{champion.Name} {champion.Title}", AppendOption.Bold, AppendOption.Underscore)
                 .AppendDescription("Classified as:", AppendOption.Italic)
                 .AppendDescription($" {string.Join(", ", champion.Tags)}")
-                .AppendDescription(Environment.NewLine)
+                .AppendDescriptionNewLine()
                 .AppendDescription("Resource:", AppendOption.Italic)
                 .AppendDescription($" {champion.Resource}")
-                .AppendDescription(Environment.NewLine)
+                .AppendDescriptionNewLine()
                 .AppendDescription("Passive:", AppendOption.Italic)
                 .AppendDescription($" {champion.Passive.Name}");
         }
 
-        private static void AppendStatisticData(ChampionDto champion, DiscordFormatEmbed message)
+        private static void AppendStatisticData(ChampionDto champion, FormattedEmbedBuilder message)
         {
-            string text = string.Empty;
             StatsDto stats = champion.Stats;
             DecimalAlign statList = new DecimalAlign(stats.GetStats());
             DecimalAlign statGrowthList = new DecimalAlign(stats.GetStatGrowthList());
-            text +=
+            string statData =
                 $"Health         - {statList.Align(stats.Hp)} | + {statGrowthList.TrimmedAlign(stats.HpPerLevel)}" +
                 Environment.NewLine +
                 $"Health Regen.  - {statList.Align(stats.HpRegen)} | + {statGrowthList.TrimmedAlign(stats.HpRegenPerLevel)}" +
@@ -107,29 +106,30 @@ namespace XayahBot.Command.Data
                 $"Attack Range   - {statList.Align(stats.AttackRange)}" +
                 Environment.NewLine +
                 $"Movement Speed - {statList.Align(stats.MoveSpeed)}";
-            DiscordFormatMessage statData = new DiscordFormatMessage()
-                .Append(text, AppendOption.Codeblock);
-            message.AddField("Stats", statData.ToString(), false, FieldFormatType.NAME, AppendOption.Underscore);
+            message.AddField("Stats", statData,
+                new AppendOption[] { AppendOption.Underscore },
+                new AppendOption[] { AppendOption.Codeblock }, inline: false);
         }
 
-        private static void AppendSpellData(ChampionDto champion, DiscordFormatEmbed message)
+        private static void AppendSpellData(ChampionDto champion, FormattedEmbedBuilder message)
         {
             for(int i = 0; i < champion.Spells.Count; i++)
             {
                 ChampionSpellDto spell = champion.Spells.ElementAt(i);
-                DiscordFormatMessage spellDetail = new DiscordFormatMessage()
+                FormattedTextBuilder spellDetail = new FormattedTextBuilder()
                     .Append("Cost:", AppendOption.Italic)
                     .Append($" {spell.GetCostString()}")
-                    .Append(Environment.NewLine)
+                    .AppendNewLine()
                     .Append("Range:", AppendOption.Italic)
                     .Append($" {spell.GetRangeString()}")
-                    .Append(Environment.NewLine)
+                    .AppendNewLine()
                     .Append("Cooldown:", AppendOption.Italic)
                     .Append($" {spell.GetCooldownString()}")
-                    .Append(Environment.NewLine)
+                    .AppendNewLine()
                     .Append("Scaling:", AppendOption.Italic)
                     .Append($" {spell.GetVarsString()}");
-                message.AddField($"{GetSpellKey(i)} - {spell.Name}", spellDetail.ToString(), true, FieldFormatType.NAME, AppendOption.Underscore);
+                message.AddField($"{GetSpellKey(i)} - {spell.Name}", spellDetail.ToString(),
+                    new AppendOption[] { AppendOption.Underscore }, inline: false);
             }
         }
 
@@ -150,7 +150,7 @@ namespace XayahBot.Command.Data
             }
         }
 
-        private static void AppendSkinData(ChampionDto champion, DiscordFormatEmbed message)
+        private static void AppendSkinData(ChampionDto champion, FormattedEmbedBuilder message)
         {
             List<SkinDto> skins = champion.Skins.Where(x => x.Num > 0).ToList();
             skins.Sort((a, b) => a.Num.CompareTo(b.Num));
@@ -164,7 +164,8 @@ namespace XayahBot.Command.Data
                 }
                 skinData += $"{Environment.NewLine}`{skinNum}` - {skin.Name}";
             }
-            message.AddField("Skins", skinData, false, FieldFormatType.NAME, AppendOption.Underscore);
+            message.AddField("Skins", skinData,
+                new AppendOption[] { AppendOption.Underscore }, inline: false);
         }
     }
 }

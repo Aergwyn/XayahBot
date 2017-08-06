@@ -32,14 +32,15 @@ namespace XayahBot
         {
             this._client = new DiscordSocketClient(new DiscordSocketConfig
             {
-                LogLevel = LogSeverity.Info
+                LogLevel = LogSeverity.Info,
+                MessageCacheSize = 5
             });
         }
 
         private async Task StartAsync()
         {
             await this.InitializeAsync();
-            string token = FileReader.GetFirstLine(Property.FilePath.Value + Property.FileToken.Value);
+            string token = FileReader.GetFirstLine(Property.FilePath.Value + Property.FileDiscordToken.Value);
             if (!string.IsNullOrWhiteSpace(token))
             {
                 await this._client.LoginAsync(TokenType.Bot, token);
@@ -48,7 +49,7 @@ namespace XayahBot
                 bool exit = false;
                 while (!exit)
                 {
-                    if (Console.ReadLine().ToLower().Equals("logout"))
+                    if (Console.ReadLine().ToLower().Equals("exit"))
                     {
                         exit = true;
                     }
@@ -84,6 +85,7 @@ namespace XayahBot
             this._client.ChannelDestroyed += eventHandler.HandleChannelDestroyed;
             this._client.LeftGuild += eventHandler.HandleLeftGuild;
             this._client.MessageReceived += eventHandler.HandleMessageReceived;
+            this._client.ReactionAdded += eventHandler.HandleReactionAdded;
 
             using (GeneralContext database = new GeneralContext())
             {

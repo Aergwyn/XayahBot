@@ -1,15 +1,17 @@
-﻿namespace XayahBot.Utility.Messages
+﻿using System;
+
+namespace XayahBot.Utility.Messages
 {
-    public class DiscordFormatMessage
+    public class FormattedTextBuilder
     {
         private string Text { get; set; }
 
-        public DiscordFormatMessage(string text = "")
+        public FormattedTextBuilder(string text = "")
         {
             this.Text = text;
         }
 
-        public DiscordFormatMessage Append(string text, params AppendOption[] options)
+        public FormattedTextBuilder Append(string text, params AppendOption[] options)
         {
             if (string.IsNullOrWhiteSpace(text))
             {
@@ -20,6 +22,11 @@
                 this.Text += AppendOption.Start(options) + text + AppendOption.End(options);
             }
             return this;
+        }
+
+        public FormattedTextBuilder AppendNewLine()
+        {
+            return this.Append(Environment.NewLine);
         }
 
         public override string ToString()

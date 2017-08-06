@@ -1,6 +1,4 @@
-﻿#pragma warning disable 4014
-
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -8,6 +6,7 @@ using Discord.WebSocket;
 using XayahBot.Command.Incidents;
 using XayahBot.Command.Remind;
 using XayahBot.Database.DAO;
+using XayahBot.Extension;
 using XayahBot.Utility.Messages;
 
 namespace XayahBot.Utility
@@ -24,31 +23,41 @@ namespace XayahBot.Utility
 
         public Task HandleReady()
         {
-            DiscordSocketClient client = this._serviceProvider.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
-            RemindService remindService = this._serviceProvider.GetService(typeof(RemindService)) as RemindService;
-            IncidentService incidentService = this._serviceProvider.GetService(typeof(IncidentService)) as IncidentService;
-
-            string game = string.IsNullOrWhiteSpace(Property.GameActive.Value) ? null : Property.GameActive.Value;
-            client.SetGameAsync(game);
-            remindService.StartAsync();
-            incidentService.StartAsync();
-
+            Task.Run(() => this.ProcessReady());
             return Task.CompletedTask;
         }
 
-        public async Task HandleMessageReceived(SocketMessage arg)
+        private async Task ProcessReady()
+        {
+            DiscordSocketClient client = this._serviceProvider.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
+            RemindService remindService = this._serviceProvider.GetService(typeof(RemindService)) as RemindService;
+            IncidentService incidentService = this._serviceProvider.GetService(typeof(IncidentService)) as IncidentService;
+            string game = string.IsNullOrWhiteSpace(Property.GameActive.Value) ? null : Property.GameActive.Value;
+
+            await client.SetGameAsync(game);
+            await remindService.StartAsync();
+            await incidentService.StartAsync();
+        }
+
+        public Task HandleMessageReceived(SocketMessage arg)
+        {
+            Task.Run(() => this.ProcessMessageReceived(arg));
+            return Task.CompletedTask;
+        }
+
+        private async Task ProcessMessageReceived(SocketMessage arg)
         {
             SocketUserMessage message = arg as SocketUserMessage;
             if (message == null)
             {
                 return;
             }
-            int pos = 0;
             DiscordSocketClient client = this._serviceProvider.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
+            CommandService commandService = this._serviceProvider.GetService(typeof(CommandService)) as CommandService;
+            int pos = 0;
             if (message.HasMentionPrefix(client.CurrentUser, ref pos))
             {
                 CommandContext context = new CommandContext(client, message);
-                CommandService commandService = this._serviceProvider.GetService(typeof(CommandService)) as CommandService;
                 IResult result = await commandService.ExecuteAsync(context, pos, this._serviceProvider);
 
                 if (!result.IsSuccess)
@@ -56,10 +65,10 @@ namespace XayahBot.Utility
                     if (this.IsUserError(result.Error))
                     {
                         IMessageChannel dmChannel = await ChannelProvider.GetDMChannelAsync(context);
-                        DiscordFormatEmbed errorResponse = new DiscordFormatEmbed()
+                        FormattedEmbedBuilder errorResponse = new FormattedEmbedBuilder()
                             .AppendTitle($"{XayahReaction.Error} This didn't work")
                             .AddField("Why, you ask?", result.ErrorReason);
-                        dmChannel.SendMessageAsync("", false, errorResponse.ToEmbed());
+                        await dmChannel.SendEmbedAsync(errorResponse);
                     }
                     else if (this.IsInterestingError(result.Error))
                     {
@@ -89,13 +98,34 @@ namespace XayahBot.Utility
 
         public Task HandleChannelDestroyed(SocketChannel deletedChannel)
         {
-            this._incidentSubscriberDao.RemoveByChannelIdAsync(deletedChannel.Id);
+            Task.Run(() => this.ProcessChannelDestroyed(deletedChannel));
             return Task.CompletedTask;
+        }
+
+        private async Task ProcessChannelDestroyed(SocketChannel deletedChannel)
+        {
+            await this._incidentSubscriberDao.RemoveByChannelIdAsync(deletedChannel.Id);
         }
 
         public Task HandleLeftGuild(SocketGuild leftGuild)
         {
-            this._incidentSubscriberDao.RemoveByGuildIdAsync(leftGuild.Id);
+            Task.Run(() => this.ProcessLeftGuild(leftGuild));
+            return Task.CompletedTask;
+        }
+
+        private async Task ProcessLeftGuild(SocketGuild leftGuild)
+        {
+            await this._incidentSubscriberDao.RemoveByGuildIdAsync(leftGuild.Id);
+        }
+
+        public Task HandleReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
+        {
+            Task.Run(() => this.ProcessReactionAdded(message, channel, reaction));
+            return Task.CompletedTask;
+        }
+
+        private Task ProcessReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
+        {
             return Task.CompletedTask;
         }
     }
