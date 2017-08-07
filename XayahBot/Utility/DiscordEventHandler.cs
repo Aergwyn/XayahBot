@@ -48,18 +48,18 @@ namespace XayahBot.Utility
         private async Task ProcessMessageReceived(SocketMessage arg)
         {
             SocketUserMessage message = arg as SocketUserMessage;
-            if (message == null)
+            if (message == null || message.Author.IsBot)
             {
                 return;
             }
             DiscordSocketClient client = this._serviceProvider.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
             CommandService commandService = this._serviceProvider.GetService(typeof(CommandService)) as CommandService;
-            int pos = 0;
-            if (message.HasMentionPrefix(client.CurrentUser, ref pos))
-            {
-                CommandContext context = new CommandContext(client, message);
-                IResult result = await commandService.ExecuteAsync(context, pos, this._serviceProvider);
 
+            int pos = 0;
+            CommandContext context = new CommandContext(client, message);
+            if (context.IsPrivate || message.HasMentionPrefix(client.CurrentUser, ref pos))
+            {
+                IResult result = await commandService.ExecuteAsync(context, pos, this._serviceProvider);
                 if (!result.IsSuccess)
                 {
                     if (this.IsUserError(result.Error))

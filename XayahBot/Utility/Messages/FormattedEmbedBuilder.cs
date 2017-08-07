@@ -42,9 +42,16 @@ namespace XayahBot.Utility.Messages
             return this;
         }
 
-        public FormattedEmbedBuilder AppendDescriptionNewLine()
+        public FormattedEmbedBuilder AppendDescriptionNewLine(int repeat = 1)
         {
-            this._builder.Description += Environment.NewLine;
+            if (repeat < 1)
+            {
+                repeat = 1;
+            }
+            for (int i = 1; i <= repeat; i++)
+            {
+                this._builder.Description += Environment.NewLine;
+            }
             return this;
         }
 

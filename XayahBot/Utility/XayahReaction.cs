@@ -10,7 +10,5 @@ namespace XayahBot.Utility
         public static readonly IEmote Question = new Emoji("❓");
         public static readonly IEmote Time = new Emoji("⏳");
         public static readonly IEmote Option = new Emoji("⚙️");
-        public static readonly IEmote LeftArrow = new Emoji("⬅");
-        public static readonly IEmote RightArrow = new Emoji("➡");
     }
 }

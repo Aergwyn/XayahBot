@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using XayahBot.Utility;
 
 namespace XayahBot.API.Riot.Model
 {
@@ -55,22 +56,7 @@ namespace XayahBot.API.Riot.Model
             if (regex.IsMatch(this.Resource))
             {
                 Match match = regex.Match(this.Resource);
-                return this.StripForNumber(match.Value as string);
-            }
-            return -1;
-        }
-
-        private int StripForNumber(string value)
-        {
-            int number = -1;
-            string result = string.Empty;
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                result = Regex.Replace(value, "[^0-9]+", string.Empty);
-                if (int.TryParse(result, out number))
-                {
-                    return number;
-                }
+                return NumberUtil.StripForNumber(match.Value as string);
             }
             return -1;
         }

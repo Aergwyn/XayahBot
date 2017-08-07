@@ -24,9 +24,17 @@ namespace XayahBot.Utility.Messages
             return this;
         }
 
-        public FormattedTextBuilder AppendNewLine()
+        public FormattedTextBuilder AppendNewLine(int repeat = 1)
         {
-            return this.Append(Environment.NewLine);
+            if (repeat < 1)
+            {
+                repeat = 1;
+            }
+            for (int i = 1; i <= repeat; i++)
+            {
+                this.Text += Environment.NewLine;
+            }
+            return this;
         }
 
         public override string ToString()

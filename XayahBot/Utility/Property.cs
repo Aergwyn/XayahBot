@@ -9,9 +9,9 @@ namespace XayahBot.Utility
     public sealed class Property
     {
         public static readonly Property FilePath = new Property("file_path", AppContext.BaseDirectory + "/", false);
-        public static readonly Property FileDiscordToken = new Property("file__discord_token", "discord.txt", false);
-        public static readonly Property FileRiotApiKey = new Property("file_riot_api_key", "riot.txt", false);
-        public static readonly Property FileChampionGGApiKey = new Property("file_championgg_api_key", "championgg.txt", false);
+        public static readonly Property FileDiscordToken = new Property("file__discord_token", "discord.token", false);
+        public static readonly Property FileRiotApiKey = new Property("file_riot_api_key", "riot_api.key", false);
+        public static readonly Property FileChampionGGApiKey = new Property("file_championgg_api_key", "championgg_api.key", false);
 
         public static readonly Property GameActive = new Property("game_active", "with Rakan");
         public static readonly Property RemindDisabled = new Property("remind_disabled", "");
