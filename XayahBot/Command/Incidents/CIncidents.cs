@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using XayahBot.Command.Logic;
@@ -30,40 +33,55 @@ namespace XayahBot.Command.Incidents
         [Command("on")]
         [RequireUserPermission(GuildPermission.Administrator)]
         [RequireContext(ContextType.Guild)]
-        public Task Enable(IChannel channel)
+        public Task Enable(string channel)
         {
             Task.Run(() => this.ProcessEnable(channel));
             return Task.CompletedTask;
         }
 
-        private async Task ProcessEnable(IChannel channel)
+        private async Task ProcessEnable(string channel)
         {
             if (this.IsDisabled())
             {
                 this.NotifyDisabledCommand();
                 return;
             }
-            TIncidentSubscriber subscriber = null;
+            FormattedEmbedBuilder message = new FormattedEmbedBuilder()
+                .CreateFooter(this.Context);
             try
             {
-                subscriber = this._incidentSubscriberDAO.GetByGuildId(this.Context.Guild.Id);
-            }
-            catch (NotExistingException)
-            {
-                subscriber = new TIncidentSubscriber
+                IReadOnlyCollection<IGuildChannel> guildChannel = await this.Context.Guild.GetChannelsAsync();
+                if (this.Context.Message.MentionedChannelIds.Count() == 0)
                 {
-                    GuildId = this.Context.Guild.Id
-                };
-            }
-            subscriber.ChannelId = channel.Id;
-            await this._incidentSubscriberDAO.SaveAsync(subscriber);
+                    throw new NoChannelException();
+                }
+                IGuildChannel validChannel = guildChannel.FirstOrDefault(x => x.Id.Equals(this.Context.Message.MentionedChannelIds.First())) ?? throw new NoChannelException();
+                TIncidentSubscriber subscriber = null;
+                try
+                {
+                    subscriber = this._incidentSubscriberDAO.GetByGuildId(this.Context.Guild.Id);
+                }
+                catch (NotExistingException)
+                {
+                    subscriber = new TIncidentSubscriber
+                    {
+                        GuildId = this.Context.Guild.Id
+                    };
+                }
+                subscriber.ChannelId = validChannel.Id;
+                await this._incidentSubscriberDAO.SaveAsync(subscriber);
 
-            FormattedEmbedBuilder message = new FormattedEmbedBuilder()
-                .CreateFooter(this.Context)
-                .AppendTitle($"{XayahReaction.Success} Done")
-                .AppendDescription($"Incident notifications will now go to `{channel.Name}`.");
+                message.AppendTitle($"{XayahReaction.Success} Done")
+                    .AppendDescription($"Incident notifications will now go to `{validChannel.Name}`.");
+                await this._incidentService.StartAsync();
+            }
+            catch (NoChannelException)
+            {
+                message
+                    .AppendTitle($"{XayahReaction.Error} This didn't work")
+                    .AppendDescription($"I couldn't find the channel on this server.");
+            }
             await this.ReplyAsync(message);
-            await this._incidentService.StartAsync();
         }
 
         [Command("status")]
@@ -100,9 +118,10 @@ namespace XayahBot.Command.Incidents
             }
             catch (NoChannelException)
             {
+                await this._incidentSubscriberDAO.RemoveByGuildIdAsync(this.Context.Guild.Id);
                 message
                     .AppendTitle($"{XayahReaction.Error} This didn't work")
-                    .AppendDescription($"I couldn't find the configured channel.");
+                    .AppendDescription($"I couldn't find the configured channel and thus automatically disabled incident notifications on this server.");
             }
             await this.ReplyAsync(message);
         }

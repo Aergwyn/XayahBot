@@ -95,27 +95,5 @@ namespace XayahBot.Utility
             }
             return false;
         }
-
-        public Task HandleChannelDestroyed(SocketChannel deletedChannel)
-        {
-            Task.Run(() => this.ProcessChannelDestroyed(deletedChannel));
-            return Task.CompletedTask;
-        }
-
-        private async Task ProcessChannelDestroyed(SocketChannel deletedChannel)
-        {
-            await this._incidentSubscriberDao.RemoveByChannelIdAsync(deletedChannel.Id);
-        }
-
-        public Task HandleLeftGuild(SocketGuild leftGuild)
-        {
-            Task.Run(() => this.ProcessLeftGuild(leftGuild));
-            return Task.CompletedTask;
-        }
-
-        private async Task ProcessLeftGuild(SocketGuild leftGuild)
-        {
-            await this._incidentSubscriberDao.RemoveByGuildIdAsync(leftGuild.Id);
-        }
     }
 }

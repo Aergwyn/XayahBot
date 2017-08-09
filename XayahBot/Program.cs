@@ -82,10 +82,7 @@ namespace XayahBot
             this._client.Log += Logger.Log;
             this._commandService.Log += Logger.Log;
             this._client.Ready += eventHandler.HandleReady;
-            this._client.ChannelDestroyed += eventHandler.HandleChannelDestroyed;
-            this._client.LeftGuild += eventHandler.HandleLeftGuild;
             this._client.MessageReceived += eventHandler.HandleMessageReceived;
-            this._client.ReactionAdded += eventHandler.HandleReactionAdded;
 
             using (GeneralContext database = new GeneralContext())
             {
