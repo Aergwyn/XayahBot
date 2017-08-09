@@ -209,9 +209,9 @@ namespace XayahBot.Command.Incidents
         {
             foreach (TIncidentMessage message in dbIncident.Messages)
             {
-                IMessageChannel channel = this._client.GetChannel(message.ChannelId) as IMessageChannel;
                 try
                 {
+                    IMessageChannel channel = this._client.GetChannel(message.ChannelId) as IMessageChannel;
                     IMessage postedMessage = await channel.GetMessageAsync(message.MessageId);
                     await postedMessage?.DeleteAsync();
                 }
@@ -228,9 +228,9 @@ namespace XayahBot.Command.Incidents
             TIncident dbIncident = this.GetDbIncident(incident, region);
             foreach (TIncidentSubscriber subscriber in this.GetInterestedSubscriber(dbIncident))
             {
-                IMessageChannel channel = this._client.GetChannel(subscriber.ChannelId) as IMessageChannel;
                 try
                 {
+                    IMessageChannel channel = this._client.GetChannel(subscriber.ChannelId) as IMessageChannel ?? throw new NoChannelException();
                     IUserMessage postedMessage = await channel.SendEmbedAsync(this.CreateEmbed(incident));
                     TIncidentMessage message = new TIncidentMessage
                     {
@@ -241,9 +241,10 @@ namespace XayahBot.Command.Incidents
                     dbIncident.Messages.Add(message);
                     await this._incidentDAO.SaveAsync(dbIncident);
                 }
-                catch (HttpException)
+                catch (Exception ex) when (ex is HttpException || ex is NoChannelException)
                 {
-                    // If your permission got revoked you can't access that channel anymore and it throws HttpException
+                    // I assume I can't reach the server/channel or it's already gone
+                    await this._incidentSubscriberDAO.RemoveAsync(subscriber);
                 }
             }
         }
