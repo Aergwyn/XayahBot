@@ -14,7 +14,7 @@ using XayahBot.Utility.Messages;
 namespace XayahBot.Command.Remind
 {
     [Group("remind me")]
-    public class CRemind : ToggleableModuleBase
+    public class CRemind : ModuleBase
     {
         private readonly RemindService _remindService;
         private readonly ReminderDAO _reminderDAO = new ReminderDAO();
@@ -24,28 +24,18 @@ namespace XayahBot.Command.Remind
             this._remindService = remindService;
         }
 
-        protected override Property GetDisableProperty()
-        {
-            return Property.RemindDisabled;
-        }
-
         [Command]
         public Task RemindMe(int value, [OverrideTypeReader(typeof(TimeUnitTypeReader))]TimeUnit timeUnit, [Remainder] string text)
         {
-            Task.Run(() => this.CreateReminder(value, timeUnit, text));
+            Task.Run(() => this.ProcessRemindMe(value, timeUnit, text));
             return Task.CompletedTask;
         }
 
-        private async Task CreateReminder(int value, TimeUnit timeUnit, string text)
+        private async Task ProcessRemindMe(int value, TimeUnit timeUnit, string text)
         {
-            if (this.IsDisabled())
-            {
-                this.NotifyDisabledCommand();
-                return;
-            }
             text = text.Trim();
             DateTime expirationTime = DateTime.UtcNow;
-            int maxTime = 30;
+            int maxTime = int.Parse(Property.RemindDayCap.Value);
             if (timeUnit == TimeUnit.Day)
             {
                 value = this.SetValueInRange(value, 1, maxTime);
@@ -61,7 +51,7 @@ namespace XayahBot.Command.Remind
                 value = this.SetValueInRange(value, 1, maxTime * 24 * 60);
                 expirationTime = DateTime.UtcNow.AddMinutes(value);
             }
-            int maxLength = 80;
+            int maxLength = int.Parse(Property.RemindTextCap.Value);
             if (text.Length > maxLength)
             {
                 text = text.Substring(0, maxLength);
@@ -98,17 +88,12 @@ namespace XayahBot.Command.Remind
         [Command("list")]
         public Task List()
         {
-            Task.Run(() => this.ListReminder());
+            Task.Run(() => this.ProcessList());
             return Task.CompletedTask;
         }
 
-        private async Task ListReminder()
+        private async Task ProcessList()
         {
-            if (this.IsDisabled())
-            {
-                this.NotifyDisabledCommand();
-                return;
-            }
             IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
             List<TReminder> reminders = this._reminderDAO.GetAll(this.Context.User.Id);
             IOrderedEnumerable<TReminder> orderedList = reminders.OrderBy(x => x.ExpirationTime);
@@ -126,29 +111,26 @@ namespace XayahBot.Command.Remind
             {
                 message.AppendDescription("imagine a soulrending void", AppendOption.Italic);
             }
-            await this.ReplyAsync(message);
+            await channel.SendEmbedAsync(message);
+            await this.Context.Message.AddReactionAsync(XayahReaction.Success);
         }
 
         [Command("clear")]
         public Task Clear()
         {
-            Task.Run(() => this.ClearReminder());
+            Task.Run(() => this.ProcessClear());
             return Task.CompletedTask;
         }
 
-        private async Task ClearReminder()
+        private async Task ProcessClear()
         {
-            if (this.IsDisabled())
-            {
-                this.NotifyDisabledCommand();
-                return;
-            }
             IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
             await this._remindService.ClearUserAsync(this.Context.User.Id);
             FormattedEmbedBuilder message = new FormattedEmbedBuilder()
                 .AppendTitle($"{XayahReaction.Success} Done")
                 .AppendDescription("I purged all of your reminder for you.");
-            await this.ReplyAsync(message);
+            await channel.SendEmbedAsync(message);
+            await this.Context.Message.AddReactionAsync(XayahReaction.Success);
         }
     }
 }

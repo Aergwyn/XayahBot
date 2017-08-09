@@ -32,11 +32,11 @@ namespace XayahBot.Command.Incidents
         [RequireContext(ContextType.Guild)]
         public Task Enable(IChannel channel)
         {
-            Task.Run(() => this.EnableIncidents(channel));
+            Task.Run(() => this.ProcessEnable(channel));
             return Task.CompletedTask;
         }
 
-        private async Task EnableIncidents(IChannel channel)
+        private async Task ProcessEnable(IChannel channel)
         {
             if (this.IsDisabled())
             {
@@ -71,11 +71,11 @@ namespace XayahBot.Command.Incidents
         [RequireContext(ContextType.Guild)]
         public Task Status()
         {
-            Task.Run(() => this.ShowStatus());
+            Task.Run(() => this.ProcessStatus());
             return Task.CompletedTask;
         }
 
-        private async Task ShowStatus()
+        private async Task ProcessStatus()
         {
             if (this.IsDisabled())
             {
@@ -112,11 +112,11 @@ namespace XayahBot.Command.Incidents
         [RequireContext(ContextType.Guild)]
         public Task Disable()
         {
-            Task.Run(() => this.DisableIncidents());
+            Task.Run(() => this.ProcessOff());
             return Task.CompletedTask;
         }
 
-        private async Task DisableIncidents()
+        private async Task ProcessOff()
         {
             if (this.IsDisabled())
             {

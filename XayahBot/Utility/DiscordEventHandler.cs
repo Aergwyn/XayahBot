@@ -117,16 +117,5 @@ namespace XayahBot.Utility
         {
             await this._incidentSubscriberDao.RemoveByGuildIdAsync(leftGuild.Id);
         }
-
-        public Task HandleReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
-        {
-            Task.Run(() => this.ProcessReactionAdded(message, channel, reaction));
-            return Task.CompletedTask;
-        }
-
-        private Task ProcessReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
-        {
-            return Task.CompletedTask;
-        }
     }
 }

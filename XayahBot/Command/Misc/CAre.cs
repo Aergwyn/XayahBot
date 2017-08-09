@@ -49,11 +49,11 @@ namespace XayahBot.Command.Misc
         [Command("are"), Alias("is", "am")]
         public Task Are([Remainder] string text = "")
         {
-            Task.Run(() => this.CreateResponse(text));
+            Task.Run(() => this.ProcessAre(text));
             return Task.CompletedTask;
         }
 
-        private async Task CreateResponse(string text)
+        private async Task ProcessAre(string text)
         {
             text = text.Trim();
             string response = string.Empty;

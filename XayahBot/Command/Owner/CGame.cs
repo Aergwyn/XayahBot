@@ -12,11 +12,11 @@ namespace XayahBot.Command.Owner
         [RequireContext(ContextType.DM)]
         public Task Game([Remainder] string text = "")
         {
-            Task.Run(() => this.SetGame(text));
+            Task.Run(() => this.ProcessGame(text));
             return Task.CompletedTask;
         }
 
-        private async Task SetGame(string text)
+        private async Task ProcessGame(string text)
         {
             DiscordSocketClient client = this.Context.Client as DiscordSocketClient;
             string game = null;

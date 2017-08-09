@@ -44,7 +44,7 @@ namespace XayahBot.Command.Remind
             await this._lock.WaitAsync();
             try
             {
-                if (this.IsEnabled() && !this._isRunning && this._reminderDAO.HasReminder())
+                if (!this._isRunning && this._reminderDAO.HasReminder())
                 {
                     this._process = Task.Run(() => this.RunAsync());
                     Logger.Info($"{nameof(RemindService)} started.");
@@ -54,16 +54,6 @@ namespace XayahBot.Command.Remind
             {
                 this._lock.Release();
             }
-        }
-
-        private bool IsEnabled()
-        {
-            string value = Property.RemindDisabled.Value;
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                return true;
-            }
-            return false;
         }
 
         private async Task RunAsync()
@@ -89,7 +79,7 @@ namespace XayahBot.Command.Remind
                 {
                     processed = false;
                 }
-                if (this.IsEnabled() && this._reminderDAO.HasReminder())
+                if (this._reminderDAO.HasReminder())
                 {
                     await Task.Delay(new TimeSpan(0, 0, 10));
                 }

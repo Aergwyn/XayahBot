@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
@@ -17,21 +18,22 @@ namespace XayahBot.Command.Owner
         [RequireContext(ContextType.DM)]
         public Task Get()
         {
-            Task.Run(() => this.BuildPropertyList());
+            Task.Run(() => this.ProcessGet());
             return Task.CompletedTask;
         }
 
-        private async Task BuildPropertyList()
+        private async Task ProcessGet()
         {
             string text = string.Empty;
-            int maxWidth = Property.UpdatableValues.OrderByDescending(x => x.Name.Length).First().Name.Length;
-            for (int i = 0; i < Property.UpdatableValues.Count(); i++)
+            int maxWidth = Property.UpdatableValues().OrderByDescending(x => x.Name.Length).First().Name.Length;
+            IEnumerable<Property> properties = Property.UpdatableValues();
+            for (int i = 0; i < properties.Count(); i++)
             {
                 if (i > 0)
                 {
                     text += Environment.NewLine;
                 }
-                Property property = Property.UpdatableValues.ElementAt(i);
+                Property property = properties.ElementAt(i);
                 text += property.Name.PadRight(maxWidth) + ":" + property.Value;
             }
             FormattedEmbedBuilder message = new FormattedEmbedBuilder()
@@ -45,11 +47,11 @@ namespace XayahBot.Command.Owner
         [RequireContext(ContextType.DM)]
         public Task Set(string name, [Remainder]string value = "")
         {
-            Task.Run(() => this.SetProperty(name, value));
+            Task.Run(() => this.ProcessSet(name, value));
             return Task.CompletedTask;
         }
 
-        private async Task SetProperty(string name, string value)
+        private async Task ProcessSet(string name, string value)
         {
             value = value.Trim();
             FormattedEmbedBuilder message = new FormattedEmbedBuilder();
@@ -60,6 +62,7 @@ namespace XayahBot.Command.Owner
                 property.Value = value;
                 message
                     .AppendTitle($"{XayahReaction.Success} Done")
+                    .AppendDescription($"I updated `{name}` for you.")
                     .AppendDescription($"Old:{oldValue}{Environment.NewLine}New:{value}", AppendOption.Codeblock);
             }
             catch (NotExistingException)

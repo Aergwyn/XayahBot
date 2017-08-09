@@ -13,22 +13,24 @@ namespace XayahBot.Utility
         public static readonly Property FileRiotApiKey = new Property("file_riot_api_key", "riot_api.key", false);
         public static readonly Property FileChampionGGApiKey = new Property("file_championgg_api_key", "championgg_api.key", false);
 
-        public static readonly Property GameActive = new Property("game_active", "with Rakan");
-        public static readonly Property RemindDisabled = new Property("remind_disabled", "");
         public static readonly Property IncidentDisabled = new Property("incident_disabled", "");
         public static readonly Property ChampDisabled = new Property("champ_disabled", "");
-        public static readonly Property RiotUrlVersion = new Property("rioturl_version", "7.16.1");
 
-        public static IEnumerable<Property> UpdatableValues
+        public static readonly Property GameActive = new Property("game_active", "with Rakan");
+        public static readonly Property RiotUrlVersion = new Property("rioturl_version", "7.16.1");
+        public static readonly Property RemindDayCap = new Property("remind_day_cap", "30");
+        public static readonly Property RemindTextCap = new Property("remind_text_cap", "100");
+        public static readonly Property IncidentCheckInterval = new Property("incident_interval", "15");
+
+        public static IEnumerable<Property> UpdatableValues()
         {
-            get
-            {
-                yield return GameActive;
-                yield return RemindDisabled;
-                yield return IncidentDisabled;
-                yield return ChampDisabled;
-                yield return RiotUrlVersion;
-            }
+            yield return IncidentDisabled;
+            yield return ChampDisabled;
+            yield return GameActive;
+            yield return RiotUrlVersion;
+            yield return RemindDayCap;
+            yield return RemindTextCap;
+            yield return IncidentCheckInterval;
         }
 
         public static Property GetUpdatableByName(string name)
@@ -36,7 +38,7 @@ namespace XayahBot.Utility
             if (!string.IsNullOrWhiteSpace(name))
             {
                 name = name.ToLower();
-                Property match = UpdatableValues.FirstOrDefault(x => x.Name.ToLower().Equals(name));
+                Property match = UpdatableValues().FirstOrDefault(x => x.Name.ToLower().Equals(name));
                 if (match != null)
                 {
                     return match;

@@ -80,7 +80,7 @@ namespace XayahBot.Command.Incidents
             this._isRunning = true;
             while (this._isRunning)
             {
-                int interval = 15;
+                int interval = int.Parse(Property.IncidentCheckInterval.Value);
                 if (DateTime.UtcNow.Minute % interval == 0 || init)
                 {
                     if (!processed)
@@ -232,7 +232,7 @@ namespace XayahBot.Command.Incidents
                 try
                 {
                     IUserMessage postedMessage = await channel.SendEmbedAsync(this.CreateEmbed(incident));
-                    await this.SaveMessageIdAsync(dbIncident, postedMessage);
+                    await this.SaveMessageAsync(dbIncident, postedMessage);
                 }
                 catch (HttpException)
                 {
@@ -288,7 +288,7 @@ namespace XayahBot.Command.Incidents
             return message;
         }
 
-        private async Task SaveMessageIdAsync(TIncident dbIncident, IUserMessage postedMessage)
+        private async Task SaveMessageAsync(TIncident dbIncident, IUserMessage postedMessage)
         {
             TIncidentMessage message = new TIncidentMessage
             {

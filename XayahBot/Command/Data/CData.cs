@@ -11,19 +11,19 @@ namespace XayahBot.Command.Data
 {
     public class CData : ToggleableModuleBase
     {
-        [Command("champ")]
-        public Task Data([Remainder] string name)
-        {
-            Task.Run(() => this.PostChampion(name));
-            return Task.CompletedTask;
-        }
-
         protected override Property GetDisableProperty()
         {
             return Property.ChampDisabled;
         }
 
-        private async Task PostChampion(string name)
+        [Command("champ")]
+        public Task Champ([Remainder] string name)
+        {
+            Task.Run(() => this.ProcessChamp(name));
+            return Task.CompletedTask;
+        }
+
+        private async Task ProcessChamp(string name)
         {
             if (this.IsDisabled())
             {
