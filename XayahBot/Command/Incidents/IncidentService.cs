@@ -109,25 +109,23 @@ namespace XayahBot.Command.Incidents
 
         private async Task CheckStatusApiAsync()
         {
-            List<RiotStatus> statusApis = new List<RiotStatus>{
-                new RiotStatus(Region.EUW),
-                new RiotStatus(Region.NA),
-                new RiotStatus(Region.EUNE)
-            };
-            foreach (RiotStatus statusApi in statusApis)
+            List<RiotStatus> riotStatusList = new List<RiotStatus>()
             {
-                List<IncidentData> incidents = new List<IncidentData>();
+                new RiotStatus(Region.EUW)
+            };
+            List<IncidentData> incidents = new List<IncidentData>();
+            foreach (RiotStatus riotStatus in riotStatusList)
+            {
                 try
                 {
-                    ShardStatusDto shardStatus = await statusApi.GetStatusAsync();
-                    incidents.AddRange(this.AnalyzeData(shardStatus));
-                    await this.ProcessCurrentIncidentsAsync(incidents);
-                    await this.ProcessSolvedIncidentsAsync(incidents);
+                    incidents.AddRange(this.AnalyzeData(await riotStatus.GetStatusAsync()));
                 }
                 catch (ErrorResponseException ex)
                 {
-                    Logger.Error($"The {statusApi.GetRegion()} Status-API returned an error.", ex);
+                    Logger.Error($"The {riotStatus.GetRegion()} Status-API returned an error.", ex);
                 }
+                await this.ProcessCurrentIncidentsAsync(incidents, riotStatus.GetRegion());
+                await this.RemoveSolvedIncidentsAsync(incidents, riotStatus.GetRegion());
             }
         }
 
@@ -166,30 +164,31 @@ namespace XayahBot.Command.Incidents
             return incidents;
         }
 
-        private async Task ProcessCurrentIncidentsAsync(List<IncidentData> incidents)
+        private async Task ProcessCurrentIncidentsAsync(List<IncidentData> incidents, Region region)
         {
             foreach (IncidentData incident in incidents)
             {
-                if (this.GotNewUpdate(incident.Id, incident.LastUpdate))
+                if (this.IsNewOrGotNewUpdate(incident.Id, incident.LastUpdate))
                 {
                     await this.DeletePostsAsync(incident.Id);
+                    await this.PostIncidentAsync(incident, region);
                 }
-                await this.PostIncidentAsync(incident);
             }
         }
 
-        private bool GotNewUpdate(long incidentId, DateTime lastUpdate)
+        private bool IsNewOrGotNewUpdate(long incidentId, DateTime lastUpdate)
         {
             try
             {
-                TIncident entry = this._incidentDAO.Get(incidentId);
-                if (lastUpdate.Ticks > entry.LastUpdate.Ticks)
+                TIncident dbIncident = this._incidentDAO.Get(incidentId);
+                if (lastUpdate.Ticks > dbIncident.LastUpdate.Ticks)
                 {
                     return true;
                 }
             }
             catch (NotExistingException)
             {
+                return true;
             }
             return false;
         }
@@ -199,40 +198,48 @@ namespace XayahBot.Command.Incidents
             try
             {
                 TIncident dbIncident = this._incidentDAO.Get(incidentId);
-                foreach (TIncidentMessage message in dbIncident.Messages)
-                {
-                    IMessageChannel channel = this._client.GetChannel(message.ChannelId) as IMessageChannel;
-                    try
-                    {
-                        IMessage postedMessage = await channel.GetMessageAsync(message.MessageId);
-                        await postedMessage?.DeleteAsync();
-                    }
-                    catch (NullReferenceException)
-                    {
-                        // If a message got deleted it throws NullReferenceException if you try to access it. weird.
-                    }
-                    catch (HttpException)
-                    {
-                        // If your permission got revoked you can't access that message anymore and it throws HttpException
-                    }
-                    await this._incidentMessageDAO.RemoveAsync(message);
-                }
+                await this.DeletePostsAsync(dbIncident);
             }
             catch (NotExistingException)
             {
             }
         }
 
-        private async Task PostIncidentAsync(IncidentData incident)
+        private async Task DeletePostsAsync(TIncident dbIncident)
         {
-            TIncident dbIncident = this.GetDbIncident(incident);
+            foreach (TIncidentMessage message in dbIncident.Messages)
+            {
+                IMessageChannel channel = this._client.GetChannel(message.ChannelId) as IMessageChannel;
+                try
+                {
+                    IMessage postedMessage = await channel.GetMessageAsync(message.MessageId);
+                    await postedMessage?.DeleteAsync();
+                }
+                catch (Exception)
+                {
+                    // I assume I can't reach the message or it's already gone
+                }
+            }
+            await this._incidentMessageDAO.RemoveRangeAsync(dbIncident.Messages.ToArray());
+        }
+
+        private async Task PostIncidentAsync(IncidentData incident, Region region)
+        {
+            TIncident dbIncident = this.GetDbIncident(incident, region);
             foreach (TIncidentSubscriber subscriber in this.GetInterestedSubscriber(dbIncident))
             {
                 IMessageChannel channel = this._client.GetChannel(subscriber.ChannelId) as IMessageChannel;
                 try
                 {
                     IUserMessage postedMessage = await channel.SendEmbedAsync(this.CreateEmbed(incident));
-                    await this.SaveMessageAsync(dbIncident, postedMessage);
+                    TIncidentMessage message = new TIncidentMessage
+                    {
+                        ChannelId = postedMessage.Channel.Id,
+                        Incident = dbIncident,
+                        MessageId = postedMessage.Id
+                    };
+                    dbIncident.Messages.Add(message);
+                    await this._incidentDAO.SaveAsync(dbIncident);
                 }
                 catch (HttpException)
                 {
@@ -241,7 +248,7 @@ namespace XayahBot.Command.Incidents
             }
         }
 
-        private TIncident GetDbIncident(IncidentData incident)
+        private TIncident GetDbIncident(IncidentData incident, Region region)
         {
             TIncident newDbIncident = null;
             try
@@ -253,6 +260,7 @@ namespace XayahBot.Command.Incidents
                 newDbIncident = new TIncident
                 {
                     IncidentId = incident.Id,
+                    Region = region.Name
                 };
             }
             newDbIncident.LastUpdate = incident.LastUpdate;
@@ -288,26 +296,14 @@ namespace XayahBot.Command.Incidents
             return message;
         }
 
-        private async Task SaveMessageAsync(TIncident dbIncident, IUserMessage postedMessage)
+        private async Task RemoveSolvedIncidentsAsync(List<IncidentData> incidents, Region region)
         {
-            TIncidentMessage message = new TIncidentMessage
-            {
-                ChannelId = postedMessage.Channel.Id,
-                Incident = dbIncident,
-                MessageId = postedMessage.Id
-            };
-            dbIncident.Messages.Add(message);
-            await this._incidentDAO.SaveAsync(dbIncident);
-        }
-
-        private async Task ProcessSolvedIncidentsAsync(List<IncidentData> incidents)
-        {
-            List<TIncident> dbIncidents = this._incidentDAO.Get();
+            List<TIncident> dbIncidents = this._incidentDAO.Get(region);
             foreach (TIncident dbIncident in dbIncidents)
             {
                 if (incidents.Where(x => x.Id.Equals(dbIncident.IncidentId)).Count() == 0)
                 {
-                    await this.DeletePostsAsync(dbIncident.IncidentId);
+                    await this.DeletePostsAsync(dbIncident);
                     await this._incidentDAO.RemoveAsync(dbIncident);
                 }
             }

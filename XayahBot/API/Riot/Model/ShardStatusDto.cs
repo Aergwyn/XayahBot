@@ -12,5 +12,10 @@ namespace XayahBot.API.Riot.Model
         //public string Region_Tag { get; set; }
         public List<ServiceDto> Services { get; set; }
         //public string Slug { get; set; }
+
+        public override string ToString()
+        {
+            return this.Region;
+        }
     }
 }

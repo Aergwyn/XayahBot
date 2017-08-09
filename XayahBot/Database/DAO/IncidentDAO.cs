@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using XayahBot.API.Riot;
 using XayahBot.Database.Model;
 using XayahBot.Error;
 
@@ -21,11 +21,11 @@ namespace XayahBot.Database.DAO
             }
         }
 
-        public List<TIncident> Get()
+        public List<TIncident> Get(Region region)
         {
             using (GeneralContext database = new GeneralContext())
             {
-                return database.Incidents.ToList();
+                return database.Incidents.Where(x => x.Region.Equals(region.Name)).ToList();
             }
         }
     }
