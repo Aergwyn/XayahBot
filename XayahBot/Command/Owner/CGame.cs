@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
 using XayahBot.Utility;
@@ -18,14 +19,21 @@ namespace XayahBot.Command.Owner
 
         private async Task ProcessGame(string text)
         {
-            DiscordSocketClient client = this.Context.Client as DiscordSocketClient;
-            string game = null;
-            if (!string.IsNullOrWhiteSpace(text))
+            try
             {
-                game = text.Trim();
+                DiscordSocketClient client = this.Context.Client as DiscordSocketClient;
+                string game = null;
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    game = text.Trim();
+                }
+                Property.GameActive.Value = game;
+                await client.SetGameAsync(game);
             }
-            Property.GameActive.Value = game;
-            await client.SetGameAsync(game);
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
+            }
         }
     }
 }

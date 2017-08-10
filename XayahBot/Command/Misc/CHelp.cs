@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using XayahBot.Command.Remind;
@@ -25,33 +26,41 @@ namespace XayahBot.Command.Misc
 
         private async Task ProcessHelp(string text)
         {
-            text = this.TrimText(text);
-            IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
-            FormattedEmbedBuilder message = new FormattedEmbedBuilder()
-                .AppendTitle("Xayah Bot Help");
-            switch (NumberUtil.StripForNumber(text))
+            try
             {
-                case 1:
-                    this.Append8BallHelp(message);
-                    break;
-                case 2:
-                    this.AppendRemindHelp(message);
-                    break;
-                case 3:
-                    this.AppendIncidentsHelp(message);
-                    break;
-                case 4:
-                    this.AppendChampHelp(message);
-                    break;
-                default:
-                    this.AppendGeneralHelp(message);
-                    break;
+                text = this.TrimText(text);
+                IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
+                FormattedEmbedBuilder message = new FormattedEmbedBuilder()
+                    .AppendTitle("Xayah Bot Help");
+                switch (NumberUtil.StripForNumber(text))
+                {
+                    case 1:
+                        this.Append8BallHelp(message);
+                        break;
+                    case 2:
+                        this.AppendRemindHelp(message);
+                        break;
+                    case 3:
+                        this.AppendIncidentsHelp(message);
+                        break;
+                    case 4:
+                        this.AppendChampHelp(message);
+                        break;
+                    default:
+                        this.AppendGeneralHelp(message);
+                        break;
+                }
+                await channel.SendEmbedAsync(message);
+                await this.Context.Message.AddReactionIfNotDMAsync(this.Context, XayahReaction.Success);
             }
-            await channel.SendEmbedAsync(message);
-            await this.Context.Message.AddReactionAsync(XayahReaction.Success);
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
+            }
         }
 
-        private string TrimText(string text) {
+        private string TrimText(string text)
+        {
             text.Trim();
             string[] parts = text.Split(new char[] { ' ' }, 2);
             if (parts.Length > 0)
@@ -85,10 +94,14 @@ namespace XayahBot.Command.Misc
                 .AppendDescription($"Tip: You don't need to mention me in private messages. There are only both of us so I'll know right away what to do.", AppendOption.Italic)
                 .AppendDescriptionNewLine(2);
             this.AppendDescriptionTitle(message, "Help Index")
-                .AppendDescription($"`1` - {_cAreTitle}").AppendDescriptionNewLine()
-                .AppendDescription($"`2` - {_cRemindTitle}").AppendDescriptionNewLine()
-                .AppendDescription($"`3` - {_cIncidentsTitle}").AppendDescriptionNewLine()
-                .AppendDescription($"`4` - {_cDataTitle}").AppendDescriptionNewLine()
+                .AppendDescription($"`1` - {_cAreTitle}")
+                .AppendDescriptionNewLine()
+                .AppendDescription($"`2` - {_cRemindTitle}")
+                .AppendDescriptionNewLine()
+                .AppendDescription($"`3` - {_cIncidentsTitle}")
+                .AppendDescriptionNewLine()
+                .AppendDescription($"`4` - {_cDataTitle}")
+                .AppendDescriptionNewLine()
                 .AppendDescription($"`5` - Champion statistics (via ChampionGG-API) [Soon™]")
                 .AppendDescriptionNewLine(2);
             this.AppendDescriptionTitle(message, "Contact")
@@ -105,7 +118,7 @@ namespace XayahBot.Command.Misc
                 .AppendDescription("Every bot needs an 8ball command. A bot without it can't even call itself complete. Also it's the most random and funny command to abuse and spam the chat with.")
                 .AppendDescriptionNewLine(2);
             this.AppendDescriptionTitle(message, "Usage")
-                .AppendDescription("The keywords to this command are `are`, `is` and `am` followed by a highly creative sentence of yours.")
+                .AppendDescription("The keywords to this command are `are`, `is` or `am` followed by a highly creative sentence of yours.")
                 .AppendDescriptionNewLine(2);
             this.AppendDescriptionTitle(message, "Examples")
                 .AppendDescription($"{this.Context.Client.CurrentUser.Mention} are you jealous of Ahri?")
@@ -131,9 +144,9 @@ namespace XayahBot.Command.Misc
                 .AppendDescriptionNewLine()
                 .AppendDescription("- `remind me [number] [time-unit] [text]`; while number and time-unit tell me how long to wait, the text is the message I'll remind you with")
                 .AppendDescriptionNewLine()
-                .AppendDescription("- `remind me list`; shows a list of your active reminder")
+                .AppendDescription("- `remind me list` shows a list of your active reminder")
                 .AppendDescriptionNewLine()
-                .AppendDescription("- `remind me clear`; if you want to get rid of them")
+                .AppendDescription("- `remind me clear` if you want to get rid of them")
                 .AppendDescriptionNewLine(2)
                 .AppendDescription($"Tip: The possible time-units are `{timeUnits}`.", AppendOption.Italic)
                 .AppendDescriptionNewLine(2);
@@ -149,7 +162,7 @@ namespace XayahBot.Command.Misc
         private FormattedEmbedBuilder AppendIncidentsHelp(FormattedEmbedBuilder message)
         {
             this.AppendDescriptionTitle(message, _cIncidentsTitle)
-                .AppendDescription("If you want to be up to date about all of Riot's troubles, I know a way. You can configure this to post in a channel of your choice.")
+                .AppendDescription("If you want to be up to date about all of League of Legend's troubles, I know a way. You can configure this to post in a channel of your choice.")
                 .AppendDescriptionNewLine(2)
                 .AppendDescription($"I will check every `{Property.IncidentCheckInterval}` minutes for new or updated incidents.")
                 .AppendDescriptionNewLine(2);
@@ -166,11 +179,11 @@ namespace XayahBot.Command.Misc
             this.AppendDescriptionTitle(message, "Usage")
                 .AppendDescription("This command is split in three parts:")
                 .AppendDescriptionNewLine()
-                .AppendDescription("- `incidents on [channel]`; the channel has to be mentioned as a post location to activate notifications")
+                .AppendDescription("- `incidents on` followed by a mentioned channel as a post location to activate notifications")
                 .AppendDescriptionNewLine()
-                .AppendDescription("- `incidents off`; to disable the notifications")
+                .AppendDescription("- `incidents off` to disable notifications")
                 .AppendDescriptionNewLine()
-                .AppendDescription("- `incidents status`; shows the current configuration on your server")
+                .AppendDescription("- `incidents status` shows the current configuration on your server")
                 .AppendDescriptionNewLine(2);
             this.AppendDescriptionTitle(message, "Examples")
                 .AppendDescription($"{this.Context.Client.CurrentUser.Mention} incidents on #channel_of_your_choice")
@@ -181,7 +194,8 @@ namespace XayahBot.Command.Misc
             return message;
         }
 
-        private FormattedEmbedBuilder AppendChampHelp(FormattedEmbedBuilder message){
+        private FormattedEmbedBuilder AppendChampHelp(FormattedEmbedBuilder message)
+        {
             this.AppendDescriptionTitle(message, _cDataTitle)
                 .AppendDescription("Have you ever wondered how far I could throw my Double Daggers? How much base armor Viktor has? How many skins Annie has? " +
                 "I at least know the answer to the first and last one. Not enough and way too many, respectively.")

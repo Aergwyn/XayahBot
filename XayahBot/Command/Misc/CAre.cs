@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord.Commands;
 using XayahBot.Utility;
@@ -55,21 +56,28 @@ namespace XayahBot.Command.Misc
 
         private async Task ProcessAre(string text)
         {
-            text = text.Trim();
-            string response = string.Empty;
-            if (this.IsQuestion(text))
+            try
             {
-                response = RNG.FromList(this._responseList);
+                text = text.Trim();
+                string response = string.Empty;
+                if (this.IsQuestion(text))
+                {
+                    response = RNG.FromList(this._responseList);
+                }
+                else if (this.IsSentence(text))
+                {
+                    response = RNG.FromList(this._noQuestionList);
+                }
+                else
+                {
+                    response = RNG.FromList(this._noSentenceList);
+                }
+                await this.ReplyAsync(response);
             }
-            else if (this.IsSentence(text))
+            catch (Exception ex)
             {
-                response = RNG.FromList(this._noQuestionList);
+                Logger.Error(ex);
             }
-            else
-            {
-                response = RNG.FromList(this._noSentenceList);
-            }
-            await this.ReplyAsync(response);
         }
 
         private bool IsQuestion(string text)

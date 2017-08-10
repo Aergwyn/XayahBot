@@ -24,22 +24,29 @@ namespace XayahBot.Command.Owner
 
         private async Task ProcessGet()
         {
-            string text = string.Empty;
-            int maxWidth = Property.UpdatableValues().OrderByDescending(x => x.Name.Length).First().Name.Length;
-            IEnumerable<Property> properties = Property.UpdatableValues();
-            for (int i = 0; i < properties.Count(); i++)
+            try
             {
-                if (i > 0)
+                string text = string.Empty;
+                int maxWidth = Property.UpdatableValues().OrderByDescending(x => x.Name.Length).First().Name.Length;
+                IEnumerable<Property> properties = Property.UpdatableValues();
+                for (int i = 0; i < properties.Count(); i++)
                 {
-                    text += Environment.NewLine;
+                    if (i > 0)
+                    {
+                        text += Environment.NewLine;
+                    }
+                    Property property = properties.ElementAt(i);
+                    text += property.Name.PadRight(maxWidth) + ":" + property.Value;
                 }
-                Property property = properties.ElementAt(i);
-                text += property.Name.PadRight(maxWidth) + ":" + property.Value;
+                FormattedEmbedBuilder message = new FormattedEmbedBuilder()
+                    .AppendTitle($"{XayahReaction.Option} Property list")
+                    .AppendDescription(text, AppendOption.Codeblock);
+                await this.ReplyAsync(message);
             }
-            FormattedEmbedBuilder message = new FormattedEmbedBuilder()
-                .AppendTitle($"{XayahReaction.Option} Property list")
-                .AppendDescription(text, AppendOption.Codeblock);
-            await this.ReplyAsync(message);
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
+            }
         }
 
         [Command("set")]
@@ -53,25 +60,32 @@ namespace XayahBot.Command.Owner
 
         private async Task ProcessSet(string name, string value)
         {
-            value = value.Trim();
-            FormattedEmbedBuilder message = new FormattedEmbedBuilder();
             try
             {
-                Property property = Property.GetUpdatableByName(name);
-                string oldValue = property.Value;
-                property.Value = value;
-                message
-                    .AppendTitle($"{XayahReaction.Success} Done")
-                    .AppendDescription($"I updated `{name}` for you.")
-                    .AppendDescription($"Old:{oldValue}{Environment.NewLine}New:{value}", AppendOption.Codeblock);
+                value = value.Trim();
+                FormattedEmbedBuilder message = new FormattedEmbedBuilder();
+                try
+                {
+                    Property property = Property.GetUpdatableByName(name);
+                    string oldValue = property.Value;
+                    property.Value = value;
+                    message
+                        .AppendTitle($"{XayahReaction.Success} Done")
+                        .AppendDescription($"I updated `{name}` for you.")
+                        .AppendDescription($"Old:{oldValue}{Environment.NewLine}New:{value}", AppendOption.Codeblock);
+                }
+                catch (NotExistingException)
+                {
+                    message
+                        .AppendTitle($"{XayahReaction.Error} This didn't work")
+                        .AppendDescription($"I couldn't find a property named `{name}`.");
+                }
+                await this.ReplyAsync(message);
             }
-            catch (NotExistingException)
+            catch (Exception ex)
             {
-                message
-                    .AppendTitle($"{XayahReaction.Error} This didn't work")
-                    .AppendDescription($"I couldn't find a property named `{name}`.");
+                Logger.Error(ex);
             }
-            await this.ReplyAsync(message);
         }
     }
 }

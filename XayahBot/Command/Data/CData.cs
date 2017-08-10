@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using XayahBot.API.Error;
@@ -25,29 +26,34 @@ namespace XayahBot.Command.Data
 
         private async Task ProcessChamp(string name)
         {
-            if (this.IsDisabled())
-            {
-                this.NotifyDisabledCommand();
-                return;
-            }
-            IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
-            FormattedEmbedBuilder message = null;
             try
             {
-                message = await ChampionDataBuilder.BuildAsync(name);
+                if (this.IsDisabled())
+                {
+                    this.NotifyDisabledCommand();
+                    return;
+                }
+                IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
+                FormattedEmbedBuilder message = null;
+                try
+                {
+                    message = await ChampionDataBuilder.BuildAsync(name);
+                }
+                catch (ErrorResponseException ex)
+                {
+                    message = new FormattedEmbedBuilder()
+                        .AppendTitle($"{XayahReaction.Error} This didn't work")
+                        .AppendDescription("Apparently the Riot-API refuses cooperation. Have some patience while I convince them again...");
+                    Logger.Error($"The StaticData-API returned an error.", ex);
+                }
+                message.CreateFooterIfNotDM(this.Context);
+                await channel.SendEmbedAsync(message);
+                await this.Context.Message.AddReactionIfNotDMAsync(this.Context, XayahReaction.Success);
             }
-            catch (ErrorResponseException ex)
+            catch (Exception ex)
             {
-                message = new FormattedEmbedBuilder()
-                    .AppendTitle($"{XayahReaction.Error} This didn't work")
-                    .AppendDescription("Apparently the Riot-API refuses cooperation. Have some patience while I convince them again...");
-                Logger.Error($"The StaticData-API returned an error.", ex);
+                Logger.Error(ex);
             }
-            if (!(this.Context as CommandContext).IsPrivate)
-            {
-                message.CreateFooter(this.Context);
-            }
-            await channel.SendEmbedAsync(message);
         }
     }
 }

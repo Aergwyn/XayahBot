@@ -29,14 +29,21 @@ namespace XayahBot.Utility
 
         private async Task ProcessReady()
         {
-            DiscordSocketClient client = this._serviceProvider.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
-            RemindService remindService = this._serviceProvider.GetService(typeof(RemindService)) as RemindService;
-            IncidentService incidentService = this._serviceProvider.GetService(typeof(IncidentService)) as IncidentService;
-            string game = string.IsNullOrWhiteSpace(Property.GameActive.Value) ? null : Property.GameActive.Value;
+            try
+            {
+                DiscordSocketClient client = this._serviceProvider.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
+                RemindService remindService = this._serviceProvider.GetService(typeof(RemindService)) as RemindService;
+                IncidentService incidentService = this._serviceProvider.GetService(typeof(IncidentService)) as IncidentService;
+                string game = string.IsNullOrWhiteSpace(Property.GameActive.Value) ? null : Property.GameActive.Value;
 
-            await client.SetGameAsync(game);
-            await remindService.StartAsync();
-            await incidentService.StartAsync();
+                await client.SetGameAsync(game);
+                await remindService.StartAsync();
+                await incidentService.StartAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
+            }
         }
 
         public Task HandleMessageReceived(SocketMessage arg)
@@ -47,34 +54,41 @@ namespace XayahBot.Utility
 
         private async Task ProcessMessageReceived(SocketMessage arg)
         {
-            SocketUserMessage message = arg as SocketUserMessage;
-            if (message == null || message.Author.IsBot)
+            try
             {
-                return;
-            }
-            DiscordSocketClient client = this._serviceProvider.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
-            CommandService commandService = this._serviceProvider.GetService(typeof(CommandService)) as CommandService;
-
-            int pos = 0;
-            CommandContext context = new CommandContext(client, message);
-            if (context.IsPrivate || message.HasMentionPrefix(client.CurrentUser, ref pos))
-            {
-                IResult result = await commandService.ExecuteAsync(context, pos, this._serviceProvider);
-                if (!result.IsSuccess)
+                SocketUserMessage message = arg as SocketUserMessage;
+                if (message == null || message.Author.IsBot)
                 {
-                    if (this.IsUserError(result.Error))
+                    return;
+                }
+                DiscordSocketClient client = this._serviceProvider.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
+                CommandService commandService = this._serviceProvider.GetService(typeof(CommandService)) as CommandService;
+
+                int pos = 0;
+                CommandContext context = new CommandContext(client, message);
+                if (context.IsPrivate || message.HasMentionPrefix(client.CurrentUser, ref pos))
+                {
+                    IResult result = await commandService.ExecuteAsync(context, pos, this._serviceProvider);
+                    if (!result.IsSuccess)
                     {
-                        IMessageChannel dmChannel = await ChannelProvider.GetDMChannelAsync(context);
-                        FormattedEmbedBuilder errorResponse = new FormattedEmbedBuilder()
-                            .AppendTitle($"{XayahReaction.Error} This didn't work")
-                            .AddField("Why, you ask?", result.ErrorReason);
-                        await dmChannel.SendEmbedAsync(errorResponse);
-                    }
-                    else if (this.IsInterestingError(result.Error))
-                    {
-                        Logger.Debug($"Command failed: {result.ErrorReason}");
+                        if (this.IsUserError(result.Error))
+                        {
+                            IMessageChannel dmChannel = await ChannelProvider.GetDMChannelAsync(context);
+                            FormattedEmbedBuilder errorResponse = new FormattedEmbedBuilder()
+                                .AppendTitle($"{XayahReaction.Error} This didn't work")
+                                .AddField("Why, you ask?", result.ErrorReason);
+                            await dmChannel.SendEmbedAsync(errorResponse);
+                        }
+                        else if (this.IsInterestingError(result.Error))
+                        {
+                            Logger.Debug($"Command failed: {result.ErrorReason}");
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
             }
         }
 

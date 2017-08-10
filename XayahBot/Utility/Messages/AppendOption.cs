@@ -14,9 +14,12 @@ namespace XayahBot.Utility.Messages
         public static string Start(params AppendOption[] options)
         {
             string text = string.Empty;
-            foreach (AppendOption option in options)
+            if (options != null)
             {
-                text += option.FormatChars;
+                foreach (AppendOption option in options)
+                {
+                    text += option.FormatChars;
+                }
             }
             return text;
         }

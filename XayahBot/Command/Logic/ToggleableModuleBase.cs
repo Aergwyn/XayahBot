@@ -22,12 +22,9 @@ namespace XayahBot.Command.Logic
         protected void NotifyDisabledCommand()
         {
             FormattedEmbedBuilder message = new FormattedEmbedBuilder()
+                .CreateFooterIfNotDM(this.Context)
                 .AppendTitle($"{XayahReaction.Warning} Command disabled")
                 .AppendDescription("This command is disabled because a certain someone is too lazy to fix it.");
-            if (!(this.Context as CommandContext).IsPrivate)
-            {
-                message.CreateFooter(this.Context);
-            }
             this.ReplyAsync(message);
         }
     }

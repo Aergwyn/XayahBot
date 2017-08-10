@@ -63,11 +63,14 @@ namespace XayahBot.Utility.Messages
             return this;
         }
 
-        public FormattedEmbedBuilder CreateFooter(ICommandContext commandContext)
+        public FormattedEmbedBuilder CreateFooterIfNotDM(ICommandContext commandContext)
         {
-            this.SetFooterThumbnail(commandContext.User.GetAvatarUrl())
-                .AppendFooter(commandContext.User.ToString())
-                .SetFooterTimestamp();
+            if (!(commandContext as CommandContext).IsPrivate)
+            {
+                this.SetFooterThumbnail(commandContext.User.GetAvatarUrl())
+                    .AppendFooter(commandContext.User.ToString())
+                    .SetFooterTimestamp();
+            }
             return this;
         }
 
