@@ -52,7 +52,7 @@ To clarify the parameter when creating a reminder:
 - `[time-unit]` can be `days, day, d, hours, hour, h, minutes, minute, mins, min, m`
 - `[text]` that will be posted once the reminder expires
 
-**Example:**  
+**Examples:**  
 *Creating a reminder*  
 ![Create Reminder](XayahBot/docs/pics/remindcreate.png?raw=true)  
 *Requesting a reminder list*  
@@ -76,9 +76,11 @@ This command is split in three parts:
 - `incidents off` to disable notifications
 - `incidents status` shows the current server configuration
 
-**Example:**  
+**Examples:**  
 *Enabling incident notifications*  
 ![Enabling Notifications](XayahBot/docs/pics/incidentson.png?raw=true)  
+*Incident example*  
+TODO (sorry, I couldn't catch one so far)
 *Requesting status*  
 ![Notification Status](XayahBot/docs/pics/incidentsstatus.png?raw=true)  
 *Disabling incident notifications*  
