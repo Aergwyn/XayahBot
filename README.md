@@ -98,7 +98,7 @@ TODO
 
 # Contact
 If you still have questions, problems or even suggestions you can e-mail me at `aergwyn@t-online.com` or add me in Discord `Aergwyn#8786`.
-There is also a [discord server](https://discord.gg/YhQYAFW) where you can reach me, try commands out or invite Xayah Bot to your server.
+There is also a [discord server](https://discord.gg/YhQYAFW) where you can reach me, try commands out or invite `Xayah Bot` to your server.
 
 # Legal Information
 `Xayah Bot` isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.
