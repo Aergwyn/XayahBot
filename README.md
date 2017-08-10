@@ -53,12 +53,12 @@ To clarify the parameter when creating a reminder:
 - `[text]` that will be posted once the reminder expires
 
 **Example:**  
-Creating a reminder:  
+*Creating a reminder*  
 ![Create Reminder](XayahBot/docs/pics/remindcreate.png?raw=true)  
-Requesting a reminder list:  
+*Requesting a reminder list*  
 ![Remind List Request](XayahBot/docs/pics/remindlistrequest.png?raw=true)  
 ![Remind List Response](XayahBot/docs/pics/remindlistresponse.png?raw=true)  
-Request clearing the list:  
+*Clearing the list*  
 ![Remind Clear Request](XayahBot/docs/pics/remindclearrequest.png?raw=true)  
 ![Remind Clear Response](XayahBot/docs/pics/remindclearresponse.png?raw=true)  
 
@@ -77,7 +77,12 @@ This command is split in three parts:
 - `incidents status` shows the current server configuration
 
 **Example:**  
-TODO
+*Enabling incident notifications*  
+![Enabling Notifications](XayahBot/docs/pics/incidentson.png?raw=true)  
+*Requesting status*  
+![Notification Status](XayahBot/docs/pics/incidentsstatus.png?raw=true)  
+*Disabling incident notifications*  
+![Disabling Notifications](XayahBot/docs/pics/incidentsoff.png?raw=true)  
 
 ## Champ
 The champ command gathers data about a specified champion (stats + stat-growth, spells, skins and misc). This data is only refreshed once on the first request each day (StaticData-Endpoint in API).  
