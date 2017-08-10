@@ -80,7 +80,7 @@ This command is split in three parts:
 *Enabling incident notifications*  
 ![Enabling Notifications](XayahBot/docs/pics/incidentson.png?raw=true)  
 *Incident example*  
-TODO (sorry, I couldn't catch one so far)
+TODO (sorry, I couldn't catch one so far)  
 *Requesting status*  
 ![Notification Status](XayahBot/docs/pics/incidentsstatus.png?raw=true)  
 *Disabling incident notifications*  
