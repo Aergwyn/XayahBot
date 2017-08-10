@@ -1,5 +1,5 @@
 # Xayah Bot
-`Xayah Bot` is a Discord Bot intended to use for giving League of Legends statistics (general data about champs, winrates, banrates, etc.). Additionally there are other useful commands which you can see later on.
+`Xayah Bot` is a Discord Bot primarily intended to use for giving League of Legends statistics (general data about champs, winrates, banrates, etc.). Additionally there are other useful commands which you can see later on.
 
 This project is comepletey written in C# and references the following frameworks:
 - Microsoft Entity Framework Core
@@ -9,28 +9,18 @@ To present data `Xayah Bot` will access the following APIs:
 - Riot Games API
 - Champion.GG API
 
-I try to write as much as possible myself to learn and try different approaches. I welcome any feedback (see [Contact](XayahBot#contact)).
-
 # Commands
-Commands can be triggered by mentioning `Xayah Bot` first before using the command syntax.  
-Exception to this are direct messages where it's not necessary to mention at all.  
+Commands can be triggered by mentioning `Xayah Bot` before using the command syntax except direct messages which don't need that.  
 
 Here are some additional points about how `Xayah Bot` works:
-- The title and description of commands will differ between here and responses from `Xayah Bot`. Responses in Discord are meant to be "in character".
-- If a command is replied per direct message (to not clutter chats) the triggering message will receive a reaction to imply it was handled. This prevents users from assuming the Bot stopped working because they can't see a response. If the reaction is missing and the user did not receive a response please panic and [contact](XayahBot#contact) me.
-- `Xayah Bot` has two "modes". If the response is an embed it's "work" and if the response is usual text it's "casual". This is a detail to differentiate between commands with replies that had consequences and those that are just banter (e.g. 8ball).
+- The title and description of commands of this documentation will differ to the ones provided in the help of `Xayah Bot`. Responses in Discord are meant to be "in character" and thus differently phrased.
+- If a command is replied to per direct message (to not clutter chats) the triggering message will receive a reaction to imply it was handled. This prevents users from assuming the Bot stopped working because they can't see a response. If the reaction is missing and the user did not receive a response please panic and contact me.
 
-__Command List__
-- Help
-- 8ball
-- Remind me
-- Incidents
-- Champ
 - [ ] TODO: Champion.GG commands
 
 ### Help
 **Description:**  
-The help displays a message with a short overview what categories exist, how to access them, how to use the help and contact data. The response will be found in a direct message to no clutter chat.
+The help displays a message with a short overview of existing categories, how to access them and contact data.
 
 **Usage:**  
 The keyword to this command is `help` followed by an optional page number.
@@ -40,7 +30,7 @@ TODO
 
 ### 8ball
 **Description:**  
-The 8ball command answers the triggering post with a random response which can be positive, neutral or negative. Additionally `Xayah Bot` demands actual questions and has responses if this requirement is not fulfilled.
+The 8ball command answers the triggering post with a random response which can be positive, neutral or negative. Additionally `Xayah Bot` demands actual questions and has witty comments if this requirement is not fulfilled.
 
 **Usage:**  
 The keywords to this command are `are`, `is` or `am` followed by a sentence.
@@ -51,52 +41,53 @@ TODO
 ### Remind me
 **Description:**  
 Reminders are exactly what the name implies. If the user creates a reminder and it expires he gets notified with the provided message.  
-There is a cap how long `Xayah Bot` is allowed to wait and how long the message can be. This is configurable but per default 30 days and 100 characters, respectively.
+There is a cap how long `Xayah Bot` is allowed to wait and how long the message can be. This is configurable but defaults to 30 days and 100 characters, respectively.
 
 **Usage:**  
 This command is split in three parts:
-- `remind me [number] [time-unit] [text]` -> creates a new reminder
-- `remind me list` -> shows a list of active reminder (DM response)
-- `remind me clear` -> clears the list of active reminder (DM response)
+- `remind me [number] [time-unit] [text]` creates a new reminder
+- `remind me list` shows a list of active reminder
+- `remind me clear` clears the list of active reminder (DM response)
 
 To clarify the parameter when creating a reminder:
-- `[number] [time-unit]` -> defines how long `Xayah Bot` has to wait before the reminder expires
-- `[text]` -> text that shall be posted once the reminder expires
+- `[number]` defines how long `Xayah Bot` has to wait before the reminder expires
+- `[time-unit]` can be `days, day, d, hours, hour, h, minutes, minute, mins, min, m`
+- `[text]` that will be posted once the reminder expires
 
 **Example:**  
 TODO
 
 ### Incidents
 **Description:**  
-Incident notifications are supposed to be a way to get notified if there are any problems with one of League of Legends services. Usually this information is available at [this site](http://status.leagueoflegends.com/#na) (that was an example for NA) or over other public channels.  
+Incident notifications are supposed to be a way to get notified if there are any problems with one of League of Legends' services. Information like that is available in different public channels (like [this site](http://status.leagueoflegends.com/#na) for NA) but having a post right in Discord could help getting knowledge so much sooner.  
 
-If there are any subscribers `Xayah Bot` will check regularly if an incident is active and post them in the configured channel. This interval is configurable and defaults to 15 minutes.
+If there are any subscribers `Xayah Bot` will check regularly (Status-Endpoint in API) if an incident is active and post them in the configured channel. This interval is configurable and defaults to 15 minutes.
 
 **Accessibility:**  
-This function is only available for a server. Direct messages or groups are excluded. To configure incident notifications the user has to have the `administrator` role for the server.
+This function is not functional in direct messages or groups. To configure incident notifications the user has to have the `administrator` role for the server.
 
 **Usage:**  
 This command is split in three parts:
-- `incidents on [channel]` -> enables incident notifications and will use the mentioned channel to post
-- `incidents off` -> disables incident notifications
-- `incidents status` -> shows the current server configuration
+- `incidents on` followed by a mentioned channel as a post location to activate notifications
+- `incidents off` to disable notifications
+- `incidents status` shows the current server configuration
 
 **Example:**  
 TODO
 
 ### Champ
 **Description:**  
-The champ command gathers data about a specified champion (stats + stat-growth, spells, skins and misc). This data is only refreshed once on the first request each day and the response will be found in a direct message to no clutter chat.  
+The champ command gathers data about a specified champion (stats + stat-growth, spells, skins and misc). This data is only refreshed once on the first request each day (StaticData-Endpoint in API).  
 
 **Usage:**  
 They keyword to this command is `champ` followed by the name to search for.  
-The name to search doesn't need to be exact! Special characters and/or whitespace can be ignored and even partial names will work. Though if the given name is too vague and could match multiple champs a different response will appear which lists all matching champions.
+The name doesn't need to be exact! Special characters and/or whitespace can be ignored and even partial names will work. Though if the given name is too vague and could match multiple champs a different response will appear which lists all matching champions.
 
 **Example:**  
 TODO
 
 ## Contact
-If you still questions, problems or even suggestions you can e-mail me at `aergwyn@t-online.com` or add me in Discord `Aergwyn#8786`.
+If you still have questions, problems or even suggestions you can e-mail me at `aergwyn@t-online.com` or add me in Discord `Aergwyn#8786`.
 There is also a [discord server](https://discord.gg/YhQYAFW) where you can reach me, try commands out or invite Xayah Bot to your server.
 
 ## Legal Information
