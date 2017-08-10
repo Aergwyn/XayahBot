@@ -1,4 +1,4 @@
-# Xayah Bot
+# About
 `Xayah Bot` is a Discord Bot primarily intended to use for giving League of Legends statistics (general data about champs, winrates, banrates, etc.). Additionally there are other useful commands which you can see later on.
 
 This project is comepletey written in C# and references the following frameworks:
@@ -19,7 +19,6 @@ Here are some additional points about how `Xayah Bot` works:
 - [ ] TODO: Champion.GG commands
 
 ## Help
-**Description:**  
 The help displays a message with a short overview of existing categories, how to access them and contact data.
 
 **Usage:**  
@@ -29,7 +28,6 @@ The keyword to this command is `help` followed by an optional page number.
 TODO
 
 ## 8ball
-**Description:**  
 The 8ball command answers the triggering post with a random response which can be positive, neutral or negative. Additionally `Xayah Bot` demands actual questions and has witty comments if this requirement is not fulfilled.
 
 **Usage:**  
@@ -39,7 +37,6 @@ The keywords to this command are `are`, `is` or `am` followed by a sentence.
 TODO
 
 ## Remind me
-**Description:**  
 Reminders are exactly what the name implies. If the user creates a reminder and it expires he gets notified with the provided message.  
 There is a cap how long `Xayah Bot` is allowed to wait and how long the message can be. This is configurable but defaults to 30 days and 100 characters, respectively.
 
@@ -58,7 +55,6 @@ To clarify the parameter when creating a reminder:
 TODO
 
 ## Incidents
-**Description:**  
 Incident notifications are supposed to be a way to get notified if there are any problems with one of League of Legends' services. Information like that is available in different public channels (like [this site](http://status.leagueoflegends.com/#na) for NA) but having a post right in Discord could help getting knowledge so much sooner.  
 
 If there are any subscribers `Xayah Bot` will check regularly (Status-Endpoint in API) if an incident is active and post them in the configured channel. This interval is configurable and defaults to 15 minutes.
@@ -76,7 +72,6 @@ This command is split in three parts:
 TODO
 
 ## Champ
-**Description:**  
 The champ command gathers data about a specified champion (stats + stat-growth, spells, skins and misc). This data is only refreshed once on the first request each day (StaticData-Endpoint in API).  
 
 **Usage:**  
