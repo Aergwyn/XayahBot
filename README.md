@@ -18,7 +18,7 @@ Here are some additional points about how `Xayah Bot` works:
 
 - [ ] TODO: Champion.GG commands
 
-### Help
+## Help
 **Description:**  
 The help displays a message with a short overview of existing categories, how to access them and contact data.
 
@@ -28,7 +28,7 @@ The keyword to this command is `help` followed by an optional page number.
 **Example:**  
 TODO
 
-### 8ball
+## 8ball
 **Description:**  
 The 8ball command answers the triggering post with a random response which can be positive, neutral or negative. Additionally `Xayah Bot` demands actual questions and has witty comments if this requirement is not fulfilled.
 
@@ -38,7 +38,7 @@ The keywords to this command are `are`, `is` or `am` followed by a sentence.
 **Example:**  
 TODO
 
-### Remind me
+## Remind me
 **Description:**  
 Reminders are exactly what the name implies. If the user creates a reminder and it expires he gets notified with the provided message.  
 There is a cap how long `Xayah Bot` is allowed to wait and how long the message can be. This is configurable but defaults to 30 days and 100 characters, respectively.
@@ -57,7 +57,7 @@ To clarify the parameter when creating a reminder:
 **Example:**  
 TODO
 
-### Incidents
+## Incidents
 **Description:**  
 Incident notifications are supposed to be a way to get notified if there are any problems with one of League of Legends' services. Information like that is available in different public channels (like [this site](http://status.leagueoflegends.com/#na) for NA) but having a post right in Discord could help getting knowledge so much sooner.  
 
@@ -75,7 +75,7 @@ This command is split in three parts:
 **Example:**  
 TODO
 
-### Champ
+## Champ
 **Description:**  
 The champ command gathers data about a specified champion (stats + stat-growth, spells, skins and misc). This data is only refreshed once on the first request each day (StaticData-Endpoint in API).  
 
@@ -86,9 +86,9 @@ The name doesn't need to be exact! Special characters and/or whitespace can be i
 **Example:**  
 TODO
 
-## Contact
+# Contact
 If you still have questions, problems or even suggestions you can e-mail me at `aergwyn@t-online.com` or add me in Discord `Aergwyn#8786`.
 There is also a [discord server](https://discord.gg/YhQYAFW) where you can reach me, try commands out or invite Xayah Bot to your server.
 
-## Legal Information
+# Legal Information
 `Xayah Bot` isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.
