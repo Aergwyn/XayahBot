@@ -25,16 +25,17 @@ The help displays a message with a short overview of existing categories, how to
 The keyword to this command is `help` followed by an optional page number.
 
 **Example:**  
-TODO
+![Help Request](XayahBot/docs/pics/helprequest.png?raw=true)  
+![Help Response](XayahBot/docs/pics/helpresponse.png?raw=true)  
 
-## 8ball
+## "8ball"
 The 8ball command answers the triggering post with a random response which can be positive, neutral or negative. Additionally `Xayah Bot` demands actual questions and has witty comments if this requirement is not fulfilled.
 
 **Usage:**  
 The keywords to this command are `are`, `is` or `am` followed by a sentence.
 
 **Example:**  
-TODO
+!["8ball"](XayahBot/docs/pics/8ball.png?raw=true)  
 
 ## Remind me
 Reminders are exactly what the name implies. If the user creates a reminder and it expires he gets notified with the provided message.  
@@ -44,7 +45,7 @@ There is a cap how long `Xayah Bot` is allowed to wait and how long the message 
 This command is split in three parts:
 - `remind me [number] [time-unit] [text]` creates a new reminder
 - `remind me list` shows a list of active reminder
-- `remind me clear` clears the list of active reminder (DM response)
+- `remind me clear` clears the list of active reminder
 
 To clarify the parameter when creating a reminder:
 - `[number]` defines how long `Xayah Bot` has to wait before the reminder expires
@@ -52,7 +53,14 @@ To clarify the parameter when creating a reminder:
 - `[text]` that will be posted once the reminder expires
 
 **Example:**  
-TODO
+Creating a reminder:  
+![Create Reminder](XayahBot/docs/pics/remindcreate.png?raw=true)  
+Requesting a reminder list:  
+![Remind List Request](XayahBot/docs/pics/remindlistrequest.png?raw=true)  
+![Remind List Response](XayahBot/docs/pics/remindlistresponse.png?raw=true)  
+Request clearing the list:  
+![Remind Clear Request](XayahBot/docs/pics/remindclearrequest.png?raw=true)  
+![Remind Clear Response](XayahBot/docs/pics/remindclearresponse.png?raw=true)  
 
 ## Incidents
 Incident notifications are supposed to be a way to get notified if there are any problems with one of League of Legends' services. Information like that is available in different public channels (like [this site](http://status.leagueoflegends.com/#na) for NA) but having a post right in Discord could help getting knowledge so much sooner.  
