@@ -123,7 +123,7 @@ namespace XayahBot.Command.Remind
 
             IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this._client, reminder.UserId);
             FormattedEmbedBuilder message = new FormattedEmbedBuilder()
-                .AppendTitle($"{XayahReaction.Time} Reminder expired")
+                .AppendTitle($"{XayahReaction.Clock} Reminder expired")
                 .AppendDescription(reminder.Message);
             await channel.SendEmbedAsync(message);
         }

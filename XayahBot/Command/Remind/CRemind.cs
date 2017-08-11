@@ -105,7 +105,7 @@ namespace XayahBot.Command.Remind
                 IOrderedEnumerable<TReminder> orderedList = reminders.OrderBy(x => x.ExpirationTime);
 
                 FormattedEmbedBuilder message = new FormattedEmbedBuilder()
-                    .AppendTitle($"{XayahReaction.Time} Active reminders");
+                    .AppendTitle($"{XayahReaction.Hourglass} Active reminders");
                 if (orderedList.Count() > 0)
                 {
                     foreach (TReminder entry in orderedList)
