@@ -80,7 +80,7 @@ This command is split in three parts:
 *Enabling incident notifications*  
 ![Enabling Notifications](XayahBot/docs/pics/incidentson.png?raw=true)  
 *Incident example*  
-TODO (sorry, I couldn't catch one so far)  
+*TODO (sorry, I couldn't catch one so far)*  
 *Requesting status*  
 ![Notification Status](XayahBot/docs/pics/incidentsstatus.png?raw=true)  
 *Disabling incident notifications*  
@@ -94,7 +94,12 @@ They keyword to this command is `champ` followed by the name to search for.
 The name doesn't need to be exact! Special characters and/or whitespace can be ignored and even partial names will work. Though if the given name is too vague and could match multiple champs a different response will appear which lists all matching champions.
 
 **Example:**  
-TODO
+*Requesting with a complete name*  
+![Champ Complete Name Request](XayahBot/docs/pics/champrequest.png?raw=true)  
+![Champ Complete Name Response](XayahBot/docs/pics/champresponse.png?raw=true)  
+*Requesting with a partial name that doesn't match a specific champion*  
+![Champ Partial Name Request](XayahBot/docs/pics/champpartialrequest.png?raw=true)  
+![Champ Partial Name Response](XayahBot/docs/pics/champpartialresponse.png?raw=true)  
 
 # Contact
 If you still have questions, problems or even suggestions you can e-mail me at `aergwyn@t-online.com` or add me in Discord `Aergwyn#8786`.
