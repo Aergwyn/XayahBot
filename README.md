@@ -55,10 +55,15 @@ To clarify the parameter when creating a reminder:
 **Examples:**  
 *Creating a reminder*  
 ![Create Reminder](XayahBot/docs/pics/remindcreate.png?raw=true)  
-*Requesting a reminder list*  
+
+*List all reminders*  
 ![Remind List Request](XayahBot/docs/pics/remindlistrequest.png?raw=true)  
 ![Remind List Response](XayahBot/docs/pics/remindlistresponse.png?raw=true)  
-*Clearing the list*  
+
+*Example expiring reminder*  
+![Remind Expired](XayahBot/docs/pics/remindexpired.png?raw=true)  
+
+*Clearing all reminders*  
 ![Remind Clear Request](XayahBot/docs/pics/remindclearrequest.png?raw=true)  
 ![Remind Clear Response](XayahBot/docs/pics/remindclearresponse.png?raw=true)  
 
@@ -79,10 +84,13 @@ This command is split in three parts:
 **Examples:**  
 *Enabling incident notifications*  
 ![Enabling Notifications](XayahBot/docs/pics/incidentson.png?raw=true)  
+
 *Incident example*  
 *TODO (sorry, I couldn't catch one so far)*  
+
 *Requesting status*  
 ![Notification Status](XayahBot/docs/pics/incidentsstatus.png?raw=true)  
+
 *Disabling incident notifications*  
 ![Disabling Notifications](XayahBot/docs/pics/incidentsoff.png?raw=true)  
 
@@ -94,10 +102,11 @@ They keyword to this command is `champ` followed by the name to search for.
 The name doesn't need to be exact! Special characters and/or whitespace can be ignored and even partial names will work. Though if the given name is too vague and could match multiple champs a different response will appear which lists all matching champions.
 
 **Example:**  
-*Requesting with a complete name*  
+*Request with a complete name*  
 ![Champ Complete Name Request](XayahBot/docs/pics/champrequest.png?raw=true)  
 ![Champ Complete Name Response](XayahBot/docs/pics/champresponse.png?raw=true)  
-*Requesting with a partial name that doesn't match a specific champion*  
+
+*Request with a partial name that doesn't match a specific champion*  
 ![Champ Partial Name Request](XayahBot/docs/pics/champpartialrequest.png?raw=true)  
 ![Champ Partial Name Response](XayahBot/docs/pics/champpartialresponse.png?raw=true)  
 
