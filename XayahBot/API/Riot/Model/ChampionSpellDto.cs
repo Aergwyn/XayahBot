@@ -70,32 +70,5 @@ namespace XayahBot.API.Riot.Model
         {
             return this.CooldownBurn != "0" ? this.CooldownBurn : this._na;
         }
-
-        public string GetVarsString()
-        {
-            List<string> varList = new List<string>();
-            List<string> coeffList = new List<string>();
-            if (this.Vars != null)
-            {
-                foreach (SpellVarsDto var in this.Vars)
-                {
-                    if (var.CoEff != null)
-                    {
-                        foreach (decimal scaling in var.CoEff)
-                        {
-                            coeffList.Add($"{(scaling * 100).ToString("G0", CultureInfo.InvariantCulture)}%");
-                        }
-                        varList.Add(string.Join(",", coeffList));
-                        coeffList.Clear();
-                    }
-                }
-            }
-            string result = this._na;
-            if (varList.Count > 0)
-            {
-                result = string.Join(" | ", varList);
-            }
-            return result;
-        }
     }
 }

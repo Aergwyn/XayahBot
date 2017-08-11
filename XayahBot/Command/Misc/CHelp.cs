@@ -144,7 +144,7 @@ namespace XayahBot.Command.Misc
                 .AppendDescriptionNewLine()
                 .AppendDescription("- `remind me [number] [time-unit] [text]`; while number and time-unit tell me how long to wait, the text is the message I'll remind you with")
                 .AppendDescriptionNewLine()
-                .AppendDescription("- `remind me list` shows a list of your active reminder")
+                .AppendDescription("- `remind me list` shows a list of your active reminders")
                 .AppendDescriptionNewLine()
                 .AppendDescription("- `remind me clear` if you want to get rid of them")
                 .AppendDescriptionNewLine(2)

@@ -10,15 +10,14 @@ using XayahBot.Utility.Messages;
 
 namespace XayahBot.Command.Data
 {
-    public static class ChampionDataBuilder
+    public class ChampionDataBuilder
     {
-        private static readonly RiotStaticData _riotStaticData = new RiotStaticData(Region.EUW);
-
         public static async Task<FormattedEmbedBuilder> BuildAsync(string name)
         {
+            ChampionDataBuilder championBuilder = new ChampionDataBuilder();
             name = name.Trim();
             FormattedEmbedBuilder message = new FormattedEmbedBuilder();
-            List<ChampionDto> matches = await GetMatchingChampions(name);
+            List<ChampionDto> matches = await championBuilder.GetMatchingChampions(name);
             if (matches.Count == 0)
             {
                 message
@@ -37,19 +36,28 @@ namespace XayahBot.Command.Data
             }
             else
             {
-                ChampionDto champion = await _riotStaticData.GetChampionAsync(matches.First().Id);
-                AppendMiscData(champion, message);
-                AppendStatisticData(champion, message);
-                AppendSpellData(champion, message);
-                AppendSkinData(champion, message);
+                ChampionDto champion = await championBuilder.GetChampionAsync(matches.First().Id);
+                championBuilder.AppendMiscData(champion, message);
+                championBuilder.AppendStatisticData(champion, message);
+                championBuilder.AppendSpellData(champion, message);
+                championBuilder.AppendSkinData(champion, message);
             }
             return message;
         }
 
-        private static async Task<List<ChampionDto>> GetMatchingChampions(string name)
+        // ---
+
+        private readonly RiotStaticData _riotStaticData = new RiotStaticData(Region.EUW);
+
+        private ChampionDataBuilder()
+        {
+
+        }
+
+        private async Task<List<ChampionDto>> GetMatchingChampions(string name)
         {
             name = name.ToLower();
-            ChampionListDto championList = await _riotStaticData.GetChampionsAsync();
+            ChampionListDto championList = await this._riotStaticData.GetChampionsAsync();
             List<ChampionDto> matches = new List<ChampionDto>();
             if (championList != null)
             {
@@ -60,12 +68,17 @@ namespace XayahBot.Command.Data
             return matches;
         }
 
-        private static string StripName(string name)
+        private async Task<ChampionDto> GetChampionAsync(int championId)
+        {
+            return await this._riotStaticData.GetChampionAsync(championId);
+        }
+
+        private string StripName(string name)
         {
             return Regex.Replace(name, @"[^ a-zA-Z0-9]+", string.Empty);
         }
 
-        private static void AppendMiscData(ChampionDto champion, FormattedEmbedBuilder message)
+        private void AppendMiscData(ChampionDto champion, FormattedEmbedBuilder message)
         {
             champion.Tags.Sort();
             message
@@ -81,11 +94,12 @@ namespace XayahBot.Command.Data
                 .AppendDescription($" {champion.Passive.Name}");
         }
 
-        private static void AppendStatisticData(ChampionDto champion, FormattedEmbedBuilder message)
+        private void AppendStatisticData(ChampionDto champion, FormattedEmbedBuilder message)
         {
             StatsDto stats = champion.Stats;
-            DecimalAlign statList = new DecimalAlign(stats.GetStats());
-            DecimalAlign statGrowthList = new DecimalAlign(stats.GetStatGrowthList());
+            int decimals = 3;
+            NumberAlign statList = new NumberAlign(decimals, stats.GetStats());
+            NumberAlign statGrowthList = new NumberAlign(decimals, stats.GetStatGrowthList());
             string statData =
                 $"Health         - {statList.Align(stats.Hp)} | + {statGrowthList.TrimmedAlign(stats.HpPerLevel)}" +
                 Environment.NewLine +
@@ -111,7 +125,7 @@ namespace XayahBot.Command.Data
                 new AppendOption[] { AppendOption.Codeblock }, inline: false);
         }
 
-        private static void AppendSpellData(ChampionDto champion, FormattedEmbedBuilder message)
+        private void AppendSpellData(ChampionDto champion, FormattedEmbedBuilder message)
         {
             for(int i = 0; i < champion.Spells.Count; i++)
             {
@@ -124,16 +138,13 @@ namespace XayahBot.Command.Data
                     .Append($" {spell.GetRangeString()}")
                     .AppendNewLine()
                     .Append("Cooldown:", AppendOption.Italic)
-                    .Append($" {spell.GetCooldownString()}")
-                    .AppendNewLine()
-                    .Append("Scaling:", AppendOption.Italic)
-                    .Append($" {spell.GetVarsString()}");
+                    .Append($" {spell.GetCooldownString()}");
                 message.AddField($"{GetSpellKey(i)} - {spell.Name}", spellDetail.ToString(),
                     new AppendOption[] { AppendOption.Underscore }, inline: false);
             }
         }
 
-        private static string GetSpellKey(int position)
+        private string GetSpellKey(int position)
         {
             int result = position % 4;
             switch (result) {
@@ -150,7 +161,7 @@ namespace XayahBot.Command.Data
             }
         }
 
-        private static void AppendSkinData(ChampionDto champion, FormattedEmbedBuilder message)
+        private void AppendSkinData(ChampionDto champion, FormattedEmbedBuilder message)
         {
             List<SkinDto> skins = champion.Skins.Where(x => x.Num > 0).ToList();
             skins.Sort((a, b) => a.Num.CompareTo(b.Num));

@@ -1,16 +1,16 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 
 namespace XayahBot.Command.Data
 {
-    public class DecimalAlign
+    public class NumberAlign
     {
         private int _intDigits;
         private int _decDigits;
 
-        public DecimalAlign(params decimal[] numbers)
+        public NumberAlign(int decimals, params decimal[] numbers)
         {
             int intDigits = 1;
-            int decDigits = 1;
             foreach (decimal number in numbers)
             {
                 string value = number.ToString("G0", CultureInfo.InvariantCulture);
@@ -19,14 +19,9 @@ namespace XayahBot.Command.Data
                 {
                     intDigits = decPosition;
                 }
-                int newDecDigits = value.Length - (decPosition + 1);
-                if (newDecDigits > decDigits)
-                {
-                    decDigits = newDecDigits;
-                }
             }
             this._intDigits = intDigits;
-            this._decDigits = decDigits;
+            this._decDigits = decimals;
         }
 
         private int GetDecPosition(string value)
@@ -42,6 +37,7 @@ namespace XayahBot.Command.Data
 
         public string Align(decimal number)
         {
+            number = Math.Round(number, this._decDigits, MidpointRounding.AwayFromZero);
             string value = number.ToString("G0", CultureInfo.InvariantCulture);
             int decPosition = this.GetDecPosition(value);
             return value.PadLeft((this._intDigits - decPosition) + value.Length).PadRight(this._intDigits + 1 + this._decDigits);

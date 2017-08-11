@@ -105,7 +105,7 @@ namespace XayahBot.Command.Remind
                 IOrderedEnumerable<TReminder> orderedList = reminders.OrderBy(x => x.ExpirationTime);
 
                 FormattedEmbedBuilder message = new FormattedEmbedBuilder()
-                    .AppendTitle($"{XayahReaction.Time} Active reminder");
+                    .AppendTitle($"{XayahReaction.Time} Active reminders");
                 if (orderedList.Count() > 0)
                 {
                     foreach (TReminder entry in orderedList)
@@ -141,7 +141,7 @@ namespace XayahBot.Command.Remind
                 await this._remindService.ClearUserAsync(this.Context.User.Id);
                 FormattedEmbedBuilder message = new FormattedEmbedBuilder()
                     .AppendTitle($"{XayahReaction.Success} Done")
-                    .AppendDescription("I purged all of your reminder for you.");
+                    .AppendDescription("I purged all of your reminders.");
                 await channel.SendEmbedAsync(message);
                 await this.Context.Message.AddReactionIfNotDMAsync(this.Context, XayahReaction.Success);
             }
