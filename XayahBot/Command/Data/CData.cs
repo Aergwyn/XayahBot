@@ -46,7 +46,6 @@ namespace XayahBot.Command.Data
                         .AppendDescription("Apparently the Riot-API refuses cooperation. Have some patience while I convince them again...");
                     Logger.Error($"The StaticData-API returned an error.", ex);
                 }
-                message.CreateFooterIfNotDM(this.Context);
                 await channel.SendEmbedAsync(message);
                 await this.Context.Message.AddReactionIfNotDMAsync(this.Context, XayahReaction.Success);
             }
