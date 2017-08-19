@@ -23,5 +23,10 @@ namespace XayahBot.API.Riot.Model
         public List<ChampionSpellDto> Spells { get; set; }
         public List<string> Tags { get; set; } // aka Mage, Marksman, ...
         public string Title { get; set; }
+
+        public override string ToString()
+        {
+            return this.Name;
+        }
     }
 }

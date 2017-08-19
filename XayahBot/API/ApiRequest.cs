@@ -7,11 +7,11 @@ namespace XayahBot.API
     {
         public string CacheId { get; private set; }
         public string Resource { get; private set; }
-        public IEnumerable<string> Arguments { get; private set; }
+        public List<string> Arguments { get; private set; }
 
         public ApiRequest(string resource, params string[] arguments)
         {
-            this.CacheId = resource + arguments?.Count();
+            this.CacheId = resource + string.Join("-", arguments);
             this.Resource = resource;
             this.Arguments = arguments?.ToList() ?? new List<string>();
         }

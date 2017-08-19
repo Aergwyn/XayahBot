@@ -13,8 +13,8 @@ namespace XayahBot.Utility
         public static readonly Property FileRiotApiKey = new Property("file_riot_api_key", "riot_api.key", false);
         public static readonly Property FileChampionGGApiKey = new Property("file_championgg_api_key", "championgg_api.key", false);
 
-        public static readonly Property IncidentDisabled = new Property("incidents_disabled", "");
-        public static readonly Property ChampDisabled = new Property("champ_disabled", "");
+        public static readonly Property ChampionGGApiDisabled = new Property("championgg_api_disabled", "");
+        public static readonly Property RiotApiDisabled = new Property("riot_api_disabled", "");
 
         public static readonly Property GameActive = new Property("game_active", "with Rakan");
         public static readonly Property RiotUrlVersion = new Property("rioturl_version", "7.16.1");
@@ -24,8 +24,8 @@ namespace XayahBot.Utility
 
         public static IEnumerable<Property> UpdatableValues()
         {
-            yield return IncidentDisabled;
-            yield return ChampDisabled;
+            yield return ChampionGGApiDisabled;
+            yield return RiotApiDisabled;
             yield return GameActive;
             yield return RiotUrlVersion;
             yield return RemindDayCap;

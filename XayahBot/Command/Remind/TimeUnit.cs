@@ -11,14 +11,11 @@ namespace XayahBot.Command.Remind
         public static readonly TimeUnit Hour = new TimeUnit(2, "hours", "hour", "h");
         public static readonly TimeUnit Minute = new TimeUnit(3, "minutes", "minute", "mins", "min", "m");
 
-        public static IEnumerable<TimeUnit> Values
+        public static IEnumerable<TimeUnit> Values()
         {
-            get
-            {
-                yield return Day;
-                yield return Hour;
-                yield return Minute;
-            }
+            yield return Day;
+            yield return Hour;
+            yield return Minute;
         }
 
         public static TimeUnit Get(string text)
@@ -26,7 +23,7 @@ namespace XayahBot.Command.Remind
             if (!string.IsNullOrWhiteSpace(text))
             {
                 text = text.ToLower();
-                TimeUnit match = Values.FirstOrDefault(x => x._matches.Contains(text));
+                TimeUnit match = Values().FirstOrDefault(x => x._matches.Contains(text));
                 if (match != null)
                 {
                     return match;

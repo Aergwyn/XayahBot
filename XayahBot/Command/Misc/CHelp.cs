@@ -133,7 +133,7 @@ namespace XayahBot.Command.Misc
 
         private FormattedEmbedBuilder AppendRemindHelp(FormattedEmbedBuilder message)
         {
-            string timeUnits = ListUtil.BuildEnumeration(TimeUnit.Values);
+            string timeUnits = ListUtil.BuildEnumeration(TimeUnit.Values());
             this.AppendDescriptionTitle(message, _cRemindTitle)
                 .AppendDescription("If you tend to forget things or just need someone to handle your appointments this is your solution.")
                 .AppendDescriptionNewLine(2)

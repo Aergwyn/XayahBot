@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace XayahBot.Command.Data
+namespace XayahBot.Command.RiotData
 {
     public class NumberAlign
     {

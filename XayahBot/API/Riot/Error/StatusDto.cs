@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace XayahBot.API.Error
+namespace XayahBot.API.Riot.Error
 {
     public class StatusDto
     {

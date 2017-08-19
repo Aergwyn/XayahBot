@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Net;
 using Discord.WebSocket;
-using XayahBot.API.Error;
 using XayahBot.API.Riot;
 using XayahBot.API.Riot.Model;
 using XayahBot.Database.DAO;
@@ -65,7 +64,7 @@ namespace XayahBot.Command.Incidents
 
         private bool IsEnabled()
         {
-            string value = Property.IncidentDisabled.Value;
+            string value = Property.RiotApiDisabled.Value;
             if (string.IsNullOrWhiteSpace(value))
             {
                 return true;
@@ -78,32 +77,39 @@ namespace XayahBot.Command.Incidents
             bool init = true;
             bool processed = false;
             this._isRunning = true;
-            while (this._isRunning)
+            try
             {
-                int interval = int.Parse(Property.IncidentCheckInterval.Value);
-                if (DateTime.UtcNow.Minute % interval == 0 || init)
+                while (this._isRunning)
                 {
-                    if (!processed)
+                    int interval = int.Parse(Property.IncidentCheckInterval.Value);
+                    if (DateTime.UtcNow.Minute % interval == 0 || init)
                     {
-                        init = false;
-                        processed = true;
-                        await this.CheckStatusApiAsync();
+                        if (!processed)
+                        {
+                            init = false;
+                            processed = true;
+                            await this.CheckStatusApiAsync();
+                        }
+                    }
+                    else
+                    {
+                        processed = false;
+                    }
+                    if (this.IsEnabled() && this._incidentSubscriberDAO.HasSubscriber())
+                    {
+                        await Task.Delay(new TimeSpan(0, 0, 10));
+                    }
+                    else
+                    {
+#pragma warning disable 4014
+                        this.StopAsync();
+#pragma warning restore 4014
                     }
                 }
-                else
-                {
-                    processed = false;
-                }
-                if (this.IsEnabled() && this._incidentSubscriberDAO.HasSubscriber())
-                {
-                    await Task.Delay(new TimeSpan(0, 0, 10));
-                }
-                else
-                {
-#pragma warning disable 4014
-                    this.StopAsync();
-#pragma warning restore 4014
-                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
             }
         }
 
@@ -120,9 +126,9 @@ namespace XayahBot.Command.Incidents
                 {
                     incidents.AddRange(this.AnalyzeData(await riotStatus.GetStatusAsync()));
                 }
-                catch (ErrorResponseException ex)
+                catch (NoApiResultException)
                 {
-                    Logger.Error($"The {riotStatus.GetRegion()} Status-API returned an error.", ex);
+                    // already logged, just skip it
                 }
                 await this.ProcessCurrentIncidentsAsync(incidents, riotStatus.GetRegion());
                 await this.RemoveSolvedIncidentsAsync(incidents, riotStatus.GetRegion());

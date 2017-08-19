@@ -78,6 +78,7 @@ namespace XayahBot.Utility
                                 .AppendTitle($"{XayahReaction.Error} This didn't work")
                                 .AddField("Why, you ask?", result.ErrorReason);
                             await dmChannel.SendEmbedAsync(errorResponse);
+                            await context.Message.AddReactionIfNotDMAsync(context, XayahReaction.Error);
                         }
                         else if (this.IsInterestingError(result.Error))
                         {

@@ -77,6 +77,7 @@ namespace XayahBot
 
             await this._commandService.AddModulesAsync(Assembly.GetEntryAssembly());
             this._commandService.AddTypeReader<TimeUnitTypeReader>(new TimeUnitTypeReader());
+            this._commandService.AddTypeReader<LeagueRoleTypeReader>(new LeagueRoleTypeReader());
 
             DiscordEventHandler eventHandler = new DiscordEventHandler(this._serviceProvider);
             this._client.Log += Logger.Log;

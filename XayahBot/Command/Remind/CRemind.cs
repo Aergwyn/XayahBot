@@ -25,7 +25,7 @@ namespace XayahBot.Command.Remind
         }
 
         [Command]
-        public Task RemindMe(int value, [OverrideTypeReader(typeof(TimeUnitTypeReader))]TimeUnit timeUnit, [Remainder] string text)
+        public Task RemindMe(int value, [OverrideTypeReader(typeof(TimeUnitTypeReader))] TimeUnit timeUnit, [Remainder] string text)
         {
             Task.Run(() => this.ProcessRemindMe(value, timeUnit, text));
             return Task.CompletedTask;
@@ -38,12 +38,12 @@ namespace XayahBot.Command.Remind
                 text = text.Trim();
                 DateTime expirationTime = DateTime.UtcNow;
                 int maxTime = int.Parse(Property.RemindDayCap.Value);
-                if (timeUnit == TimeUnit.Day)
+                if (TimeUnit.Day.Equals(timeUnit))
                 {
                     value = this.SetValueInRange(value, 1, maxTime);
                     expirationTime = DateTime.UtcNow.AddDays(value);
                 }
-                else if (timeUnit == TimeUnit.Hour)
+                else if (TimeUnit.Hour.Equals(timeUnit))
                 {
                     value = this.SetValueInRange(value, 1, maxTime * 24);
                     expirationTime = DateTime.UtcNow.AddHours(value);

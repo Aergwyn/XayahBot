@@ -6,7 +6,7 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using XayahBot.API.Error;
+using XayahBot.Error;
 using XayahBot.Utility;
 
 namespace XayahBot.API
@@ -22,6 +22,8 @@ namespace XayahBot.API
 
         protected abstract string GetBaseUrl();
 
+        protected abstract string CreateErrorMessage(string content);
+
         // ---
 
         protected async Task<T> GetAsync<T>(ApiRequest request)
@@ -30,10 +32,38 @@ namespace XayahBot.API
             await _lock.WaitAsync();
             try
             {
-                result = this.GetFromCache<T>(request.CacheId);
-                if (result == null)
+                NoApiResultException noResultError = null;
+                CacheEntry cacheData = this.GetFromCache(request.CacheId);
+                try
                 {
-                    result = await this.GetFromApiAsync<T>(request);
+                    if (cacheData == null || cacheData.IsExpired())
+                    {
+                        result = await this.GetFromApiAsync<T>(request);
+                    }
+                }
+                catch (NoApiResultException ex)
+                {
+                    Logger.Error(ex);
+                    noResultError = ex;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex);
+                }
+                if (EqualityComparer<T>.Default.Equals(result, default(T)))
+                {
+                    if (cacheData != null)
+                    {
+                        result = (T)cacheData.Data;
+                    }
+                    else
+                    {
+                        throw noResultError ?? new NoApiResultException();
+                    }
+                }
+                else
+                {
+                    _cache.Remove(request.CacheId);
                     _cache.Add(request.CacheId, new CacheEntry(result, this.GetDataExpirationTime()));
                 }
             }
@@ -44,21 +74,13 @@ namespace XayahBot.API
             return result;
         }
 
-        private T GetFromCache<T>(string cacheId)
+        private CacheEntry GetFromCache(string cacheId)
         {
-            T result = default(T);
-            if (_cache.TryGetValue(cacheId, out CacheEntry entry))
+            if (_cache.TryGetValue(cacheId, out CacheEntry cacheData))
             {
-                if (entry.IsExpired())
-                {
-                    _cache.Remove(cacheId);
-                }
-                else
-                {
-                    result = (T)entry.Data;
-                }
+                return cacheData;
             }
-            return result;
+            return null;
         }
 
         private async Task<T> GetFromApiAsync<T>(ApiRequest request)
@@ -67,29 +89,16 @@ namespace XayahBot.API
             using (HttpClient client = this.SetupHttpClient())
             {
                 HttpResponseMessage response = null;
-                try
+                string url = this.BuildUrl(request);
+                response = await client.GetAsync(url);
+                string content = await response.Content.ReadAsStringAsync() ?? string.Empty;
+                if (!response.IsSuccessStatusCode)
                 {
-                    response = await client.GetAsync(this.BuildUrl(request));
-                    string content = await response.Content.ReadAsStringAsync() ?? string.Empty;
-                    this.CheckResponseStatus(response, content);
-                    result = JsonConvert.DeserializeObject<T>(content);
+                    throw new NoApiResultException(this.CreateErrorMessage(content));
                 }
-                catch (ErrorResponseException ex)
-                {
-                    Logger.Error(ex.Message);
-                    throw ex;
-                }
+                result = JsonConvert.DeserializeObject<T>(content);
             }
             return result;
-        }
-
-        private void CheckResponseStatus(HttpResponseMessage response, string content)
-        {
-            if (!response.IsSuccessStatusCode)
-            {
-                ErrorDto error = JsonConvert.DeserializeObject<ErrorDto>(content);
-                throw new ErrorResponseException($"{error.Status.StatusCode} {error.Status.Message}");
-            }
         }
 
         private HttpClient SetupHttpClient()

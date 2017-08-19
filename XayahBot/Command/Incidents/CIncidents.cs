@@ -27,7 +27,7 @@ namespace XayahBot.Command.Incidents
 
         protected override Property GetDisableProperty()
         {
-            return Property.IncidentDisabled;
+            return Property.RiotApiDisabled;
         }
 
         [Command("on")]

@@ -5,42 +5,52 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using XayahBot.API.Riot;
 using XayahBot.API.Riot.Model;
+using XayahBot.Error;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
 
-namespace XayahBot.Command.Data
+namespace XayahBot.Command.RiotData
 {
     public class ChampionDataBuilder
     {
         public static async Task<FormattedEmbedBuilder> BuildAsync(string name)
         {
-            ChampionDataBuilder championBuilder = new ChampionDataBuilder();
             name = name.Trim();
+            ChampionDataBuilder championBuilder = new ChampionDataBuilder();
             FormattedEmbedBuilder message = new FormattedEmbedBuilder();
-            List<ChampionDto> matches = await championBuilder.GetMatchingChampions(name);
-            if (matches.Count == 0)
+            try
             {
-                message
-                    .AppendTitle($"{XayahReaction.Error} This didn't work")
-                    .AppendDescription($"Oops! Your bad. I couldn't find a champion (fully or partially) named `{name}`.");
-            }
-            else if (matches.Count > 1)
-            {
-                message
-                    .AppendTitle($"{XayahReaction.Warning} This didn't went as expected")
-                    .AppendDescription($"I found more than one champion (fully or partially) named `{name}`.");
-                foreach (ChampionDto champion in matches)
+                List<ChampionDto> matches = await championBuilder.GetMatchingChampionsAsync(name);
+                if (matches.Count == 0)
                 {
-                    message.AppendDescription(Environment.NewLine + champion.Name);
+                    message
+                        .AppendTitle($"{XayahReaction.Error} This didn't work")
+                        .AppendDescription($"Oops! Your bad. I couldn't find a champion (fully or partially) named `{name}`.");
+                }
+                else if (matches.Count > 1)
+                {
+                    message
+                        .AppendTitle($"{XayahReaction.Warning} This didn't went as expected")
+                        .AppendDescription($"I found more than one champion (fully or partially) named `{name}`.");
+                    foreach (ChampionDto champion in matches)
+                    {
+                        message.AppendDescription(Environment.NewLine + champion.Name);
+                    }
+                }
+                else
+                {
+                    ChampionDto champion = await championBuilder.GetChampionAsync(matches.First().Id);
+                    championBuilder.AppendMiscData(champion, message);
+                    championBuilder.AppendStatisticData(champion, message);
+                    championBuilder.AppendSpellData(champion, message);
+                    championBuilder.AppendSkinData(champion, message);
                 }
             }
-            else
+            catch (NoApiResultException)
             {
-                ChampionDto champion = await championBuilder.GetChampionAsync(matches.First().Id);
-                championBuilder.AppendMiscData(champion, message);
-                championBuilder.AppendStatisticData(champion, message);
-                championBuilder.AppendSpellData(champion, message);
-                championBuilder.AppendSkinData(champion, message);
+                message = new FormattedEmbedBuilder()
+                    .AppendTitle($"{XayahReaction.Error} This didn't work")
+                    .AppendDescription("Apparently some random API refuses cooperation. Have some patience while I convince them again...");
             }
             return message;
         }
@@ -51,10 +61,9 @@ namespace XayahBot.Command.Data
 
         private ChampionDataBuilder()
         {
-
         }
 
-        private async Task<List<ChampionDto>> GetMatchingChampions(string name)
+        private async Task<List<ChampionDto>> GetMatchingChampionsAsync(string name)
         {
             name = name.ToLower();
             ChampionListDto championList = await this._riotStaticData.GetChampionsAsync();

@@ -11,5 +11,6 @@ namespace XayahBot.Utility
         public static readonly IEmote Hourglass = new Emoji("⏳");
         public static readonly IEmote Clock = new Emoji("🕒");
         public static readonly IEmote Option = new Emoji("⚙️");
+        public static readonly IEmote Clipboard = new Emoji("📋");
     }
 }
