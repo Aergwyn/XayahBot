@@ -118,7 +118,7 @@ namespace XayahBot.Command.Remind
                     message.AppendDescription("imagine a soulrending void", AppendOption.Italic);
                 }
                 await channel.SendEmbedAsync(message);
-                await this.Context.Message.AddReactionIfNotDMAsync(this.Context, XayahReaction.Success);
+                await this.Context.Message.AddReactionIfNotDMAsync(this.Context, XayahReaction.Envelope);
             }
             catch (Exception ex)
             {
@@ -143,7 +143,7 @@ namespace XayahBot.Command.Remind
                     .AppendTitle($"{XayahReaction.Success} Done")
                     .AppendDescription("I purged all of your reminders.");
                 await channel.SendEmbedAsync(message);
-                await this.Context.Message.AddReactionIfNotDMAsync(this.Context, XayahReaction.Success);
+                await this.Context.Message.AddReactionIfNotDMAsync(this.Context, XayahReaction.Envelope);
             }
             catch (Exception ex)
             {

@@ -51,7 +51,7 @@ namespace XayahBot.Command.Misc
                         break;
                 }
                 await channel.SendEmbedAsync(message);
-                await this.Context.Message.AddReactionIfNotDMAsync(this.Context, XayahReaction.Success);
+                await this.Context.Message.AddReactionIfNotDMAsync(this.Context, XayahReaction.Envelope);
             }
             catch (Exception ex)
             {

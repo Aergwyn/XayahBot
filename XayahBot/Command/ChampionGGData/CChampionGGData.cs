@@ -15,15 +15,8 @@ namespace XayahBot.Command.ChampionGGData
             return Property.ChampionGGApiDisabled;
         }
 
-        [Command("winrate")]
-        public Task Winrate()
-        {
-            Task.Run(() => this.ProcessWinrate(LeagueRole.All));
-            return Task.CompletedTask;
-        }
-
-        [Command("winrate")]
-        public Task Winrate([OverrideTypeReader(typeof(LeagueRoleTypeReader))] LeagueRole role)
+        //[Command("winrate")]
+        public Task Winrate([OverrideTypeReader(typeof(LeagueRoleTypeReader))] LeagueRole role = null)
         {
             Task.Run(() => this.ProcessWinrate(role));
             return Task.CompletedTask;
@@ -33,7 +26,12 @@ namespace XayahBot.Command.ChampionGGData
         {
             try
             {
-                FormattedEmbedBuilder message = await ChampionStatsBuilder.BuildForRoleAsync(role);
+                if (role == null)
+                {
+                    role = LeagueRole.All;
+                }
+                ChampionStatsBuilder statsBuilder = new ChampionStatsBuilder();
+                FormattedEmbedBuilder message = await statsBuilder.BuildForRoleAsync(role);
                 message.CreateFooterIfNotDM(this.Context);
                 await this.ReplyAsync(message);
             }
@@ -42,5 +40,31 @@ namespace XayahBot.Command.ChampionGGData
                 Logger.Error(ex);
             }
         }
+
+        //[Command("stats")]
+        public Task Stats([OverrideTypeReader(typeof(LeagueRoleTypeReader))] LeagueRole role, [Remainder] string name)
+        {
+            //Task.Run(() => this.ProcessStats());
+            return Task.CompletedTask;
+        }
+
+        //[Command("stats")]
+        public Task Stats([Remainder] string name)
+        {
+            //Task.Run(() => this.ProcessStats());
+            return Task.CompletedTask;
+        }
+
+        //private async Task ProcessStats()
+        //{
+        //    try
+        //    {
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Logger.Error(ex);
+        //    }
+        //}
     }
 }

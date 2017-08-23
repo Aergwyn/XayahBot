@@ -16,8 +16,6 @@ namespace XayahBot.API
         private static SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
         private static Dictionary<string, CacheEntry> _cache = new Dictionary<string, CacheEntry>();
 
-        protected abstract DateTime GetDataExpirationTime();
-
         protected abstract string GetApiKey();
 
         protected abstract string GetBaseUrl();
@@ -26,7 +24,7 @@ namespace XayahBot.API
 
         // ---
 
-        protected async Task<T> GetAsync<T>(ApiRequest request)
+        protected async Task<T> GetAsync<T>(ApiRequest request, DateTime expirationTime = default(DateTime))
         {
             T result = default(T);
             await _lock.WaitAsync();
@@ -64,7 +62,11 @@ namespace XayahBot.API
                 else
                 {
                     _cache.Remove(request.CacheId);
-                    _cache.Add(request.CacheId, new CacheEntry(result, this.GetDataExpirationTime()));
+                    if (EqualityComparer<DateTime>.Default.Equals(expirationTime, default(DateTime)))
+                    {
+                        expirationTime = TimeUtil.Now();
+                    }
+                    _cache.Add(request.CacheId, new CacheEntry(result, expirationTime));
                 }
             }
             finally

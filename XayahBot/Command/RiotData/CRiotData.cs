@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using XayahBot.Command.Logic;
+using XayahBot.Error;
 using XayahBot.Extension;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
@@ -35,7 +36,7 @@ namespace XayahBot.Command.RiotData
                 IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
                 FormattedEmbedBuilder message = await ChampionDataBuilder.BuildAsync(name);
                 await channel.SendEmbedAsync(message);
-                await this.Context.Message.AddReactionIfNotDMAsync(this.Context, XayahReaction.Success);
+                await this.Context.Message.AddReactionIfNotDMAsync(this.Context, XayahReaction.Envelope);
             }
             catch (Exception ex)
             {

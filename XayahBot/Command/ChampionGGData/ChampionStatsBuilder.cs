@@ -16,30 +16,36 @@ namespace XayahBot.Command.ChampionGGData
 {
     public class ChampionStatsBuilder
     {
-        public static async Task<FormattedEmbedBuilder> BuildForRoleAsync(LeagueRole role)
+        private readonly ChampionGGChampions _championGGChampions = new ChampionGGChampions();
+        private readonly RiotStaticData _riotStaticData = new RiotStaticData(Region.EUW);
+        private List<ChampionDto> _championList = new List<ChampionDto>();
+        private List<ChampionStatsDto> _championStats = new List<ChampionStatsDto>();
+
+        public async Task<FormattedEmbedBuilder> BuildForRoleAsync(LeagueRole role)
         {
-            ChampionStatsBuilder statsBuilder = new ChampionStatsBuilder();
             FormattedEmbedBuilder message = new FormattedEmbedBuilder();
             try
             {
-                List<ChampionStatsDto> championStats = await statsBuilder.GetChampionGGStatsAsync();
-                championStats.Sort((a, b) => b.WinRate.CompareTo(a.WinRate));
-                List<ChampionDto> championList = await statsBuilder.GetRiotChampionListAsync();
+                await this.LoadFromApi();
 
                 if (LeagueRole.All.Equals(role))
                 {
-                    ChampionStatsDto first = championStats.ElementAtOrDefault(0);
-                    message.AppendTitle($"{XayahReaction.Clipboard} Winrates for all roles");
-                    if (first != null)
+                    foreach (LeagueRole leagueRole in LeagueRole.Values())
                     {
-                        message.AppendTitle($" (Patch {first.Patch})");
+                        this.AppendStatsOfRole(leagueRole, 3, message);
                     }
-                    statsBuilder.AppendHighestAndLowestPerRole(championStats, championList, message);
                 }
                 else
                 {
-                    // TODO
+                    this.AppendStatsOfRole(role, 6, message);
                 }
+                message.AppendTitle($"{XayahReaction.Clipboard} Winrates");
+                ChampionStatsDto first = this._championStats.ElementAtOrDefault(0);
+                if (first != null)
+                {
+                    message.AppendTitle($" for Patch {first.Patch}");
+                }
+                message.AppendDescription("Short explanation of the table: `Position - Win % - Play %` - Name", AppendOption.Italic);
             }
             catch (NoApiResultException)
             {
@@ -50,70 +56,66 @@ namespace XayahBot.Command.ChampionGGData
             return message;
         }
 
-        // ---
-
-        private readonly ChampionGGChampions _championGGChampions = new ChampionGGChampions();
-        private readonly RiotStaticData _riotStaticData = new RiotStaticData(Region.EUW);
-
-        private ChampionStatsBuilder()
+        private async Task LoadFromApi()
         {
+            this._championList.AddRange((await this._riotStaticData.GetChampionsAsync()).Data.Values);
+            this._championStats.AddRange(await this._championGGChampions.GetChampionsAsync());
+            this._championStats.Sort((a, b) => b.WinRate.CompareTo(a.WinRate));
         }
 
-        private async Task<List<ChampionStatsDto>> GetChampionGGStatsAsync()
+        private void AppendStatsOfRole(LeagueRole role, int entryCount, FormattedEmbedBuilder message)
         {
-            return await this._championGGChampions.GetChampionsAsync();
-        }
-
-        private async Task<List<ChampionDto>> GetRiotChampionListAsync()
-        {
-            ChampionListDto championList = await this._riotStaticData.GetChampionsAsync();
-            return championList.Data.Values.ToList();
-        }
-
-        private void AppendHighestAndLowestPerRole(List<ChampionStatsDto> championStats, List<ChampionDto> championList, FormattedEmbedBuilder message)
-        {
-            foreach (LeagueRole leagueRole in LeagueRole.Values())
+            List<ChampionStatsDto> roleStats = this._championStats.Where(x => x.Role.Equals(role.ApiRole)).ToList();
+            if (entryCount * 2 > roleStats.Count)
             {
-                List<ChampionStatsDto> roleStats = championStats.Where(x => x.Role.Equals(leagueRole.ApiRole)).ToList();
-                FormattedTextBuilder winrates = new FormattedTextBuilder();
-                int entryCount = 3;
-                for (int i = 0; i < entryCount; i++)
-                {
-                    ChampionStatsDto topX = roleStats.ElementAtOrDefault(i);
-                    if (topX != null)
-                    {
-                        ChampionDto champion = championList.FirstOrDefault(x => x.Id.Equals(topX.ChampionId));
-                        if (champion != null)
-                        {
-                            if (i > 0)
-                            {
-                                winrates.AppendNewLine();
-                            }
-                            winrates.Append($"`{this.BuildPercentage(topX.WinRate)}%` - {champion.Name}");
-                        }
-                    }
-                }
-                winrates.AppendNewLine().Append("`...`");
-                for (int i = roleStats.Count - entryCount; i < roleStats.Count; i++)
-                {
-                    ChampionStatsDto bottomX = roleStats.ElementAtOrDefault(i);
-                    if (bottomX != null)
-                    {
-                        ChampionDto champion = championList.FirstOrDefault(x => x.Id.Equals(bottomX.ChampionId));
-                        if (champion != null)
-                        {
-                            winrates.AppendNewLine().Append($"`{this.BuildPercentage(bottomX.WinRate)}%` - {champion.Name}");
-                        }
-                    }
-                }
-                message.AddField(leagueRole.Name, winrates.ToString(), new AppendOption[] { AppendOption.Underscore });
+                entryCount = (int)Math.Truncate(roleStats.Count / (decimal)2);
             }
+            FormattedTextBuilder winrates = new FormattedTextBuilder();
+            for (int i = 0; i < entryCount && i < roleStats.Count; i++)
+            {
+                ChampionStatsDto topX = roleStats.ElementAt(i);
+                string championLine = this.BuildChampionStats(topX, i + 1);
+                if (i > 0)
+                {
+                    winrates.AppendNewLine();
+                }
+                winrates.Append(championLine);
+            }
+            if (roleStats.Count > entryCount * 2)
+            {
+                winrates.AppendNewLine();
+            }
+            for (int i = roleStats.Count - entryCount; i >= 0 && i < roleStats.Count; i++)
+            {
+                ChampionStatsDto bottomX = roleStats.ElementAt(i);
+                string championLine = this.BuildChampionStats(bottomX, i + 1);
+                winrates.AppendNewLine().Append(championLine);
+            }
+            string resultText = winrates.ToString();
+            if (string.IsNullOrWhiteSpace(resultText))
+            {
+                resultText = ". . .";
+            }
+            message.AddField(role.Name, resultText, new AppendOption[] { AppendOption.Underscore });
         }
 
-        private string BuildPercentage(double percentage)
+        private string BuildChampionStats(ChampionStatsDto championStats, int position)
         {
-            return Math.Round(percentage * 100, 2, MidpointRounding.AwayFromZero).ToString("#.00", CultureInfo.InvariantCulture);
+            ChampionDto champion = this._championList.FirstOrDefault(x => x.Id.Equals(championStats.ChampionId));
+            if (champion != null)
+            {
+                return $"`{position.ToString("00", CultureInfo.InvariantCulture)} - {this.FormatPercentage(championStats.WinRate)} - " +
+                    $"{this.FormatPercentage(championStats.PlayRate)}` - {champion.Name}";
+            }
+            return string.Empty;
         }
+
+        private string FormatPercentage(double percentage)
+        {
+            double result = Math.Round(percentage * 100, 2, MidpointRounding.AwayFromZero);
+            return result.ToString("#.00", CultureInfo.InvariantCulture).PadLeft(5, ' ');
+        }
+
 
         // ---------------------------------------------------------
 

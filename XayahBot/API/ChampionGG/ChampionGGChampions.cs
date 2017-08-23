@@ -8,12 +8,6 @@ namespace XayahBot.API.ChampionGG
 {
     public class ChampionGGChampions : ChampionGGApi
     {
-        protected override DateTime GetDataExpirationTime()
-        {
-            DateTime now = DateTime.UtcNow;
-            return new DateTime(now.Year, now.Month, now.Day, 0, 0, 0).AddDays(1);
-        }
-
         public async Task<List<ChampionStatsDto>> GetChampionsAsync()
         {
             int batchSize = 200;
@@ -24,17 +18,17 @@ namespace XayahBot.API.ChampionGG
                 try
                 {
                     ApiRequest request = new ApiRequest("champions", $"limit={batchSize}", $"skip={batchSize * rounds}");
-                    tempList.AddRange(await this.GetAsync<List<ChampionStatsDto>>(request));
+                    tempList.AddRange(await this.GetAsync<List<ChampionStatsDto>>(request, TimeUtil.InDays(1)));
                 }
                 catch (Exception ex)
                 {
                     Logger.Error(ex);
                 }
-                if (tempList.Count == 0)
+                data.AddRange(tempList);
+                if (tempList.Count < batchSize)
                 {
                     break;
                 }
-                data.AddRange(tempList);
             }
             return data;
         }

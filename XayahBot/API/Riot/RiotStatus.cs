@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using XayahBot.API.Riot.Model;
 
 namespace XayahBot.API.Riot
@@ -8,11 +7,6 @@ namespace XayahBot.API.Riot
     {
         public RiotStatus(Region region) : base(region)
         {
-        }
-
-        protected override DateTime GetDataExpirationTime()
-        {
-            return DateTime.UtcNow;
         }
 
         protected override string GetService()
