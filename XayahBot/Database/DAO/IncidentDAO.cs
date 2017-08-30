@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using XayahBot.API.Riot;
 using XayahBot.Database.Model;
 using XayahBot.Error;
@@ -12,7 +13,7 @@ namespace XayahBot.Database.DAO
         {
             using (GeneralContext database = new GeneralContext())
             {
-                TIncident match = database.Incidents.FirstOrDefault(x => x.IncidentId.Equals(incidentId));
+                TIncident match = database.Incidents.Include(x => x.Messages).FirstOrDefault(x => x.IncidentId.Equals(incidentId));
                 if (match != null)
                 {
                     database.Entry(match).Collection(x => x.Messages).Load();
@@ -25,7 +26,7 @@ namespace XayahBot.Database.DAO
         {
             using (GeneralContext database = new GeneralContext())
             {
-                return database.Incidents.Where(x => x.Region.Equals(region.Name)).ToList();
+                return database.Incidents.Include(x => x.Messages).Where(x => x.Region.Equals(region.Name)).ToList();
             }
         }
     }
