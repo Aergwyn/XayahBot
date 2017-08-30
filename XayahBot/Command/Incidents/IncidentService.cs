@@ -117,7 +117,8 @@ namespace XayahBot.Command.Incidents
         {
             List<RiotStatus> riotStatusList = new List<RiotStatus>()
             {
-                new RiotStatus(Region.EUW)
+                new RiotStatus(Region.EUW),
+                new RiotStatus(Region.NA)
             };
             List<IncidentData> incidents = new List<IncidentData>();
             foreach (RiotStatus riotStatus in riotStatusList)
@@ -251,6 +252,10 @@ namespace XayahBot.Command.Incidents
                 {
                     // I assume I can't reach the server/channel or it's already gone
                     await this._incidentSubscriberDAO.RemoveAsync(subscriber);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex);
                 }
             }
         }
