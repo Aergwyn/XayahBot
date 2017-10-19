@@ -24,7 +24,7 @@ namespace XayahBot.API
 
         // ---
 
-        protected async Task<T> GetAsync<T>(ApiRequest request, DateTime expirationTime = default(DateTime))
+        protected async Task<T> GetAsync<T>(ApiRequest request, DateTime expirationTime = default(DateTime), bool logCall = true)
         {
             T result = default(T);
             await _lock.WaitAsync();
@@ -36,7 +36,7 @@ namespace XayahBot.API
                 {
                     if (cacheData == null || cacheData.IsExpired())
                     {
-                        result = await this.GetFromApiAsync<T>(request);
+                        result = await this.GetFromApiAsync<T>(request, logCall);
                     }
                 }
                 catch (NoApiResultException ex)
@@ -85,13 +85,13 @@ namespace XayahBot.API
             return null;
         }
 
-        private async Task<T> GetFromApiAsync<T>(ApiRequest request)
+        private async Task<T> GetFromApiAsync<T>(ApiRequest request, bool logCall)
         {
             T result = default(T);
             using (HttpClient client = this.SetupHttpClient())
             {
                 HttpResponseMessage response = null;
-                string url = this.BuildUrl(request);
+                string url = this.BuildUrl(request, logCall);
                 response = await client.GetAsync(url);
                 string content = await response.Content.ReadAsStringAsync() ?? string.Empty;
                 if (!response.IsSuccessStatusCode)
@@ -111,14 +111,17 @@ namespace XayahBot.API
             return client;
         }
 
-        private string BuildUrl(ApiRequest request)
+        private string BuildUrl(ApiRequest request, bool logCall)
         {
             string url = $"{this.GetBaseUrl()}/{request.Resource}?{string.Join("&", request.Arguments)}";
             if (request.Arguments.Count() > 0)
             {
                 url += "&";
             }
-            Logger.Debug($"Calling API: {url}");
+            if (logCall)
+            {
+                Logger.Debug($"Calling API: {url}");
+            }
             return url + this.GetApiKey();
         }
     }
