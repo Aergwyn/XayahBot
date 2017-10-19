@@ -296,7 +296,7 @@ namespace XayahBot.Command.Incidents
         private FormattedEmbedBuilder CreateEmbed(IncidentData incident)
         {
             FormattedEmbedBuilder message = new FormattedEmbedBuilder()
-                .AppendDescription($"{incident.Region} | {incident.Service} | {incident.Status}", AppendOption.Bold);
+                .AppendDescription($"({incident.Status.ToUpper()}) {incident.Region} - {incident.Service}", AppendOption.Bold);
             foreach (UpdateData update in incident.Updates)
             {
                 message
