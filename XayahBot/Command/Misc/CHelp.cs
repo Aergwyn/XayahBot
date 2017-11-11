@@ -14,7 +14,6 @@ namespace XayahBot.Command.Misc
         private static string _cHelpTitle = "General";
         private static string _cAreTitle = "Obligatory 8ball";
         private static string _cRemindTitle = "Reminder for weak brains";
-        private static string _cIncidentsTitle = "Incident notifications (via Riot-API)";
         private static string _cDataTitle = "General champion data (via Riot-API)";
 
         [Command("help")]
@@ -41,9 +40,6 @@ namespace XayahBot.Command.Misc
                         this.AppendRemindHelp(message);
                         break;
                     case 3:
-                        this.AppendIncidentsHelp(message);
-                        break;
-                    case 4:
                         this.AppendChampHelp(message);
                         break;
                     default:
@@ -98,11 +94,9 @@ namespace XayahBot.Command.Misc
                 .AppendDescriptionNewLine()
                 .AppendDescription($"`2` - {_cRemindTitle}")
                 .AppendDescriptionNewLine()
-                .AppendDescription($"`3` - {_cIncidentsTitle}")
+                .AppendDescription($"`3` - {_cDataTitle}")
                 .AppendDescriptionNewLine()
-                .AppendDescription($"`4` - {_cDataTitle}")
-                .AppendDescriptionNewLine()
-                .AppendDescription($"`5` - Champion statistics (via ChampionGG-API) [Soon™]")
+                .AppendDescription($"`4` - Champion statistics (via ChampionGG-API) [Soon™]")
                 .AppendDescriptionNewLine(2);
             this.AppendDescriptionTitle(message, "Contact")
                 .AppendDescription("If you still got questions, problems or even suggestions just contact `Aergwyn#8786` and all your desires will be fulfilled " +
@@ -156,41 +150,6 @@ namespace XayahBot.Command.Misc
                 .AppendDescription($"{this.Context.Client.CurrentUser.Mention} remind me list")
                 .AppendDescriptionNewLine()
                 .AppendDescription($"{this.Context.Client.CurrentUser.Mention} remind me clear");
-            return message;
-        }
-
-        private FormattedEmbedBuilder AppendIncidentsHelp(FormattedEmbedBuilder message)
-        {
-            this.AppendDescriptionTitle(message, _cIncidentsTitle)
-                .AppendDescription("If you want to be up to date about all of League of Legend's troubles, I know a way. You can configure this to post in a channel of your choice.")
-                .AppendDescriptionNewLine(2)
-                .AppendDescription($"I will check every `{Property.IncidentCheckInterval}` minutes for new or updated incidents.")
-                .AppendDescriptionNewLine(2);
-            this.AppendDescriptionTitle(message, "Accessibility")
-                .AppendDescription("This function is only available in ").AppendDescription("guilds", AppendOption.Bold).AppendDescription("!")
-                .AppendDescriptionNewLine()
-                .AppendDescription("There will be ").AppendDescription("no", AppendOption.Bold).AppendDescription(" effect in ")
-                .AppendDescription("direct messages", AppendOption.Bold).AppendDescription(" or ")
-                .AppendDescription("groups", AppendOption.Bold).AppendDescription("!")
-                .AppendDescriptionNewLine()
-                .AppendDescription("You are required to have the ").AppendDescription("administrator", AppendOption.Bold)
-                .AppendDescription(" role to be able to configure the incident notifications!")
-                .AppendDescriptionNewLine(2);
-            this.AppendDescriptionTitle(message, "Usage")
-                .AppendDescription("This command is split in three parts:")
-                .AppendDescriptionNewLine()
-                .AppendDescription("- `incidents on` followed by a mentioned channel as a post location to activate notifications")
-                .AppendDescriptionNewLine()
-                .AppendDescription("- `incidents off` to disable notifications")
-                .AppendDescriptionNewLine()
-                .AppendDescription("- `incidents status` shows the current configuration on your server")
-                .AppendDescriptionNewLine(2);
-            this.AppendDescriptionTitle(message, "Examples")
-                .AppendDescription($"{this.Context.Client.CurrentUser.Mention} incidents on #channel_of_your_choice")
-                .AppendDescriptionNewLine()
-                .AppendDescription($"{this.Context.Client.CurrentUser.Mention} incidents off")
-                .AppendDescriptionNewLine()
-                .AppendDescription($"{this.Context.Client.CurrentUser.Mention} incidents status");
             return message;
         }
 

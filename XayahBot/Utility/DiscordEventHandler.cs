@@ -3,9 +3,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using XayahBot.Command.Incidents;
 using XayahBot.Command.Remind;
-using XayahBot.Database.DAO;
 using XayahBot.Extension;
 using XayahBot.Utility.Messages;
 
@@ -14,7 +12,6 @@ namespace XayahBot.Utility
     public class DiscordEventHandler
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly IncidentSubscriberDAO _incidentSubscriberDao = new IncidentSubscriberDAO();
 
         public DiscordEventHandler(IServiceProvider serviceProvider)
         {
@@ -33,12 +30,10 @@ namespace XayahBot.Utility
             {
                 DiscordSocketClient client = this._serviceProvider.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
                 RemindService remindService = this._serviceProvider.GetService(typeof(RemindService)) as RemindService;
-                IncidentService incidentService = this._serviceProvider.GetService(typeof(IncidentService)) as IncidentService;
                 string game = string.IsNullOrWhiteSpace(Property.GameActive.Value) ? null : Property.GameActive.Value;
 
                 await client.SetGameAsync(game);
                 await remindService.StartAsync();
-                await incidentService.StartAsync();
             }
             catch (Exception ex)
             {

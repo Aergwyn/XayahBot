@@ -5,7 +5,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using XayahBot.Command.Incidents;
 using XayahBot.Command.Logic;
 using XayahBot.Command.Remind;
 using XayahBot.Database;
@@ -71,7 +70,6 @@ namespace XayahBot
             this._serviceCollection.AddSingleton(this._client);
             this._serviceCollection.AddSingleton(this._commandService);
             this._serviceCollection.AddSingleton(RemindService.GetInstance(this._client));
-            this._serviceCollection.AddSingleton(IncidentService.GetInstance(this._client));
 
             this._serviceProvider = this._serviceCollection.BuildServiceProvider(true);
 
@@ -94,7 +92,6 @@ namespace XayahBot
         private async Task StopBackgroundThreadsAsync()
         {
             await (this._serviceProvider.GetService(typeof(RemindService)) as RemindService)?.StopAsync();
-            await (this._serviceProvider.GetService(typeof(IncidentService)) as IncidentService)?.StopAsync();
         }
     }
 }
