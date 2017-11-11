@@ -1,3 +1,5 @@
+- [ ] TODO update pictures
+
 # About
 `Xayah Bot` is a Discord Bot primarily intended to use for giving League of Legends statistics (general data about champs, winrates, banrates, etc.). Additionally there are other useful commands which you can see later on.
 
@@ -15,8 +17,6 @@ Commands can be triggered by mentioning `Xayah Bot` before using the command syn
 Here are some additional points about how `Xayah Bot` works:
 - The title and description of commands of this documentation will differ to the ones provided in the help of `Xayah Bot`. Responses in Discord are meant to be "in character" and thus differently phrased.
 - If a command is replied to per direct message (to not clutter chats) the triggering message will receive a reaction to imply it was handled. This prevents users from assuming the Bot stopped working because they can't see a response. If the reaction is missing and the user did not receive a response please panic and contact me.
-
-- [ ] TODO: Champion.GG commands
 
 ## Help
 The help displays a message with a short overview of existing categories, how to access them and contact data.
@@ -66,33 +66,6 @@ To clarify the parameter when creating a reminder:
 *Clearing all reminders*  
 ![Remind Clear Request](XayahBot/docs/pics/remindclearrequest.png?raw=true)  
 ![Remind Clear Response](XayahBot/docs/pics/remindclearresponse.png?raw=true)  
-
-## Incidents
-Incident notifications are supposed to be a way to get notified if there are any problems with one of League of Legends' services. Information like that is available in different public channels (like [this site](http://status.leagueoflegends.com/#na) for NA) but having a post right in Discord could help getting knowledge so much sooner.  
-
-If there are any subscribers `Xayah Bot` will check regularly (Status-Endpoint in API) if an incident is active and post them in the configured channel. This interval is configurable and defaults to 15 minutes.
-
-**Accessibility:**  
-This function is not functional in direct messages or groups. To configure incident notifications the user has to have the `administrator` role for the server.
-
-**Usage:**  
-This command is split in three parts:
-- `incidents on` followed by a mentioned channel as a post location to activate notifications
-- `incidents off` to disable notifications
-- `incidents status` shows the current server configuration
-
-**Examples:**  
-*Enabling incident notifications*  
-![Enabling Notifications](XayahBot/docs/pics/incidentson.png?raw=true)  
-
-*Incident example*  
-*TODO (sorry, I couldn't catch one so far)*  
-
-*Requesting status*  
-![Notification Status](XayahBot/docs/pics/incidentsstatus.png?raw=true)  
-
-*Disabling incident notifications*  
-![Disabling Notifications](XayahBot/docs/pics/incidentsoff.png?raw=true)  
 
 ## Champ
 The champ command gathers data about a specified champion (stats + stat-growth, spells, skins and misc). This data is only refreshed once on the first request each day (StaticData-Endpoint in API).  
