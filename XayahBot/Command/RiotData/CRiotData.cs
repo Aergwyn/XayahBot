@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using XayahBot.Command.Logic;
-using XayahBot.Error;
 using XayahBot.Extension;
 using XayahBot.Utility;
 using XayahBot.Utility.Messages;
@@ -42,6 +41,18 @@ namespace XayahBot.Command.RiotData
             {
                 Logger.Error(ex);
             }
+        }
+
+        [Command("item")]
+        public Task Item([Remainder] string name)
+        {
+            Task.Run(() => this.ProcessItem(name));
+            return Task.CompletedTask;
+        }
+
+        private async Task ProcessItem(string name)
+        {
+            // TODO
         }
     }
 }
