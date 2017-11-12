@@ -24,7 +24,7 @@ namespace XayahBot.API
 
         // ---
 
-        protected async Task<T> GetAsync<T>(ApiRequest request, DateTime expirationTime = default(DateTime), bool logCall = true)
+        protected async Task<T> GetAsync<T>(ApiRequest request, DateTime expirationTime = default(DateTime), bool logCall = false)
         {
             T result = default(T);
             await _lock.WaitAsync();

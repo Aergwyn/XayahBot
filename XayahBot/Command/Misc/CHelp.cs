@@ -14,7 +14,7 @@ namespace XayahBot.Command.Misc
         private static string _cHelpTitle = "General";
         private static string _cAreTitle = "Obligatory 8ball";
         private static string _cRemindTitle = "Reminder for weak brains";
-        private static string _cDataTitle = "General champion data (via Riot-API)";
+        private static string _cRiotDataTitle = "General champion and item data (via Riot-API)";
 
         [Command("help")]
         public Task Help([Remainder] string page = "")
@@ -40,7 +40,7 @@ namespace XayahBot.Command.Misc
                         this.AppendRemindHelp(message);
                         break;
                     case 3:
-                        this.AppendChampHelp(message);
+                        this.AppendRiotDataHelp(message);
                         break;
                     default:
                         this.AppendGeneralHelp(message);
@@ -94,7 +94,7 @@ namespace XayahBot.Command.Misc
                 .AppendDescriptionNewLine()
                 .AppendDescription($"`2` - {_cRemindTitle}")
                 .AppendDescriptionNewLine()
-                .AppendDescription($"`3` - {_cDataTitle}")
+                .AppendDescription($"`3` - {_cRiotDataTitle}")
                 .AppendDescriptionNewLine()
                 .AppendDescription($"`4` - Champion statistics (via ChampionGG-API) [Soon™]")
                 .AppendDescriptionNewLine(2);
@@ -153,23 +153,26 @@ namespace XayahBot.Command.Misc
             return message;
         }
 
-        private FormattedEmbedBuilder AppendChampHelp(FormattedEmbedBuilder message)
+        private FormattedEmbedBuilder AppendRiotDataHelp(FormattedEmbedBuilder message)
         {
-            this.AppendDescriptionTitle(message, _cDataTitle)
-                .AppendDescription("Have you ever wondered how far I could throw my Double Daggers? How much base armor Viktor has? How many skins Annie has? " +
-                "I at least know the answer to the first and last one. Not enough and way too many, respectively.")
+            this.AppendDescriptionTitle(message, _cRiotDataTitle)
+                .AppendDescription("Have you ever wondered how far I could throw my Double Daggers? How much base armor Viktor has? How much does Essence Reaver cost? " +
+                "I at least know the answer to the first and last one. Not enough and way too much, respectively.")
                 .AppendDescriptionNewLine(2)
-                .AppendDescription("If you need data about a champion just use this command and you'll get an overview about stats, spells and skins.")
+                .AppendDescription("If you need data about a champion or item just use these commands and you'll get an overview about stats, spells and skins for champions and item cost and composition " +
+                    "for... well, items.")
                 .AppendDescriptionNewLine(2)
                 .AppendDescription("Bonus:", AppendOption.Italic)
-                .AppendDescription(" If you are unsure how to spell a certain champion name you can ignore special characters and/or whitespaces. " +
+                .AppendDescription(" If you are unsure how to spell a certain champion or item name you can ignore special characters and/or whitespaces. " +
                     "If it's even worse (hello Cassiopeia) then I can also handle partial names.")
                 .AppendDescriptionNewLine(2);
             this.AppendDescriptionTitle(message, "Usage")
-                .AppendDescription("The keyword to this command is `champ` followed by the name I should search for.")
+                .AppendDescription("The keyword to this command is `champ` or `item` followed by the name I should search for.")
                 .AppendDescriptionNewLine(2);
             this.AppendDescriptionTitle(message, "Examples")
-                .AppendDescription($"{this.Context.Client.CurrentUser.Mention} champ Xayah");
+                .AppendDescription($"{this.Context.Client.CurrentUser.Mention} champ Xayah")
+                .AppendDescriptionNewLine()
+                .AppendDescription($"{this.Context.Client.CurrentUser.Mention} item Essence Reaver");
             return message;
         }
     }

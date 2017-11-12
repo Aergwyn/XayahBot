@@ -29,7 +29,12 @@ namespace XayahBot.API.Riot
         {
             return await this.GetAsync<ChampionDto>(new ApiRequest($"champions/{id}",
                 "champData=partype", "champData=passive", "champData=skins", "champData=spells", "champData=stats", "champData=tags"),
-                TimeUtil.InDays(3));
+                TimeUtil.InDays(2));
+        }
+
+        public async Task<ItemListDto> GetItemsAsync()
+        {
+            return await this.GetAsync<ItemListDto>(new ApiRequest("items", "tags=gold", "tags=from", "tags=into", "tags=sanitizedDescription"), TimeUtil.InDays(1));
         }
     }
 }

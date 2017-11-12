@@ -17,7 +17,7 @@ namespace XayahBot.Utility
         public static readonly Property RiotApiDisabled = new Property("riot_api_disabled", "");
 
         public static readonly Property GameActive = new Property("game_active", "with Rakan");
-        public static readonly Property RiotUrlVersion = new Property("rioturl_version", "7.16.1");
+        public static readonly Property RiotUrlVersion = new Property("rioturl_version", "7.22.1");
         public static readonly Property RemindDayCap = new Property("remind_day_cap", "30");
         public static readonly Property RemindTextCap = new Property("remind_text_cap", "100");
         public static readonly Property IncidentCheckInterval = new Property("incidents_interval", "15");

@@ -77,14 +77,14 @@ namespace XayahBot.Command.RiotData
             return matches;
         }
 
-        private async Task<ChampionDto> GetChampionAsync(int championId)
-        {
-            return await this._riotStaticData.GetChampionAsync(championId);
-        }
-
         private string StripName(string name)
         {
             return Regex.Replace(name, @"[^ a-zA-Z0-9]+", string.Empty);
+        }
+
+        private async Task<ChampionDto> GetChampionAsync(int championId)
+        {
+            return await this._riotStaticData.GetChampionAsync(championId);
         }
 
         private void AppendMiscData(ChampionDto champion, FormattedEmbedBuilder message)

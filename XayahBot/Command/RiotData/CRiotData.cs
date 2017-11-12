@@ -52,7 +52,22 @@ namespace XayahBot.Command.RiotData
 
         private async Task ProcessItem(string name)
         {
-            // TODO
+            try
+            {
+                if (this.IsDisabled())
+                {
+                    this.NotifyDisabledCommand();
+                    return;
+                }
+                IMessageChannel channel = await ChannelProvider.GetDMChannelAsync(this.Context);
+                FormattedEmbedBuilder message = await ItemDataBuilder.BuildAsync(name);
+                await channel.SendEmbedAsync(message);
+                await this.Context.Message.AddReactionIfNotDMAsync(this.Context, XayahReaction.Envelope);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
+            }
         }
     }
 }
