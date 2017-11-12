@@ -91,7 +91,8 @@ namespace XayahBot.Command.RiotData
                .AppendDescription($"Selling for:", AppendOption.Italic).AppendDescription($" {item.Gold.Sell} Gold")
                .AppendDescriptionNewLine()
                .AppendDescription($"Completion Cost:", AppendOption.Italic).AppendDescription($" {item.Gold.Base} Gold");
-            if (item.From.Count > 0)
+
+            if (item.From != null)
             {
                 message.AppendDescriptionNewLine(2)
                     .AppendDescription("Components", AppendOption.Bold, AppendOption.Underscore);
@@ -104,7 +105,7 @@ namespace XayahBot.Command.RiotData
                      .AppendDescription($"{component.Name} ({component.Gold.Base} Gold)");
                 }
             }
-            if (item.Into.Count > 0)
+            if (item.Into != null)
             {
                 message.AppendDescriptionNewLine(2)
                     .AppendDescription("Builds Into", AppendOption.Bold, AppendOption.Underscore);
